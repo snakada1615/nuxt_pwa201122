@@ -1,0 +1,1 @@
+var PouchDB = require('pouchdb');
