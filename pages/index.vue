@@ -22,6 +22,7 @@
         >
           GitHub
         </a>
+        <nuxt-link to="/page02">page02</nuxt-link>
       </div>
     </div>
   </div>

@@ -1,30 +1,13 @@
 <template>
   <div class="page">
     <div>おはようございます</div>
-    <label>
-     <span>
-       お名前:
-     </span>
-      <input
-        type="text"
-        v-model="user.name"
-      >
-    </label>
-    <label>
-     <span>
-       email:
-     </span>
-      <input
-        type="text"
-        v-model="user.email"
-      >
-    </label>
-    <button
+    <button class=""
       type="button"
       @click="sync"
     >
       Sync database
     </button>
+    <nuxt-link to="/">index</nuxt-link>
     <div>
       <b-table
         striped
@@ -113,6 +96,7 @@
       fct.allDocs({include_docs: true})
         .then(function (docs) {
           $.each(docs.rows, function (index, val) {
+            console.log(val.doc.Food_grp);
             vm.items.push({
               'Group': val.doc.Food_grp,
               'Name': val.doc.Food_name,
@@ -121,9 +105,12 @@
               'Va': val.doc.VITA_RAE,
               'Fe': val.doc.FE
             })
+            console.log(val.doc);
           })
           // Set the initial number of items
           vm.totalRows = vm.items.length
+          console.log(vm.items);
+          console.log(vm.mydat);
         })
         .catch(function (err) {
           console.log(err)
@@ -132,11 +119,14 @@
     methods: {
       sync() {
         const dbs = ['fct', 'dri', 'pop', 'crop_national', 'crop_name']
+        //const username = "82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix"
+        //const password = "f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6"
+        let url = "https://82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix:f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6@82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix.cloudantnosqldb.appdomain.cloud"
         // Replicating a local database to Remote
         dbs.map(function (value, index, array) {
           const localdb = new PouchDB('@/assets/dbs/' + value)
           const remotedb = new PouchDB(
-            'http://snakada:Bluecity1965@localhost:5984/' + value
+            url + '/' + value
           )
           localdb
             .sync(remotedb)
