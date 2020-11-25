@@ -1,13 +1,33 @@
 <template>
   <div class="page">
-    <div>おはようございます</div>
-    <button class=""
-      type="button"
-      @click="sync"
-    >
-      Sync database
-    </button>
     <nuxt-link to="/">index</nuxt-link>
+    <b-form-group
+      label="Filter"
+      label-cols-sm="3"
+      label-align-sm="right"
+      label-size="sm"
+      label-for="filterInput"
+      class="mb-0"
+    >
+      <b-input-group size="sm">
+        <b-form-input
+          v-model="filter"
+          type="search"
+          id="filterInput"
+          placeholder="Type to Search"
+        ></b-form-input>
+        <b-dropdown right size="sm" id="dropdown1" text="Food Group" class="m-md-2" variant="primary">
+          <b-dropdown-item v-for="grpName in FoodGrp"
+                           :key="grpName.name"
+                           :value="grpName.name"
+                           @click="filter = grpName.name">{{grpName.name}}
+          </b-dropdown-item>
+        </b-dropdown>
+        <b-input-group-append>
+          <b-button :disabled="!filter" @click="filter = ''">Clear</b-button>
+        </b-input-group-append>
+      </b-input-group>
+    </b-form-group>
     <div>
       <b-table
         striped
@@ -17,6 +37,9 @@
         :per-page="perPage"
         :sort-by="sortBy"
         :sort-desc="sortDesc"
+        :filter="filter"
+        :filter-included-fields="filterOn"
+        @filtered="onFiltered"
       ></b-table>
       <b-form-group
         label="Per page"
@@ -78,17 +101,21 @@
         sortBy: 'Name',
         sortDesc: false,
         filter: null,
-        filterOn: [],
-        mydat: [
-          {age: '40', first_name: 'Dickerson', last_name: 'Macdonald'},
-          {age: '21', first_name: 'Larsen', last_name: 'Shaw'},
-          {age: '89', first_name: 'Geneva', last_name: 'Wilson'},
-          {age: '38', first_name: 'Jami', last_name: 'Carney'}
+        filterOn: ['Group'],
+        FoodGrp: [
+          {name: 'Grains, roots and tubers'},
+          {name:'Legumes and nuts'},
+          {name:'Vitamin A rich fruits and Vegetable'},
+          {name:'Other fruits and vegetables'},
+          {name:'Flesh foods'},
+          {name:'Dairy products'},
+          {name:'Eggs'},
+          {name:'non-category'}
         ]
       }
     },
     mounted() {
-      const fct = new PouchDB('@/assets/dbs/fct');
+      const fct = new PouchDB('fct');
       const vm = this;
       fct.info().then(function (info) {
         console.log(info);
@@ -96,16 +123,14 @@
       fct.allDocs({include_docs: true})
         .then(function (docs) {
           $.each(docs.rows, function (index, val) {
-            console.log(val.doc.Food_grp);
             vm.items.push({
-              'Group': val.doc.Food_grp,
+              'Group': val.doc.food_group_unicef,
               'Name': val.doc.Food_name,
               'En': val.doc.Energy,
               'Pr': val.doc.Protein,
               'Va': val.doc.VITA_RAE,
               'Fe': val.doc.FE
             })
-            console.log(val.doc);
           })
           // Set the initial number of items
           vm.totalRows = vm.items.length
@@ -118,13 +143,14 @@
     },
     methods: {
       sync() {
-        const dbs = ['fct', 'dri', 'pop', 'crop_national', 'crop_name']
+        const dbs = ['fct', 'dri', 'crop_name']
         //const username = "82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix"
         //const password = "f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6"
+        let sync_count = 0;
         let url = "https://82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix:f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6@82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix.cloudantnosqldb.appdomain.cloud"
         // Replicating a local database to Remote
         dbs.map(function (value, index, array) {
-          const localdb = new PouchDB('@/assets/dbs/' + value)
+          const localdb = new PouchDB(value)
           const remotedb = new PouchDB(
             url + '/' + value
           )
@@ -132,24 +158,23 @@
             .sync(remotedb)
             .on('complete', function () {
               console.log(value + ': synced')
+              sync_count += 1
+              if (sync_count == 3) {
+                //location.reload();
+                console.log('all sync done!')
+              }
             })
             .on('error', function (err) {
               console.log(err)
             })
         })
       },
-      add() {
-        const db = firebase.firestore()
-        let dbUsers = db.collection('users').add({
-          name: this.user.name,
-          email: this.user.email,
-        })
-          .then(ref => {
-            this.user.name = ''
-            this.user.email = ''
-            console.log('added -> Add ID: ', ref.id)
-          })
-      },
+      onFiltered(filteredItems) {
+        // Trigger pagination to update the number of buttons/pages due to filtering
+        this.totalRows = filteredItems.length
+        this.currentPage = 1
+        console.log('filtered!!')
+      }
     },
   }
 </script>
