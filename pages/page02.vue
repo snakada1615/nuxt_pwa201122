@@ -1,6 +1,5 @@
 <template>
   <div class="page">
-    <nuxt-link to="/">index</nuxt-link>
     <b-form-group
       label="Filter"
       label-cols-sm="3"
@@ -20,7 +19,7 @@
           <b-dropdown-item v-for="grpName in FoodGrp"
                            :key="grpName.name"
                            :value="grpName.name"
-                           @click="filter = grpName.name">{{grpName.name}}
+                           @click="filter = grpName.name">{{ grpName.name }}
           </b-dropdown-item>
         </b-dropdown>
         <b-input-group-append>
@@ -73,108 +72,119 @@
 
 
 <script>
-  //  import PouchDB from '@/plugins/pouchdb'
-  import PouchDB from 'pouchdb'
+//  import PouchDB from '@/plugins/pouchdb'
+import PouchDB from 'pouchdb'
 
-  var $ = require('jQuery');
+var $ = require('jQuery');
 
-  export default {
-    data() {
-      return {
-        user: {
-          name: "",
-          email: ""
-        },
-        items: [],
-        fields: [
-          {key: 'Group', sortable: true, tdClass: 'd-none', thClass: 'd-none'},
-          {key: 'Name', sortable: true},
-          {key: 'En', sortable: true},
-          {key: 'Pr', sortable: true},
-          {key: 'Va', sortable: true},
-          {key: 'Fe', sortable: true},
-        ],
-        totalRows: 1,
-        currentPage: 1,
-        perPage: 5,
-        pageOptions: [5, 10, 15, {value: 100, text: "Show a lot"}],
-        sortBy: 'Name',
-        sortDesc: false,
-        filter: null,
-        filterOn: ['Group'],
-        FoodGrp: [
-          {name: 'Grains, roots and tubers'},
-          {name:'Legumes and nuts'},
-          {name:'Vitamin A rich fruits and Vegetable'},
-          {name:'Other fruits and vegetables'},
-          {name:'Flesh foods'},
-          {name:'Dairy products'},
-          {name:'Eggs'},
-          {name:'non-category'}
-        ]
-      }
-    },
-    mounted() {
-      const fct = new PouchDB('fct');
-      const vm = this;
-      fct.info().then(function (info) {
-        console.log(info);
-      })
-      fct.allDocs({include_docs: true})
-        .then(function (docs) {
-          $.each(docs.rows, function (index, val) {
-            vm.items.push({
-              'Group': val.doc.food_group_unicef,
-              'Name': val.doc.Food_name,
-              'En': val.doc.Energy,
-              'Pr': val.doc.Protein,
-              'Va': val.doc.VITA_RAE,
-              'Fe': val.doc.FE
-            })
-          })
-          // Set the initial number of items
-          vm.totalRows = vm.items.length
-          console.log(vm.items);
-          console.log(vm.mydat);
-        })
-        .catch(function (err) {
+export default {
+  data() {
+    return {
+      user: {
+        name: "",
+        email: ""
+      },
+      items: [],
+      fields: [
+        {key: 'Group', sortable: true, tdClass: 'd-none', thClass: 'd-none'},
+        {key: 'Name', sortable: true},
+        {key: 'En', sortable: true},
+        {key: 'Pr', sortable: true},
+        {key: 'Va', sortable: true},
+        {key: 'Fe', sortable: true},
+      ],
+      totalRows: 1,
+      currentPage: 1,
+      perPage: 5,
+      pageOptions: [5, 10, 15, {value: 100, text: "Show a lot"}],
+      sortBy: 'Name',
+      sortDesc: false,
+      filter: null,
+      filterOn: ['Group'],
+      FoodGrp: [
+        {name: 'Grains, roots and tubers'},
+        {name: 'Legumes and nuts'},
+        {name: 'Vitamin A rich fruits and Vegetable'},
+        {name: 'Other fruits and vegetables'},
+        {name: 'Flesh foods'},
+        {name: 'Dairy products'},
+        {name: 'Eggs'},
+        {name: 'non-category'}
+      ]
+    }
+  },
+  mounted() {
+    const fct = new PouchDB('fct');
+    const vm = this;
+    fct.info().then(function (info) {
+      console.log(info);
+      if (!(info.doc_count)) {
+        vm.$bvModal.msgBoxConfirm('your dataset is currently empty.' +
+          ' the application will try to getch data from server!').then(val =>{
+            console.log(val)
+          vm.sync(['fct'])
+        }).catch(err => {
           console.log(err)
         })
-    },
-    methods: {
-      sync() {
-        const dbs = ['fct', 'dri', 'crop_name']
-        //const username = "82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix"
-        //const password = "f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6"
-        let sync_count = 0;
-        let url = "https://82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix:f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6@82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix.cloudantnosqldb.appdomain.cloud"
-        // Replicating a local database to Remote
-        dbs.map(function (value, index, array) {
-          const localdb = new PouchDB(value)
-          const remotedb = new PouchDB(
-            url + '/' + value
-          )
-          localdb
-            .sync(remotedb)
-            .on('complete', function () {
-              console.log(value + ': synced')
-              sync_count += 1
-              if (sync_count == 3) {
-                //location.reload();
-                console.log('all sync done!')
-              }
-            })
-            .on('error', function (err) {
-              console.log(err)
-            })
-        })
-      },
-      onFiltered(filteredItems) {
-        // Trigger pagination to update the number of buttons/pages due to filtering
-        this.totalRows = filteredItems.length
-        this.currentPage = 1
-        console.log('filtered!!')
       }
+    })
+    fct.allDocs({include_docs: true})
+      .then(function (docs) {
+        $.each(docs.rows, function (index, val) {
+          vm.items.push({
+            'Group': val.doc.food_group_unicef,
+            'Name': val.doc.Food_name,
+            'En': val.doc.Energy,
+            'Pr': val.doc.Protein,
+            'Va': val.doc.VITA_RAE,
+            'Fe': val.doc.FE
+          })
+        })
+        // Set the initial number of items
+        vm.totalRows = vm.items.length
+        console.log(vm.items);
+      })
+      .catch(function (err) {
+        console.log(err)
+      })
+  },
+  methods: {
+    sync(dbs) {
+      const vm = this;
+      //const dbs = ['fct', 'dri', 'crop_name']
+      //const username = "82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix"
+      //const password = "f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6"
+      let sync_count = 0;
+      let url = "https://82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix:f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6@82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix.cloudantnosqldb.appdomain.cloud"
+      // Replicating a local database to Remote
+      dbs.map(function (value, index, array) {
+        const localdb = new PouchDB(value)
+        const remotedb = new PouchDB(
+          url + '/' + value
+        )
+        localdb
+          .sync(remotedb)
+          .on('complete', function () {
+            console.log(value + ': synced')
+            sync_count += 1
+            if (sync_count == 3) {
+              //location.reload();
+              console.log('all sync done!')
+              vm.$bvModal.msgBoxConfirm('sync complete')
+            }
+          })
+          .on('error', function (err) {
+            console.log(err)
+            vm.$bvModal.msgBoxConfirm('sync failed')
+          })
+      })
     },
-  }
+    onFiltered(filteredItems) {
+      // Trigger pagination to update the number of buttons/pages due to filtering
+      this.totalRows = filteredItems.length
+      this.currentPage = 1
+      console.log('filtered!!')
+    }
+  },
+}
 </script>
