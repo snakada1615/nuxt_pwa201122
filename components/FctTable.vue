@@ -39,6 +39,7 @@
         :filter="filter"
         :filter-included-fields="filterOn"
         @filtered="onFiltered"
+        @row-clicked="rowClick"
       ></b-table>
       <b-form-group
         label="Per page"
@@ -157,7 +158,7 @@ export default {
       let sync_count = 0;
       let url = "https://82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix:f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6@82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix.cloudantnosqldb.appdomain.cloud"
       // Replicating a local database to Remote
-      dbs.map(function (value, index, array) {
+      dbs.map(function (value) {
         const localdb = new PouchDB(value)
         const remotedb = new PouchDB(
           url + '/' + value
@@ -167,7 +168,7 @@ export default {
           .on('complete', function () {
             console.log(value + ': synced')
             sync_count += 1
-            if (sync_count == 3) {
+            if (sync_count === 3) {
               //location.reload();
               console.log('all sync done!')
               vm.$bvModal.msgBoxConfirm('sync complete')
@@ -184,6 +185,10 @@ export default {
       this.totalRows = filteredItems.length
       this.currentPage = 1
       console.log('filtered!!')
+    },
+    rowClick(record){
+      console.log(record)
+      this.$emit('fctClick', record)
     }
   },
 }
