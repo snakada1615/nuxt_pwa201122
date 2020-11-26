@@ -76,7 +76,7 @@
 //  import PouchDB from '@/plugins/pouchdb'
 import PouchDB from 'pouchdb'
 
-var $ = require('jQuery');
+var $ = require('jquery');
 
 export default {
   data() {
