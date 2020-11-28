@@ -9,6 +9,7 @@
     "generate": "nuxt generate"
   },
   "dependencies": {
+    "@fortawesome/free-solid-svg-icons": "^5.15.1",
     "@nuxtjs/axios": "^5.12.2",
     "@nuxtjs/pwa": "^3.0.2",
     "bootstrap-vue": "^2.19.0",
@@ -16,6 +17,7 @@
     "jquery": "^3.5.1",
     "nuxt": "^2.14.6",
     "pouchdb": "^7.2.2",
+    "vue-fa": "^2.0.1",
     "vue-rate-it": "^2.1.0"
   },
   "devDependencies": {
