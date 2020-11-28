@@ -6,7 +6,7 @@
       label-align-sm="right"
       label-size="sm"
       label-for="filterInput"
-      class="mb-0"
+      class="mb-1"
     >
       <b-input-group size="sm">
         <b-form-input
@@ -30,6 +30,7 @@
     <div>
       <b-table
         striped
+        ref="table"
         :items="items"
         :fields="fields"
         :current-page="currentPage"
@@ -43,13 +44,13 @@
       ></b-table>
       <b-form-group
         label="Per page"
-        label-cols-sm="6"
-        label-cols-md="4"
-        label-cols-lg="3"
+        label-cols-sm="10"
+        label-cols-md="10"
+        label-cols-lg="10"
         label-align-sm="right"
         label-size="sm"
         label-for="perPageSelect"
-        class="mb-0"
+        class="mb-1"
       >
         <b-form-select
           v-model="perPage"
@@ -64,7 +65,6 @@
         :per-page="perPage"
         align="fill"
         size="sm"
-        class="my-0"
       ></b-pagination>
     </div>
   </div>
@@ -129,32 +129,36 @@ export default {
         })
       }
     })
-    fct.allDocs({include_docs: true})
-      .then(function (docs) {
-        $.each(docs.rows, function (index, val) {
-          vm.items.push({
-            'Group': val.doc.food_group_unicef,
-            'Name': val.doc.Food_name,
-            'En': val.doc.Energy,
-            'Pr': val.doc.Protein,
-            'Va': val.doc.VITA_RAE,
-            'Fe': val.doc.FE
-          })
-        })
-        // Set the initial number of items
-        vm.totalRows = vm.items.length
-        console.log(vm.items);
-      })
-      .catch(function (err) {
-        console.log(err)
-      })
+    this.setData(fct)
   },
   methods: {
+    setData(dataset){
+      const vm = this;
+      console.log('test01');
+      dataset.allDocs({include_docs: true})
+        .then(function (docs) {
+          $.each(docs.rows, function (index, val) {
+            vm.items.push({
+              'Group': val.doc.food_group_unicef,
+              'Name': val.doc.Food_name,
+              'En': val.doc.Energy,
+              'Pr': val.doc.Protein,
+              'Va': val.doc.VITA_RAE,
+              'Fe': val.doc.FE
+            })
+          })
+          // Set the initial number of items
+          console.log('test02');
+          vm.totalRows = vm.items.length
+          console.log(vm.items);
+        })
+        .catch(function (err) {
+          console.log(err)
+        })
+      console.log('test03');
+    },
     sync(dbs) {
       const vm = this;
-      //const dbs = ['fct', 'dri', 'crop_name']
-      //const username = "82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix"
-      //const password = "f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6"
       let sync_count = 0;
       let url = "https://82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix:f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6@82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix.cloudantnosqldb.appdomain.cloud"
       // Replicating a local database to Remote
@@ -168,8 +172,9 @@ export default {
           .on('complete', function () {
             console.log(value + ': synced')
             sync_count += 1
-            if (sync_count === 3) {
+            if (sync_count === dbs.length) {
               //location.reload();
+              vm.setData(localdb)
               console.log('all sync done!')
               vm.$bvModal.msgBoxConfirm('sync complete')
             }
