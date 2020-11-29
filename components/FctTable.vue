@@ -1,5 +1,5 @@
 <template>
-  <div class="page">
+  <b-container class="my-0">
     <b-form-group
       label="Filter"
       label-cols-sm="3"
@@ -67,7 +67,7 @@
         size="sm"
       ></b-pagination>
     </div>
-  </div>
+  </b-container>
 
 </template>
 

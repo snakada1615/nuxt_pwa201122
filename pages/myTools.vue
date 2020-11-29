@@ -1,11 +1,11 @@
 <template>
-  <div class="page">
+  <b-container class="my-0">
     <div>helo</div>
     <button v-on:click="fetchDB(fname[3])">fetch csv!</button>
     <button v-on:click="update_db(0)">update fct!</button>
     <button v-on:click="update_db_local_name()">update local_name!</button>
     <button v-on:click="update_db_dri()">update dri!</button>
-  </div>
+  </b-container>
 </template>
 
 <script>
