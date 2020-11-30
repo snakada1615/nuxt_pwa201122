@@ -1,14 +1,14 @@
 <template>
   <b-container class="my-0">
     <b-row class="my-0">
-      <b-col cols="3" class="px-0">
+      <b-col cols="3" class="px-0 d-flex justify-content-center">
         <div>{{ cropName }}</div>
       </b-col>
-      <b-col cols="2" class="px-0">
+      <b-col cols="2" class="px-0 d-flex justify-content-center">
         <div>0000</div>
       </b-col>
       <b-col class="px-0 d-flex justify-content-start">
-        <div class="">
+        <div>
           <fa-rating :glyph="myicon"
                      :item-size="20"
                      :spacing="-1"
