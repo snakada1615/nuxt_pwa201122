@@ -1,10 +1,11 @@
 <template>
   <b-container class="my-0">
-    <div>helo</div>
+    <div>helo-------------------</div>
     <button v-on:click="fetchDB(fname[3])">fetch csv!</button>
-    <button v-on:click="update_db(0)">update fct!</button>
-    <button v-on:click="update_db_local_name()">update local_name!</button>
-    <button v-on:click="update_db_dri()">update dri!</button>
+    <button v-on:click="update_db(0)">update fct from CSV!</button>
+    <button v-on:click="update_db_local_name()">update local_name from CSV!</button>
+    <button v-on:click="update_db_dri()">update dri from csv!</button>
+    <button v-on:click="syncCloudant(['dri'])">sync dri!</button>
   </b-container>
 </template>
 
@@ -30,6 +31,14 @@
       }
     },
     methods: {
+      makeToast(mes, append = false) {
+        this.$bvToast.toast(mes, {
+          autoHideDelay: 5000,
+          appendToast: append,
+          variant: "info",
+          noCloseButton: true
+        })
+      },
       async fetchDB(fname) {
         // 通常時は this.$axios でアクセスできる。
         const ip = await this.$axios.$get(fname)
@@ -48,7 +57,7 @@
         const mySource_tmp = await this.$axios.$get(this.fname[db_num])
 
         let mySource = mySource_tmp.split('\n').filter(function (item, index) {
-          return index != 0
+          return index !== 0
         }).map(function (item) {
           let sub_item = item.split(',').map(function (item2) {
             return item2.replace(/@/g, ',')
@@ -95,7 +104,7 @@
         const mySource_tmp = await this.$axios.$get(this.fname[2])
 
         let mySource = mySource_tmp.split('\n').filter(function (item, index) {
-          return index != 0
+          return index !== 0
         }).map(function (item) {
           let sub_item = item.split(',').map(function (item2) {
             return item2.replace(/@/g, ',')
@@ -135,7 +144,7 @@
         const mySource_tmp = await this.$axios.$get(this.fname[1])
 
         let mySource = mySource_tmp.split('\n').filter(function (item, index) {
-          return index != 0
+          return index !== 0
         }).map(function (item) {
           let sub_item = item.split(',').map(function (item2) {
             return item2.replace(/@/g, ',')
@@ -145,8 +154,9 @@
             nut_group: sub_item[1],
             energy: sub_item[2],
             protein: sub_item[3],
-            fe: sub_item[4],
-            max_vol: sub_item[5],
+            vita: sub_item[4],
+            fe: sub_item[5],
+            max_vol: sub_item[6],
           }
         })
         console.log(mySource);
@@ -170,7 +180,33 @@
         }).catch(function (err) {
           console.error(err);
         })
-      }
+      },
+      syncCloudant(dbs) {
+        const vm = this;
+        let sync_count = 0;
+        let url = "https://82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix:f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6@82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix.cloudantnosqldb.appdomain.cloud"
+        // Replicating a local database to Remote
+        dbs.map(function (value) {
+          const localdb = new PouchDB(value)
+          const remotedb = new PouchDB(
+            url + '/' + value
+          )
+          localdb
+            .sync(remotedb)
+            .on('complete', function () {
+              console.log(value + ': synced')
+              sync_count += 1
+              if (sync_count === dbs.length) {
+                console.log('all sync done!')
+                vm.makeToast('sync complete')
+              }
+            })
+            .on('error', function (err) {
+              console.log(err)
+              vm.makeToast('sync failed')
+            })
+        })
+      },
     }
   }
 </script>

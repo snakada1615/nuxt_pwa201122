@@ -15,9 +15,16 @@
       </b-col>
     </b-row>
     <b-row>
+      <b-col class="px-0 mb-2 mt-1">
+        <b-card bg-variant="light" border-variant="success" class="mx-1 px-0">
+          <dri-table @changeTarget="onChangeTarget" :mySelection=driID></dri-table>
+        </b-card>
+      </b-col>
+    </b-row>
+    <b-row>
       <b-col class="px-0 py-2">
         <b-card bg-variant="light" border-variant="success" class="mx-1 px-2">
-          <recepi-table>
+          <recepi-table @inputData="onChangeRecepi">
           </recepi-table>
         </b-card>
       </b-col>
@@ -30,6 +37,8 @@
               cropName="Energy"
               :iconNum=iconNum
               :max="10"
+              :nutritionTarget="nutritionTarget.En"
+              :rating="nutritionRating.En"
             ></nutrition-bar>
           </b-row>
           <b-row>
@@ -37,6 +46,8 @@
               cropName="Protain"
               :iconNum=iconNum
               :max="10"
+              :nutritionTarget="nutritionTarget.Pr"
+              :rating="nutritionRating.Pr"
             ></nutrition-bar>
           </b-row>
           <b-row>
@@ -44,6 +55,8 @@
               cropName="Vit-A"
               :iconNum=iconNum
               :max="10"
+              :nutritionTarget="nutritionTarget.Va"
+              :rating="nutritionRating.Va"
             ></nutrition-bar>
           </b-row>
           <b-row class="mb-2">
@@ -51,11 +64,14 @@
               cropName="Iron"
               :iconNum=iconNum
               :max="10"
+              :nutritionTarget="nutritionTarget.Fe"
+              :rating="nutritionRating.Fe"
             ></nutrition-bar>
           </b-row>
         </b-card>
       </b-col>
     </b-row>
+    <b-button id="test" @click="setDRI(3)">test</b-button>
   </b-container>
 </template>
 
@@ -79,7 +95,7 @@
   import fctTable from '~/components/FctTable'
   import nutritionBar from "~/components/nutritionBar";
   import recepiTable from "~/components/recepiTable";
-
+  import driTable from "../components/driTable";
   import PouchDB from 'pouchdb'
 
   var $ = require('jquery');
@@ -89,12 +105,41 @@
       fctTable,
       nutritionBar,
       recepiTable,
+      driTable
+    },
+    computed: {
+      nutritionRating: function () {
+        let En = this.nutritionTarget.En ? Math.round(100 * this.nutritionSum.En / this.nutritionTarget.En) / 10 : 0
+        let Pr = this.nutritionTarget.En ? Math.round(100 * this.nutritionSum.Pr / this.nutritionTarget.Pr) / 10 : 0
+        let Va = this.nutritionTarget.En ? Math.round(100 * this.nutritionSum.Va / this.nutritionTarget.Va) / 10 : 0
+        let Fe = this.nutritionTarget.En ? Math.round(100 * this.nutritionSum.Fe / this.nutritionTarget.Fe) / 10 : 0
+        return {
+          En: En,
+          Pr: Pr,
+          Va: Va,
+          Fe: Fe,
+        }
+      }
     },
     data() {
       return {
+        driID: "8",
         items: [],
         iconNum: 1,
-        showFCT: true
+        showFCT: true,
+        nutritionTarget: {
+          En: 10,
+          Pr: 10,
+          Va: 10,
+          Fe: 10,
+        },
+        nutritionSum: {
+          En: 10,
+          Pr: 10,
+          Va: 10,
+          Fe: 10,
+          Wt: 10,
+        }
       }
     },
     mounted() {
@@ -102,18 +147,22 @@
       const vm = this;
       this.makeToast('start fetching')
       fct.info().then(function (info) {
-        console.log(info);
         if (!(info.doc_count)) {
           vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
-          vm.syncCloudant(['fct'])
-            .catch(err => {
-              console.log(err)
-            })
+          vm.syncCloudant('fct').then(dataset => {
+            vm.setPouchData(dataset)
+          })
+        } else {
+          vm.setPouchData(fct)
         }
       })
-      this.setPouchData(fct)
+      vm.setDRI(9)
     },
     methods: {
+      setDRI(val) {
+        this.driID = val
+        console.log('bbBBBBBBbbbBBBbbbBBB')
+      },
       makeToast(mes, append = false) {
         this.$bvToast.toast(mes, {
           autoHideDelay: 5000,
@@ -148,34 +197,42 @@
           })
         console.log('test03');
       },
-      syncCloudant(dbs) {
+      async syncCloudant(value) {
         const vm = this;
         let sync_count = 0;
         let url = "https://82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix:f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6@82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix.cloudantnosqldb.appdomain.cloud"
         // Replicating a local database to Remote
-        dbs.map(function (value) {
+        let promise = new Promise((resolve, reject) =>{
           const localdb = new PouchDB(value)
-          const remotedb = new PouchDB(
-            url + '/' + value
-          )
+          const remotedb = new PouchDB(url + '/' + value)
           localdb
             .sync(remotedb)
             .on('complete', function () {
-              console.log(value + ': synced')
-              sync_count += 1
-              if (sync_count === dbs.length) {
-                //location.reload();
-                vm.setPouchData(localdb)
-                console.log('all sync done!')
-                vm.makeToast('sync complete')
-              }
+              resolve(localdb)
             })
             .on('error', function (err) {
               console.log(err)
-              vm.makeToast('sync failed')
+              reject(err)
             })
         })
+        let output = await promise
+        return output
       },
+      onChangeRecepi(value) {
+        this.nutritionSum.En = value.En
+        this.nutritionSum.Pr = value.Pr
+        this.nutritionSum.Va = value.Va
+        this.nutritionSum.Fe = value.Fe
+        this.nutritionSum.Wt = value.Wt
+      },
+      onChangeTarget(value) {
+        console.log("i am hi")
+        console.log(value)
+        this.nutritionTarget.En = Number(value[1].Value)
+        this.nutritionTarget.Pr = Number(value[2].Value)
+        this.nutritionTarget.Va = Number(value[3].Value)
+        this.nutritionTarget.Fe = Number(value[4].Value)
+      }
     }
   }
 </script>

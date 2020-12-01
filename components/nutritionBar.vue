@@ -5,7 +5,7 @@
         <div>{{ cropName }}</div>
       </b-col>
       <b-col cols="2" class="px-0 d-flex justify-content-center">
-        <div>0000</div>
+        <div>{{ nutritionTarget }}</div>
       </b-col>
       <b-col class="px-0 d-flex justify-content-start">
         <div>
@@ -66,6 +66,10 @@
       cropName: {
         type: String,
         required: true
+      },
+      nutritionTarget: {
+        type: Number,
+        default: 0
       }
     },
     data() {

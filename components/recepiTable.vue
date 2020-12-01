@@ -1,11 +1,13 @@
 <template>
-  <b-container class="my-0">
+  <b-container class="my-0 px-0">
     <div>
       <b-table
         striped
+        small
         ref="table"
         :items="items"
         :fields="fields"
+        @input="inputData"
         foot-clone>
 
         <!-- A custom formatted footer cell for field 'name' -->
@@ -78,10 +80,6 @@
     },
     data() {
       return {
-        items2: [
-            {id:"1", Group: "grain", Name: "taro", En: "25", Pr: "5", Va: "109", Fe: "13", Wt: "196"},
-            {id:"2", Group: "meat", Name: "pork", En: "15", Pr: "9", Va: "58", Fe: "31", Wt: "208"}
-          ],
         fields: [
           {key: 'id', sortable: false, tdClass: 'd-none', thClass: 'd-none'},
           {key: 'Group', sortable: true, tdClass: 'd-none', thClass: 'd-none'},
@@ -94,5 +92,10 @@
         ],
       }
     },
+    methods: {
+      inputData() {
+        this.$emit('inputData', this.nutritionSum)
+      }
+    }
   }
 </script>
