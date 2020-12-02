@@ -9,7 +9,7 @@
                 <div>
                   test
                 </div>
-                <slot/>
+                <b-button variant="info" size="sm" @click="$emit('modalClose')">close</b-button>
               </b-card>
             </b-col>
           </b-row>
@@ -19,51 +19,62 @@
   </transition>
 </template>
 
+<script>
+export default {
+  props: {
+  }
+}
+</script>
+
 <style lang="scss" scoped>
-  .modal {
-    &__overlay {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      position: fixed;
-      z-index: 100;
-      top: 0;
-      left: 0;
-      height: 100%;
-      width: 100%;
-      background: rgba(0, 0, 0, 0.7);
-    }
-
-    &__window {
-      height: 50%;
-      width: 70%;
-      overflow: hidden;
-      background-color: lightgray;
-    }
-
-    &__content {
-      height: 100%;
-      padding: 30px;
-    }
+.modal {
+  &__overlay {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: fixed;
+    z-index: 100;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.7);
   }
 
-  // transition
-  .modal-enter-active,
-  .modal-leave-active {
-    transition: opacity 0.4s;
-    .modal__window {
-      transition: opacity 0.4s, transform 0.4s;
-    }
+  &__window {
+    height: 300px;
+    width: 500px;
+    overflow: hidden;
+    background-color: lightgray;
   }
-  .modal-leave-active {
-    transition: opacity 0.6s ease 0.4s;
+
+  &__content {
+    height: 100%;
+    padding: 30px;
   }
-  .modal-enter,
-  .modal-leave-to {
+}
+
+// transition
+.modal-enter-active,
+.modal-leave-active {
+  transition: opacity 0.4s;
+
+  .modal__window {
+    transition: opacity 0.4s, transform 0.4s;
+  }
+}
+
+.modal-leave-active {
+  transition: opacity 0.6s ease 0.4s;
+}
+
+.modal-enter,
+.modal-leave-to {
+  opacity: 0;
+
+  .modal__window {
     opacity: 0;
-    .modal__window {
-      opacity: 0;
-      transform: translateY(-20px);
-    }
+    transform: translateY(-20px);
   }
+}
 </style>

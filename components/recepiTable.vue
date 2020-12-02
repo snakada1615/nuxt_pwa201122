@@ -74,6 +74,11 @@
           sum_Fe += Number(value.Fe)
           sum_Wt += Number(value.Wt)
         })
+        sum_En = Math.round(sum_En)
+        sum_Pr = Math.round(sum_Pr)
+        sum_Va = Math.round(sum_Va)
+        sum_Fe = Math.round(sum_Fe)
+        sum_Wt = Math.round(sum_Wt)
         console.log('sum_Wt=' + sum_Wt)
         return {En: sum_En, Pr: sum_Pr, Va: sum_Va, Fe: sum_Fe, Wt: sum_Wt}
       }

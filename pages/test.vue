@@ -25,7 +25,7 @@
     <b-row>
       <b-col class="px-0 py-2">
         <b-card bg-variant="light" border-variant="success" class="mx-1 px-2">
-          <recepi-table @inputData="onChangeRecepi">
+          <recepi-table @inputData="onChangeRecepi" :items="itemsRecepi">
           </recepi-table>
         </b-card>
       </b-col>
@@ -78,9 +78,7 @@
       </b-col>
     </b-row>
     <b-button id="test" @click="showFoodDialog=true">test</b-button>
-    <Modal v-if="showFoodDialog">
-     <button @click="showFoodDialog=false">close</button>
-    </Modal>
+    <food-dialog v-if="showFoodDialog" @modalClose="showFoodDialog=false" @modalOk="onCropWeightSet" :items="itemSingleCrop"></food-dialog>
   </b-container>
 </template>
 
@@ -106,7 +104,6 @@
   import recepiTable from "~/components/recepiTable";
   import driTable from "../components/driTable";
   import foodDialog from '../components/foodDialog'
-  import Modal from '../components/Modal'
   import PouchDB from 'pouchdb'
 
   var $ = require('jquery');
@@ -118,7 +115,6 @@
       recepiTable,
       driTable,
       foodDialog,
-      Modal
     },
     computed: {
       nutritionRating: function () {
@@ -139,6 +135,8 @@
         driID: "8",
         items: [],
         itemsDRI: [],
+        itemSingleCrop: [],
+        itemsRecepi: [],
         iconNum: 1,
         showFCT: true,
         showFoodDialog: false,
@@ -275,22 +273,44 @@
         return output
       },
       onChangeRecepi(value) {
-        this.nutritionSum.En = value.En
-        this.nutritionSum.Pr = value.Pr
-        this.nutritionSum.Va = value.Va
-        this.nutritionSum.Fe = value.Fe
-        this.nutritionSum.Wt = value.Wt
+        this.nutritionSum.En = value.En || 0
+        this.nutritionSum.Pr = value.Pr || 0
+        this.nutritionSum.Va = value.Va || 0
+        this.nutritionSum.Fe = value.Fe || 0
+        this.nutritionSum.Wt = value.Wt || 0
       },
       onChangeTarget(value) {
-        console.log("i am hi")
         console.log(value)
-        this.nutritionTarget.En = Number(value[1].Value)
-        this.nutritionTarget.Pr = Number(value[2].Value)
-        this.nutritionTarget.Va = Number(value[3].Value)
-        this.nutritionTarget.Fe = Number(value[4].Value)
+        this.nutritionTarget.En = Number(value[1].Value) || 0
+        this.nutritionTarget.Pr = Number(value[2].Value) || 0
+        this.nutritionTarget.Va = Number(value[3].Value) || 0
+        this.nutritionTarget.Fe = Number(value[4].Value) || 0
       },
       onFCTclick(rec) {
-        console.log(rec)
+        this.itemSingleCrop.length = 0
+        this.itemSingleCrop.push({
+          'id': rec.id,
+          'Name': rec.Name,
+          'En': rec.En,
+          'Pr': rec.Pr,
+          'Va': rec.Va,
+          'Fe': rec.Fe,
+        })
+        console.log(this.itemSingleCrop)
+        this.showFoodDialog=true
+      },
+      onCropWeightSet(dat){
+        console.log(dat)
+        this.itemsRecepi.push({
+          'id': dat.item[0].id || 0,
+          'Name': dat.item[0].Name || 0,
+          'En': dat.item[0].En || 0,
+          'Pr': dat.item[0].Pr || 0,
+          'Va': dat.item[0].Va || 0,
+          'Fe': dat.item[0].Fe || 0,
+          "Wt": dat.Wt || 0
+        })
+        this.showFoodDialog=false
       }
     }
   }
