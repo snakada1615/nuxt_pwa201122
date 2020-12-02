@@ -1,9 +1,10 @@
 <template>
-  <b-container>
+  <b-container style="max-width: 540px;">
     <b-row class="my-2" v-show="showFCT">
       <b-card bg-variant="light" border-variant="success" class="mx-1 px-0">
         <fct-table
           :items="items"
+          @fctClick="onFCTclick"
         ></fct-table>
       </b-card>
     </b-row>
@@ -17,7 +18,7 @@
     <b-row>
       <b-col class="px-0 mb-2 mt-1">
         <b-card bg-variant="light" border-variant="success" class="mx-1 px-0">
-          <dri-table @changeTarget="onChangeTarget" :mySelection=driID></dri-table>
+          <dri-table @changeTarget="onChangeTarget" :mySelection=driID :items="itemsDRI"></dri-table>
         </b-card>
       </b-col>
     </b-row>
@@ -32,6 +33,11 @@
     <b-row>
       <b-col class="px-0">
         <b-card bg-variant="light" border-variant="success" class="mx-1 px-2">
+          <b-row class="mt-2">
+            <b-col cols="3" class="text-center mr-2 font-weight-bold">Nutrition</b-col>
+            <b-col cols="2" class="font-weight-bold">DRI</b-col>
+            <b-col class="font-weight-bold">Nutrient supply</b-col>
+          </b-row>
           <b-row class="mt-2">
             <nutrition-bar
               cropName="Energy"
@@ -71,7 +77,10 @@
         </b-card>
       </b-col>
     </b-row>
-    <b-button id="test" @click="setDRI(3)">test</b-button>
+    <b-button id="test" @click="showFoodDialog=true">test</b-button>
+    <Modal v-if="showFoodDialog">
+     <button @click="showFoodDialog=false">close</button>
+    </Modal>
   </b-container>
 </template>
 
@@ -96,6 +105,8 @@
   import nutritionBar from "~/components/nutritionBar";
   import recepiTable from "~/components/recepiTable";
   import driTable from "../components/driTable";
+  import foodDialog from '../components/foodDialog'
+  import Modal from '../components/Modal'
   import PouchDB from 'pouchdb'
 
   var $ = require('jquery');
@@ -105,7 +116,9 @@
       fctTable,
       nutritionBar,
       recepiTable,
-      driTable
+      driTable,
+      foodDialog,
+      Modal
     },
     computed: {
       nutritionRating: function () {
@@ -125,8 +138,10 @@
       return {
         driID: "8",
         items: [],
+        itemsDRI: [],
         iconNum: 1,
         showFCT: true,
+        showFoodDialog: false,
         nutritionTarget: {
           En: 10,
           Pr: 10,
@@ -144,6 +159,7 @@
     },
     mounted() {
       const fct = new PouchDB('fct');
+      const dri = new PouchDB('dri');
       const vm = this;
       this.makeToast('start fetching')
       fct.info().then(function (info) {
@@ -156,12 +172,24 @@
           vm.setPouchData(fct)
         }
       })
-      vm.setDRI(9)
+      dri.info().then(function (info) {
+        if (!(info.doc_count)) {
+          vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
+          vm.syncCloudant('dri').then(dataset => {
+            vm.setPouchDataDRI(dataset).then(
+              vm.setDRI(9)
+            )
+          })
+        } else {
+          vm.setPouchDataDRI(dri).then(
+            vm.setDRI(9)
+          )
+        }
+      })
     },
     methods: {
       setDRI(val) {
         this.driID = val
-        console.log('bbBBBBBBbbbBBBbbbBBB')
       },
       makeToast(mes, append = false) {
         this.$bvToast.toast(mes, {
@@ -177,7 +205,6 @@
       },
       setPouchData(dataset) {
         const vm = this;
-        console.log('test01');
         dataset.allDocs({include_docs: true})
           .then(function (docs) {
             $.each(docs.rows, function (index, val) {
@@ -197,12 +224,41 @@
           })
         console.log('test03');
       },
+      async setPouchDataDRI(dataset) {
+        const vm = this;
+        console.log('test01');
+
+        let promise = new Promise((resolve, reject) => {
+          dataset.allDocs({include_docs: true})
+            .then(function (docs) {
+              $.each(docs.rows, function (index, val) {
+                vm.itemsDRI.push({
+                  'id': val.key,
+                  'Name': val.doc.nut_group,
+                  'En': val.doc.energy,
+                  'Pr': val.doc.protein,
+                  'Va': val.doc.vita,
+                  'Fe': val.doc.fe
+                })
+              })
+            })
+            .then(
+              resolve(true)
+            )
+            .catch(function (err) {
+              console.log(err)
+              reject(err)
+            })
+        })
+        let output = await promise
+        return output
+      },
       async syncCloudant(value) {
         const vm = this;
         let sync_count = 0;
         let url = "https://82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix:f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6@82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix.cloudantnosqldb.appdomain.cloud"
         // Replicating a local database to Remote
-        let promise = new Promise((resolve, reject) =>{
+        let promise = new Promise((resolve, reject) => {
           const localdb = new PouchDB(value)
           const remotedb = new PouchDB(url + '/' + value)
           localdb
@@ -232,6 +288,9 @@
         this.nutritionTarget.Pr = Number(value[2].Value)
         this.nutritionTarget.Va = Number(value[3].Value)
         this.nutritionTarget.Fe = Number(value[4].Value)
+      },
+      onFCTclick(rec) {
+        console.log(rec)
       }
     }
   }
