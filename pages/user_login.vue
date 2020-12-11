@@ -1,23 +1,22 @@
 <template>
-  <section class="container">
+  <div class="container">
     <div>
-      <p>{{ $store.state.message }}</p>
-      <p>{{ $store.state.user.email }}</p>
+      <p>email: {{ $store.state.user.email }}</p>
+      <p>pass: {{ $store.state.user.pass }}</p>
+      <p>status: {{ $store.state.user.login }}</p>
     </div>
-    <b-button @click="$store.commit('updateMessage', 'baka')">push me!</b-button>
-    <b-button @click="$store.commit('setUser', {email:'aho', pass:'123232'})">push em!</b-button>
-    <p
-      v-if="false"
-      class="text"
+    <form
+      v-if="$store.state.user.login"
+      class="form"
     >
-      {{ $store.user.email }}
-    </p>
+      <div>you are signed in</div>
+      <b-button @click="$store.dispatch('logout')">logout</b-button>
+    </form>
     <form
       v-else
       class="form"
       @submit.prevent
     >
-      <p>{{ $store.dummy }}</p>
       <label class="label">
        <span class="label">
          email
@@ -46,7 +45,7 @@
         Login
       </button>
     </form>
-  </section>
+  </div>
 </template>
 
 <script>
@@ -62,11 +61,8 @@
         console.log('halo')
       },
       login() {
-        this.$store.dispatch('login', {email: this.email, password: this.password}).then(
-          console.log(this.$store.state.user.email),
-          alert('yeah' + this.$store.state.user.email)
-          //this.$router.push('/')
-        )
+        this.$store.dispatch('login', {email: this.email, password: this.password})
+        //this.$router.push('/')
       },
     }
   }
