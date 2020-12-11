@@ -1,69 +1,49 @@
 <template>
-  <div class="container">
-    <div>
-      <p>email: {{ $store.state.user.email }}</p>
-      <p>pass: {{ $store.state.user.pass }}</p>
-      <p>status: {{ $store.state.user.login }}</p>
-    </div>
-    <form
-      v-if="$store.state.user.login"
-      class="form"
-    >
-      <div>you are signed in</div>
-      <b-button @click="$store.dispatch('logout')">logout</b-button>
-    </form>
-    <form
-      v-else
-      class="form"
-      @submit.prevent
-    >
-      <label class="label">
-       <span class="label">
-         email
-       </span>
-        <input
-          class="input"
-          type="email"
-          v-model="email"
-        >
-      </label>
-      <label class="label">
-       <span class="label">
-         password
-       </span>
-        <input
-          class="input"
-          type="password"
-          v-model="password"
-        >
-      </label>
-      <button
-        class="button"
-        type="submit"
-        @click="login()"
-      >
-        Login
-      </button>
-    </form>
+  <div class="container" style="max-width:: 540px">
+    <b-form @submit.prevent>
+      <b-row>
+        <b-col>
+          <b-form-input
+            id="email_input"
+            class="mb-2 mr-sm-2 mb-sm-0"
+            placeholder="email"
+            type="email"
+            v-model="email"
+          ></b-form-input>
+        </b-col>
+        <b-col>
+          <b-form-input
+            id="pass_input"
+            class="mb-2 mr-sm-2 mb-sm-0"
+            placeholder="password"
+s            type="password"
+            v-model="password"
+          ></b-form-input>
+        </b-col>
+        <b-col>
+          <b-button @click="login()" variant="primary">login</b-button>
+        </b-col>
+      </b-row>
+    </b-form>
   </div>
 </template>
 
 <script>
-  export default {
-    data() {
-      return {
-        email: '',
-        password: ''
-      }
-    },
-    methods: {
-      halo() {
-        console.log('halo')
-      },
-      login() {
-        this.$store.dispatch('login', {email: this.email, password: this.password})
-        //this.$router.push('/')
-      },
+export default {
+  data() {
+    return {
+      email: '',
+      password: ''
     }
+  },
+  methods: {
+    halo() {
+      console.log('halo')
+    },
+    login() {
+      this.$store.dispatch('login', {email: this.email, password: this.password})
+      //this.$router.push('/')
+    },
   }
+}
 </script>

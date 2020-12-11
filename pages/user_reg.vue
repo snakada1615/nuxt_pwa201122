@@ -1,13 +1,6 @@
 <template>
-  <div class="login">
-    <p
-      v-if="user.login"
-      class="text"
-    >
-      {{ user }}
-    </p>
+  <div class="container">
     <form
-      v-else
       class="form"
       @submit.prevent
     >
@@ -17,7 +10,7 @@
        </span>
         <input
           class="input"
-          type="text"
+          type="email"
           v-model="email"
         >
       </label>
@@ -34,32 +27,30 @@
       <button
         class="button"
         type="submit"
-        @click="register"
+        @click="registUser()"
       >
-        register
+        Login
       </button>
     </form>
   </div>
 </template>
 
 <script>
-  export default {
-    computed: {
-      user () {
-        return this.$store.getters['user']
-      },
+export default {
+  data() {
+    return {
+      email: '',
+      password: ''
+    }
+  },
+  methods: {
+    halo() {
+      console.log('halo')
     },
-    data () {
-      return {
-        email: '',
-        password: '',
-      }
-    },
-    methods : {
-      register (email, password) {
-        if (this.$store.dispatch('register', {email: this.email, password: this.password})) // 成功したら1以上がreturnで帰ってくる
-          this.$router.push('/')
-      },
+    registUser() {
+      this.$store.dispatch('registUser', {email: this.email, password: this.password})
+      this.$router.push('/')
     },
   }
+}
 </script>

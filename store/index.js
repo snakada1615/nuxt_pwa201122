@@ -47,6 +47,18 @@ const createStore = () => {
           console.log('firebase:sign out failed')
         });
       },
+      registUser(context, userInfo) {
+        firebase.auth().createUserWithEmailAndPassword(userInfo.email, userInfo.password)
+          .then((user) => {
+            console.log('regist ok！')
+            context.commit('setUser', userInfo)
+          })
+          .catch((error) => {
+            context.commit('setOffUser')
+            console.log('registration failed')
+            alert(error)
+          });
+      },
     }
   })
 }
