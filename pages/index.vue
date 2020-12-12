@@ -1,74 +1,73 @@
 <template>
-  <div class="container">
+  <section class="container">
     <div>
-      <Logo />
-      <h1 class="title">
-        nuxt-pwa-201122
-      </h1>
-      <div class="links">
-        <a
-          href="https://nuxtjs.org/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--green"
-        >
-          Documentation
-        </a>
-        <a
-          href="https://github.com/nuxt/nuxt.js"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="button--grey"
-        >
-          GitHub
-        </a>
-        <nuxt-link to="/page02">page02</nuxt-link>
-      </div>
+      <p>{{ $store.state.message }}</p>
+      <p>{{ $store.state.user.email }}</p>
     </div>
-  </div>
+    <b-button @click="$store.commit('updateMessage', 'baka')">push me!</b-button>
+    <b-button @click="$store.commit('setUser', {email:'aho', pass:'123232'})">push em!</b-button>
+    <p
+      v-if="false"
+      class="text"
+    >
+      {{ $store.user.email }}
+    </p>
+    <form
+      v-else
+      class="form"
+      @submit.prevent
+    >
+      <p>{{ $store.dummy }}</p>
+      <label class="label">
+       <span class="label">
+         email
+       </span>
+        <input
+          class="input"
+          type="email"
+          v-model="email"
+        >
+      </label>
+      <label class="label">
+       <span class="label">
+         password
+       </span>
+        <input
+          class="input"
+          type="password"
+          v-model="password"
+        >
+      </label>
+      <button
+        class="button"
+        type="submit"
+        @click="login()"
+      >
+        Login
+      </button>
+    </form>
+  </section>
 </template>
 
 <script>
-export default {}
+  export default {
+    data() {
+      return {
+        email: '',
+        password: ''
+      }
+    },
+    methods: {
+      halo() {
+        console.log('halo')
+      },
+      login() {
+        this.$store.dispatch('login', {email: this.email, password: this.password}).then(
+          console.log(this.$store.state.user.email),
+          alert('yeah' + this.$store.state.user.email)
+          //this.$router.push('/')
+        )
+      },
+    }
+  }
 </script>
-
-<style>
-.container {
-  margin: 0 auto;
-  min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-align: center;
-}
-
-.title {
-  font-family:
-    'Quicksand',
-    'Source Sans Pro',
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    'Helvetica Neue',
-    Arial,
-    sans-serif;
-  display: block;
-  font-weight: 300;
-  font-size: 100px;
-  color: #35495e;
-  letter-spacing: 1px;
-}
-
-.subtitle {
-  font-weight: 300;
-  font-size: 42px;
-  color: #526488;
-  word-spacing: 5px;
-  padding-bottom: 15px;
-}
-
-.links {
-  padding-top: 15px;
-}
-</style>

@@ -30,6 +30,8 @@
     <div>
       <b-table
         striped
+        responsive
+        small
         ref="table"
         :items="items"
         :fields="fields"
@@ -41,8 +43,8 @@
         :filter-included-fields="filterOn"
         @filtered="onFiltered"
         @row-clicked="rowClick"
-        @input="onInput"
-      ></b-table>
+        @input="onInput">
+      </b-table>
       <b-form-group
         label="Per page"
         label-cols-sm="10"
@@ -100,12 +102,13 @@ export default {
       fields: [
         {key: 'id', sortable: false, tdClass: 'd-none', thClass: 'd-none'},
         {key: 'Group', sortable: true, tdClass: 'd-none', thClass: 'd-none'},
-        {key: 'Name', sortable: true},
-        {key: 'En', sortable: true},
-        {key: 'Pr', sortable: true},
-        {key: 'Va', sortable: true},
-        {key: 'Fe', sortable: true},
+        {key: 'Name', sortable: true, thStyle:{width: "290px"}},
+        {key: 'En', sortable: true, thStyle:{width: "50px"}},
+        {key: 'Pr', sortable: true, thStyle:{width: "50px"}},
+        {key: 'Va', sortable: true, thStyle:{width: "50px"}},
+        {key: 'Fe', sortable: true, thStyle:{width: "50px"}},
       ],
+      colWidth: [0,0,120,30,30,30,30],
       totalRows: 1,
       currentPage: 1,
       perPage: 5,
@@ -128,12 +131,9 @@ export default {
     },
     onInput() {
       // Set the initial number of items
-      console.log('test02');
       this.totalRows = this.items.length
-      console.log(this.items);
     },
     rowClick(record){
-      console.log(record)
       this.$emit('fctClick', record)
     }
   },

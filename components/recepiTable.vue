@@ -1,11 +1,13 @@
 <template>
-  <b-container class="my-0">
+  <b-container class="my-0 px-0">
     <div>
       <b-table
         striped
+        small
         ref="table"
         :items="items"
         :fields="fields"
+        @input="inputData"
         foot-clone>
 
         <!-- A custom formatted footer cell for field 'name' -->
@@ -72,27 +74,33 @@
           sum_Fe += Number(value.Fe)
           sum_Wt += Number(value.Wt)
         })
+        sum_En = Math.round(sum_En)
+        sum_Pr = Math.round(sum_Pr)
+        sum_Va = Math.round(sum_Va)
+        sum_Fe = Math.round(sum_Fe)
+        sum_Wt = Math.round(sum_Wt)
         console.log('sum_Wt=' + sum_Wt)
         return {En: sum_En, Pr: sum_Pr, Va: sum_Va, Fe: sum_Fe, Wt: sum_Wt}
       }
     },
     data() {
       return {
-        items2: [
-            {id:"1", Group: "grain", Name: "taro", En: "25", Pr: "5", Va: "109", Fe: "13", Wt: "196"},
-            {id:"2", Group: "meat", Name: "pork", En: "15", Pr: "9", Va: "58", Fe: "31", Wt: "208"}
-          ],
         fields: [
           {key: 'id', sortable: false, tdClass: 'd-none', thClass: 'd-none'},
           {key: 'Group', sortable: true, tdClass: 'd-none', thClass: 'd-none'},
           {key: 'Name', sortable: true},
-          {key: 'En', sortable: true},
-          {key: 'Pr', sortable: true},
-          {key: 'Va', sortable: true},
-          {key: 'Fe', sortable: true},
-          {key: 'Wt', sortable: true},
+          {key: 'En', sortable: true, tdClass: 'text-center', thClass: 'text-center'},
+          {key: 'Pr', sortable: true, tdClass: 'text-center', thClass: 'text-center'},
+          {key: 'Va', sortable: true, tdClass: 'text-center', thClass: 'text-center'},
+          {key: 'Fe', sortable: true, tdClass: 'text-center', thClass: 'text-center'},
+          {key: 'Wt', sortable: true, tdClass: 'text-center', thClass: 'text-center'},
         ],
       }
     },
+    methods: {
+      inputData() {
+        this.$emit('inputData', this.nutritionSum)
+      }
+    }
   }
 </script>
