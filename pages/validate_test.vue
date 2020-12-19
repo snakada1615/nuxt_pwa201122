@@ -16,12 +16,13 @@
 
   export default {
     components: {
-      veeInput
+      veeInput,
     },
     data(){
       return{
         value: '',
-        email: ''
+        email: '',
+        email2: ''
       }
     }
   };

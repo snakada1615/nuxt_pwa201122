@@ -1,14 +1,9 @@
 <template>
-  <validation-provider immidiate :name="name" :rules="rules" v-slot="{ errors, valid }">
+  <validation-provider :name="name" :rules="rules" v-slot="{ errors, valid }">
     <b-input-group>
       <template #append>
-        <b-input-group-text
-          class="bg-light"
-          :class="{ 'border-danger': !valid, 'border-info':valid }">
-          <div v-show="valid" class="text-info bg-light">
-            <Fa :icon="faCheck"/>
-          </div>
-          <b-badge v-show="!valid" v-b-tooltip.hover :title="errors[0]" class="text-danger bg-light">
+        <b-input-group-text v-show="!valid" class="bg-light border-danger">
+          <b-badge v-b-tooltip.hover :title="errors[0]" class="text-danger bg-light">
             <Fa :icon="faExclamationCircle"/>
           </b-badge>
         </b-input-group-text>
@@ -28,16 +23,16 @@
 
 <script>
   import Fa from 'vue-fa'
-  import { faExclamationCircle, faCheck } from '@fortawesome/free-solid-svg-icons'
+  import { faExclamationCircle } from '@fortawesome/free-solid-svg-icons'
 
   export default {
     components:{
-      Fa, faCheck
+      Fa
     },
     name: "MyInput",
     data(){
       return {
-        faExclamationCircle, faCheck
+        faExclamationCircle
       }
     },
     props: {
