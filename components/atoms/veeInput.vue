@@ -41,7 +41,7 @@
       }
     },
     props: {
-      value: { type: String, required: true },
+      value: { required: true },
       type: { type: String, required: true },
       name: { type: String, required: true },
       placeholder: { type: String, required: false },

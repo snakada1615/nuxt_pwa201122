@@ -77,8 +77,9 @@
         </b-card>
       </b-col>
     </b-row>
-    <b-button id="test" @click="showFoodDialog=true">test</b-button>
+    <b-button id="test" @click="openModal">test</b-button>
     <food-dialog v-if="showFoodDialog" @modalClose="showFoodDialog=false" @modalOk="onCropWeightSet" :items="itemSingleCrop"></food-dialog>
+    <food-modal id="modalTest" @input="onCropWeightSet" ></food-modal>
   </b-container>
 </template>
 
@@ -99,11 +100,12 @@
 </style>
 
 <script>
-  import fctTable from '~/components/FctTable'
-  import nutritionBar from "~/components/nutritionBar";
-  import recepiTable from "~/components/recepiTable";
-  import driTable from "../components/driTable";
-  import foodDialog from '../components/foodDialog'
+  import fctTable from '~/components/organisms/FctTable'
+  import nutritionBar from "~/components/organisms/nutritionBar";
+  import recepiTable from "~/components/organisms/recepiTable";
+  import driTable from "../components/organisms/driTable";
+  import foodDialog from '../components/organisms/foodDialog'
+  import foodModal from '../components/molecules/foodModal'
   import PouchDB from 'pouchdb'
 
   var $ = require('jquery');
@@ -115,6 +117,7 @@
       recepiTable,
       driTable,
       foodDialog,
+      foodModal,
     },
     computed: {
       nutritionRating: function () {
@@ -286,6 +289,11 @@
         this.nutritionTarget.Va = Number(value[3].Value) || 0
         this.nutritionTarget.Fe = Number(value[4].Value) || 0
       },
+      openModal(){
+        console.log('start')
+        this.$bvModal.show('modalTest')
+        console.log('end')
+      },
       onFCTclick(rec) {
         this.itemSingleCrop.length = 0
         this.itemSingleCrop.push({
@@ -297,7 +305,8 @@
           'Fe': rec.Fe,
         })
         console.log(this.itemSingleCrop)
-        this.showFoodDialog=true
+        //this.showFoodDialog=true
+        this.$bvModal.show('modalTest')
       },
       onCropWeightSet(dat){
         console.log(dat)
