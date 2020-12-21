@@ -8,7 +8,8 @@
         :items="items"
         :fields="fields"
         @input="inputData"
-        foot-clone>
+        foot-clone
+        v-bind="$attrs">
 
         <!-- A custom formatted footer cell for field 'name' -->
         <template #foot(Name)="data">

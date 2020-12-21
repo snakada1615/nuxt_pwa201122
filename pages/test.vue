@@ -4,6 +4,8 @@
       <b-card bg-variant="light" border-variant="success" class="mx-1 px-0">
         <fct-table
           :items="items"
+          head-row-variant="success"
+          table-variant="light"
           @fctClick="onFCTclick"
         ></fct-table>
       </b-card>
@@ -18,14 +20,26 @@
     <b-row>
       <b-col class="px-0 mb-2 mt-1">
         <b-card bg-variant="light" border-variant="success" class="mx-1 px-0">
-          <dri-table @changeTarget="onChangeTarget" :mySelection=driID :items="itemsDRI"></dri-table>
+          <dri-table
+            @changeTarget="onChangeTarget"
+            :mySelection=driID
+            :items="itemsDRI"
+            head-row-variant="success"
+            table-variant="light"
+          ></dri-table>
         </b-card>
       </b-col>
     </b-row>
     <b-row>
       <b-col class="px-0 py-2">
         <b-card bg-variant="light" border-variant="success" class="mx-1 px-2">
-          <recepi-table @inputData="onChangeRecepi" :items="itemsRecepi">
+          <recepi-table
+            @inputData="onChangeRecepi"
+            :items="itemsRecepi"
+            head-row-variant="success"
+            table-variant="light"
+            foot-row-variant="light"
+          >
           </recepi-table>
         </b-card>
       </b-col>
@@ -33,7 +47,7 @@
     <b-row>
       <b-col class="px-0">
         <b-card bg-variant="light" border-variant="success" class="mx-1 px-2">
-          <b-row class="mt-2">
+          <b-row class="mt-2 bg-success">
             <b-col cols="3" class="text-center mr-2 font-weight-bold">Nutrition</b-col>
             <b-col cols="2" class="font-weight-bold">DRI</b-col>
             <b-col class="font-weight-bold">Nutrient supply</b-col>
@@ -79,7 +93,14 @@
     </b-row>
     <b-button id="test" @click="openModal">test</b-button>
     <food-dialog v-if="showFoodDialog" @modalClose="showFoodDialog=false" @modalOk="onCropWeightSet" :items="itemSingleCrop"></food-dialog>
-    <food-modal id="modalTest" @input="onCropWeightSet" ></food-modal>
+    <food-modal
+      :init-weight="initWeight"
+      :items="itemSingleCrop"
+      my-name="modalTest"
+      my-type="Number"
+      rules="min_value:0|max_value:500"
+      @modalOk="onCropWeightSet"
+    ></food-modal>
   </b-container>
 </template>
 
@@ -105,7 +126,7 @@
   import recepiTable from "~/components/organisms/recepiTable";
   import driTable from "../components/organisms/driTable";
   import foodDialog from '../components/organisms/foodDialog'
-  import foodModal from '../components/molecules/foodModal'
+  import foodModal from '../components/organisms/foodModal'
   import PouchDB from 'pouchdb'
 
   var $ = require('jquery');
@@ -155,7 +176,8 @@
           Va: 10,
           Fe: 10,
           Wt: 10,
-        }
+        },
+        initWeight:0,
       }
     },
     mounted() {

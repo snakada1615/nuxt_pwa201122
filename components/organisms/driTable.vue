@@ -1,6 +1,6 @@
 <template>
   <b-container class="my-0 px-0">
-    <div>
+    <div class="mb-2">
       <b-form-select v-model="selectedValue" :options="menuOptions" @change="changeSelection"></b-form-select>
     </div>
     <b-table
@@ -9,6 +9,7 @@
       :items="selectedData"
       :fields="fields"
       small
+      v-bind="$attrs"
     ></b-table>
   </b-container>
 </template>

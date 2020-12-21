@@ -16,10 +16,9 @@
       <b-form-input
         class="bg-light"
         :class="{ 'border-danger': !valid, 'border-info':valid }"
-        :type="type"
         :value="value"
-        :placeholder="placeholder"
         @input.native="updateValue"
+        v-bind="$attrs"
       />
     </b-input-group>
 
@@ -42,9 +41,7 @@
     },
     props: {
       value: { required: true },
-      type: { type: String, required: true },
       name: { type: String, required: true },
-      placeholder: { type: String, required: false },
       rules:{
         type: String,
         required:true

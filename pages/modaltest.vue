@@ -1,24 +1,21 @@
 <template>
   <div>
-    <b-button v-b-modal.modal-1>Launch demo modal</b-button>
-    <b-modal id="modal-1" title="BootstrapVue" @ok="clickOk" @cancel="clickCancel">
-      <p class="my-4">Hello from modal!</p>
-      <vee-input
-        v-model="inputWeight"
-        placeholder="Weight of Food"
-        name="sample-input"
-        type="number"
-        rules="min_value:0|max_value:500"
-      ></vee-input>
-    </b-modal>
+    <b-button @click="openModal">Launch demo modal</b-button>
+    <food-modal
+      :init-weight="inputWeight"
+      my-name="bakabaka"
+      my-type="Number"
+      rules="min_value:0|max_value:500"
+    ></food-modal>
   </div>
 </template>
 
 <script>
-  import veeInput from "../components/atoms/veeInput";
+  import foodModal from "~/components/organisms/foodModal";
+
   export default {
     components:{
-      veeInput
+      foodModal,
     },
     props:{
       items: {
@@ -28,13 +25,20 @@
     },
     data(){
       return{
-        inputWeight: 0
+        inputWeight: 30
       }
     },
     methods: {
       // ...
+      openModal(){
+        this.$bvModal.show('bakabaka')
+      },
       clickOk(){
-        console.log('OK')
+        let result = {}
+        //result.item = this.items
+        result.Wt = this.inputWeight
+        console.log(this.inputWeight)
+        this.$emit('modalOk', result)
       },
       clickCancel(){
         console.log('Cancel')

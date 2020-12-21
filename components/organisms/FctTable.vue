@@ -43,7 +43,8 @@
         :filter-included-fields="filterOn"
         @filtered="onFiltered"
         @row-clicked="rowClick"
-        @input="onInput">
+        @input="onInput"
+        v-bind="$attrs">
       </b-table>
       <b-form-group
         label="Per page"
