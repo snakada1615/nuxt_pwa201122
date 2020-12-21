@@ -58,6 +58,11 @@
         return this.myName + '_input'
       }
     },
+    watch: {
+      initWeight: function(){
+        this.myWeight = this.initWeight
+      }
+    },
     data() {
       return {
         myWeight: this.initWeight,

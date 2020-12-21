@@ -91,8 +91,8 @@
         </b-card>
       </b-col>
     </b-row>
-    <b-button id="test" @click="openModal">test</b-button>
-    <food-dialog v-if="showFoodDialog" @modalClose="showFoodDialog=false" @modalOk="onCropWeightSet" :items="itemSingleCrop"></food-dialog>
+    <b-button id="test" @click="test">test</b-button>
+    <b-button @click="initWeight=8">change</b-button>
     <food-modal
       :init-weight="initWeight"
       :items="itemSingleCrop"
@@ -311,10 +311,8 @@
         this.nutritionTarget.Va = Number(value[3].Value) || 0
         this.nutritionTarget.Fe = Number(value[4].Value) || 0
       },
-      openModal(){
-        console.log('start')
-        this.$bvModal.show('modalTest')
-        console.log('end')
+      test(){
+        console.log('files1')
       },
       onFCTclick(rec) {
         this.itemSingleCrop.length = 0
@@ -326,22 +324,35 @@
           'Va': rec.Va,
           'Fe': rec.Fe,
         })
-        console.log(this.itemSingleCrop)
-        //this.showFoodDialog=true
+        const result = this.itemsRecepi.find((v)=>v.id===rec.id)
+        if (result){
+          this.initWeight = Number(result.Wt)
+        } else {
+          this.initWeight = 0
+        }
+        console.log('initweight = ' + this.initWeight)
         this.$bvModal.show('modalTest')
       },
       onCropWeightSet(dat){
         console.log(dat)
-        this.itemsRecepi.push({
-          'id': dat.item[0].id || 0,
-          'Name': dat.item[0].Name || 0,
-          'En': dat.item[0].En || 0,
-          'Pr': dat.item[0].Pr || 0,
-          'Va': dat.item[0].Va || 0,
-          'Fe': dat.item[0].Fe || 0,
-          "Wt": dat.Wt || 0
+        let res = false
+        this.itemsRecepi.forEach(function(val){
+          if (val.id===dat.item[0].id ){
+            val.Wt = dat.Wt
+            res = true
+          }
         })
-        this.showFoodDialog=false
+        if (!res){
+          this.itemsRecepi.push({
+            'id': dat.item[0].id || 0,
+            'Name': dat.item[0].Name || 0,
+            'En': dat.item[0].En || 0,
+            'Pr': dat.item[0].Pr || 0,
+            'Va': dat.item[0].Va || 0,
+            'Fe': dat.item[0].Fe || 0,
+            "Wt": dat.Wt || 0
+          })
+        }
       }
     }
   }

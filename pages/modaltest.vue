@@ -7,6 +7,7 @@
       my-type="Number"
       rules="min_value:0|max_value:500"
     ></food-modal>
+    <b-button @click="inputWeight=8">change</b-button>
   </div>
 </template>
 
