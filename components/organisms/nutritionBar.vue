@@ -30,7 +30,7 @@
 <script>
   var $ = require('jquery')
   import {FaRating} from 'vue-rate-it';
-  import ThumbsUp from 'vue-rate-it/glyphs/thumbs-up';
+  import align_justify from 'vue-rate-it/glyphs/align-justify';
   import apple from 'vue-rate-it/glyphs/apple';
   import navicon from 'vue-rate-it/glyphs/navicon';
 
@@ -80,7 +80,7 @@
     },
     created() {
       console.log("halo")
-      this.myicon = navicon
+      this.myicon = align_justify
     },
     methods: {
       mybar() {

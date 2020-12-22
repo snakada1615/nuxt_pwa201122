@@ -22,7 +22,7 @@
         <b-card bg-variant="light" border-variant="success" class="mx-1 px-0">
           <dri-table
             @changeTarget="onChangeTarget"
-            :mySelection=driID
+            :mySelection="driID"
             :items="itemsDRI"
             head-row-variant="success"
             table-variant="light"
@@ -125,7 +125,6 @@
   import nutritionBar from "~/components/organisms/nutritionBar";
   import recepiTable from "~/components/organisms/recepiTable";
   import driTable from "../components/organisms/driTable";
-  import foodDialog from '../components/organisms/foodDialog'
   import foodModal from '../components/organisms/foodModal'
   import PouchDB from 'pouchdb'
 
@@ -137,7 +136,6 @@
       nutritionBar,
       recepiTable,
       driTable,
-      foodDialog,
       foodModal,
     },
     computed: {
@@ -156,7 +154,7 @@
     },
     data() {
       return {
-        driID: "8",
+        driID: "1",
         items: [],
         itemsDRI: [],
         itemSingleCrop: [],
@@ -200,12 +198,12 @@
           vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
           vm.syncCloudant('dri').then(dataset => {
             vm.setPouchDataDRI(dataset).then(
-              vm.setDRI(9)
+              vm.setDRI(8)
             )
           })
         } else {
           vm.setPouchDataDRI(dri).then(
-            vm.setDRI(9)
+            vm.setDRI(8)
           )
         }
       })

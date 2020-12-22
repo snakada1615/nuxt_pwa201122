@@ -3,6 +3,7 @@
     <div>
       <b-table
         striped
+        bordered
         small
         ref="table"
         :items="items"

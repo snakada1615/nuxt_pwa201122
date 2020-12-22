@@ -30,6 +30,8 @@
     <div>
       <b-table
         striped
+        bordered
+        border-variant="dark"
         responsive
         small
         ref="table"

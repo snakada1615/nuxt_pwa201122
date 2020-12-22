@@ -8,11 +8,11 @@
           <span>NFA tool</span>
           <b-navbar-nav class="ml-auto">
             <b-nav-item-dropdown text="Link" right>
-              <b-dropdown-item to="/index">index</b-dropdown-item>
-              <b-dropdown-item to="/test">test</b-dropdown-item>
-              <b-dropdown-item to="/modalTest">modal test</b-dropdown-item>
-              <b-dropdown-item to="/validate_test">validate_test</b-dropdown-item>
-              <b-dropdown-item to="/user_login">user_login</b-dropdown-item>
+              <b-dropdown-item
+                v-for="(link, index) in links"
+                :to="link.to"
+                :key="link.val"
+              >{{ link.val }}</b-dropdown-item>
             </b-nav-item-dropdown>
           </b-navbar-nav>
         </b-navbar>
@@ -26,6 +26,7 @@
   import LayoutContent from '~/components/LayoutContent' // パスは適宜変更
   import Fa from 'vue-fa'
   import { faHome } from '@fortawesome/free-solid-svg-icons'
+  import user_login from "../pages/user_login";
 
 
   export default {
@@ -35,7 +36,14 @@
     },
     data(){
       return {
-        faHome
+        faHome,
+        links:[
+          {to: '/', val:'index'},
+          {to: '/test', val:'test'},
+          {to: '/modaltest', val:'modaltest'},
+          {to: '/user_login', val:'user_login'},
+          {to: '/validate_test', val:'validate_test'},
+        ]
       }
     }
   }
