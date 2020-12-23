@@ -11,12 +11,13 @@
         <div>
           <fa-rating :glyph="myicon"
                      :item-size="20"
-                     :spacing="-1"
+                     :spacing="-5"
                      :border-width="0"
                      active-color="#FF3333"
                      inactive-color="#cfcfcf"
                      :increment="increment"
                      :max-rating="max"
+                     :read-only="true"
                      v-model="rating">
           </fa-rating>
           <span v-show="showReset"><a href="#" @click.prevent="rating = 0">Reset Rating</a></span>
@@ -31,7 +32,7 @@
   var $ = require('jquery')
   import {FaRating} from 'vue-rate-it';
   import align_justify from 'vue-rate-it/glyphs/align-justify';
-  import apple from 'vue-rate-it/glyphs/apple';
+  import stop from 'vue-rate-it/glyphs/stop';
   import navicon from 'vue-rate-it/glyphs/navicon';
 
   export default {
@@ -80,7 +81,7 @@
     },
     created() {
       console.log("halo")
-      this.myicon = align_justify
+      this.myicon = stop
     },
     methods: {
       mybar() {

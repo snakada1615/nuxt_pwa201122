@@ -9,6 +9,7 @@
         :items="items"
         :fields="fields"
         @input="inputData"
+        @row-clicked="rowClick"
         foot-clone
         v-bind="$attrs">
 
@@ -102,6 +103,9 @@
     methods: {
       inputData() {
         this.$emit('inputData', this.nutritionSum)
+      },
+      rowClick(record){
+        this.$emit('rowClick', record)
       }
     }
   }

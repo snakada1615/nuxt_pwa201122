@@ -39,6 +39,7 @@
             head-row-variant="success"
             table-variant="light"
             foot-row-variant="light"
+            @rowClick="onRecepiclick"
           >
           </recepi-table>
         </b-card>
@@ -329,6 +330,19 @@
           this.initWeight = 0
         }
         console.log('initweight = ' + this.initWeight)
+        this.$bvModal.show('modalTest')
+      },
+      onRecepiclick(rec) {
+        this.itemSingleCrop.length = 0
+        this.itemSingleCrop.push({
+          'id': rec.id,
+          'Name': rec.Name,
+          'En': rec.En,
+          'Pr': rec.Pr,
+          'Va': rec.Va,
+          'Fe': rec.Fe,
+        })
+        this.initWeight = Number(rec.Wt)
         this.$bvModal.show('modalTest')
       },
       onCropWeightSet(dat){
