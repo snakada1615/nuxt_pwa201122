@@ -59,9 +59,18 @@
       }
     },
     watch: {
+/*
       initWeight: function(){
         this.myWeight = this.initWeight
-      }
+      },
+*/
+      initWeight:{
+        handler: function(){
+            this.myWeight = this.initWeight
+          },
+        immediate: true,
+        deep: true
+        }
     },
     data() {
       return {

@@ -39,6 +39,7 @@
         faHome,
         links:[
           {to: '/', val:'index'},
+          {to: '/dietCalk', val:'dietCalk'},
           {to: '/test', val:'test'},
           {to: '/modaltest', val:'modaltest'},
           {to: '/user_login', val:'user_login'},
