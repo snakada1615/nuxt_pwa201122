@@ -48,10 +48,15 @@
     <b-row>
       <b-col class="px-0">
         <b-card bg-variant="light" border-variant="success" class="mx-1 px-2">
-          <span>Per meal<b-form-checkbox name="check-button" switch>Per day</b-form-checkbox></span>
-          <b-row class="mt-2 bg-success">
+          <b-row class="mt-0 bg-success">
             <b-col cols="3" class="text-center mr-2 font-weight-bold">Nutrition</b-col>
-            <b-col class="font-weight-bold">Nutrient supply</b-col>
+            <b-col cols="3" class="font-weight-bold">Balance</b-col>
+            <b-col>
+              <left-right-switch
+                label-left="per meal"
+                label-right="per day"
+              />
+            </b-col>
           </b-row>
           <b-row class="mt-2">
             <nutrition-bar
@@ -127,6 +132,7 @@
   import recepiTable from "~/components/organisms/recepiTable";
   import driTable from "../components/organisms/driTable";
   import foodModal from '../components/organisms/foodModal'
+  import leftRightSwitch from "@/components/atoms/leftRightSwitch";
   import PouchDB from 'pouchdb'
 
   var $ = require('jquery');
@@ -138,6 +144,7 @@
       recepiTable,
       driTable,
       foodModal,
+      leftRightSwitch,
     },
     computed: {
       nutritionRating: function () {
