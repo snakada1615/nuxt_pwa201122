@@ -1,24 +1,59 @@
 <template>
- <b-form-group class="my-0">
-   <label class="my-0" style="font-size: 14
-   px">{{labelLeft}}</label>
-   <b-form-checkbox size="sm" switch inline v-bind="$attrs" id="check01" class="my-0">{{labelRight}}</b-form-checkbox>
- </b-form-group>
+  <b-form inline>
+    <span v-if="labelLeft"><slot name="labelLeft">{{ labelLeft }}</slot></span>
+
+    <b-form-checkbox
+      switch
+      class="mr-0 ml-1"
+      :name="name"
+      :value="value"
+      :checked="input === value"
+      @change="updateValue"
+      @focus="$emit('focus', $event)"
+      @blur="$emit('blur', $event)"
+    />
+    <span v-if="labelRight" class="mx-0 px-0">
+      <slot name="labelRight">{{ labelRight }}</slot>
+    </span>
+    <slot></slot>
+  </b-form>
 </template>
 
 <script>
   export default {
-    props:{
-      labelLeft: '',
-      labelRight:'',
-      leftColor:'',
-      rightColor:''
+    model: {
+      prop: 'checked',
+      event: 'input'
+    },
+
+    props: {
+      value: {},
+      checked: {},
+      labelLeft: { type: String },
+      labelRight: { type: String },
+      name: { type: String, require: true }
+    },
+
+    computed: {
+      group () {
+        return ('$parent' in this && this.$parent.$options.name === 'vue-group') ? this.$parent : null
+      },
+      input () {
+        return this.group ? this.group.value : this.checked
+      }
+    },
+
+    methods: {
+      updateValue (e) {
+        let value = e ? true : false
+        if (this.group) {
+          this.group.$emit('input', value)
+          this.group.$emit('checked', value)
+        } else {
+          this.$emit('input', value)
+          this.$emit('checked', value)
+        }
+      }
     }
   }
 </script>
-
-<style>
-  .custom-control-label:before{
-    background-color:red;
-  }
-</style>

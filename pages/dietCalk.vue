@@ -53,9 +53,12 @@
             <b-col cols="3" class="font-weight-bold">Balance</b-col>
             <b-col>
               <left-right-switch
-                label-left="per meal"
-                label-right="per day"
-              />
+                labelLeft="per meal"
+                labelRight="per day"
+                name="check"
+                v-model="driSwitch"
+                @checked="onChangeNutrientBalance"
+              ></left-right-switch>
             </b-col>
           </b-row>
           <b-row class="mt-2">
@@ -168,6 +171,7 @@
         itemSingleCrop: [],
         itemsRecepi: [],
         iconNum: 1,
+        driSwitch: false,
         showFCT: true,
         showFoodDialog: false,
         nutritionTarget: {
@@ -374,6 +378,10 @@
             "Wt": dat.Wt || 0
           })
         }
+      },
+      onChangeNutrientBalance(){
+        console.log('checked')
+        console.log(this.driSwitch)
       }
     }
   }
