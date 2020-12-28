@@ -59,11 +59,6 @@
       }
     },
     watch: {
-/*
-      initWeight: function(){
-        this.myWeight = this.initWeight
-      },
-*/
       initWeight:{
         handler: function(){
             this.myWeight = this.initWeight

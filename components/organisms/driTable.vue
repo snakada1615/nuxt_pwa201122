@@ -5,9 +5,8 @@
     </div>
     <b-table
       striped
-      ref="table"
       :items="selectedData"
-      :fields="fields"
+      :fields="fields1"
       small
       v-bind="$attrs"
     ></b-table>
@@ -24,7 +23,7 @@
       return {
         selectedData: [],
         selectedValue: null,
-        fields: [
+        fields1: [
           {key: 'Item', sortable: false},
           {key: 'Value', sortable: false},
         ],

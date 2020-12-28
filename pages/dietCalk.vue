@@ -57,7 +57,6 @@
                 labelRight="per day"
                 name="check"
                 v-model="driSwitch"
-                @checked="onChangeNutrientBalance"
               ></left-right-switch>
             </b-col>
           </b-row>
@@ -134,6 +133,7 @@
   import nutritionBar from "~/components/organisms/nutritionBar";
   import recepiTable from "~/components/organisms/recepiTable";
   import driTable from "../components/organisms/driTable";
+  import driTableGroup from "../components/organisms/driTableGroup";
   import foodModal from '../components/organisms/foodModal'
   import leftRightSwitch from "@/components/atoms/leftRightSwitch";
   import PouchDB from 'pouchdb'
@@ -148,19 +148,31 @@
       driTable,
       foodModal,
       leftRightSwitch,
+      driTableGroup,
     },
     computed: {
       nutritionRating: function () {
-        let En = this.nutritionTarget.En ? Math.round(100 * this.nutritionSum.En / this.nutritionTarget.En) / 10 : 0
-        let Pr = this.nutritionTarget.En ? Math.round(100 * this.nutritionSum.Pr / this.nutritionTarget.Pr) / 10 : 0
-        let Va = this.nutritionTarget.En ? Math.round(100 * this.nutritionSum.Va / this.nutritionTarget.Va) / 10 : 0
-        let Fe = this.nutritionTarget.En ? Math.round(100 * this.nutritionSum.Fe / this.nutritionTarget.Fe) / 10 : 0
+        let En = this.nutritionTarget.En ?
+          Math.round(100 * this.nutritionSum.En * this.driRange / this.nutritionTarget.En) / 10 : 0
+        let Pr = this.nutritionTarget.En ?
+          Math.round(100 * this.nutritionSum.Pr * this.driRange / this.nutritionTarget.Pr) / 10 : 0
+        let Va = this.nutritionTarget.En ?
+          Math.round(100 * this.nutritionSum.Va * this.driRange / this.nutritionTarget.Va) / 10 : 0
+        let Fe = this.nutritionTarget.En ?
+          Math.round(100 * this.nutritionSum.Fe * this.driRange / this.nutritionTarget.Fe) / 10 : 0
         return {
           En: En,
           Pr: Pr,
           Va: Va,
           Fe: Fe,
         }
+      },
+      driRange: function () {
+        let res = 1
+        if (this.driSwitch) {
+          res = 0.33
+        }
+        return res
       }
     },
     data() {
@@ -187,7 +199,8 @@
           Fe: 10,
           Wt: 10,
         },
-        initWeight:0,
+        initWeight: 0,
+        groupFlag: false
       }
     },
     mounted() {
@@ -321,7 +334,7 @@
         this.nutritionTarget.Va = Number(value[3].Value) || 0
         this.nutritionTarget.Fe = Number(value[4].Value) || 0
       },
-      test(){
+      test() {
         console.log('files1')
       },
       onFCTclick(rec) {
@@ -339,7 +352,7 @@
         vm.initWeight = 0
         vm.itemsRecepi.forEach(function (item) {
           console.log(item.id)
-          if (item.id === rec.id){
+          if (item.id === rec.id) {
             vm.initWeight = Number(item.Wt)
           }
         })
@@ -358,16 +371,16 @@
         this.initWeight = Number(rec.Wt)
         this.$bvModal.show('modalTest')
       },
-      onCropWeightSet(dat){
+      onCropWeightSet(dat) {
         console.log(dat)
         let res = false
-        this.itemsRecepi.forEach(function(val){
-          if (val.id===dat.item[0].id ){
+        this.itemsRecepi.forEach(function (val) {
+          if (val.id === dat.item[0].id) {
             val.Wt = dat.Wt
             res = true
           }
         })
-        if (!res){
+        if (!res) {
           this.itemsRecepi.push({
             'id': dat.item[0].id || 0,
             'Name': dat.item[0].Name || 0,
@@ -379,10 +392,6 @@
           })
         }
       },
-      onChangeNutrientBalance(){
-        console.log('checked')
-        console.log(this.driSwitch)
-      }
     }
   }
 </script>

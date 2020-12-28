@@ -1,5 +1,5 @@
 <template>
-  <validation-provider mode="eager" :name="name" :rules="rules" v-slot="{ errors, valid }">
+  <validation-provider :mode="mode" :name="name" :rules="rules" v-slot="{ errors, valid }">
     <b-input-group>
       <template #append>
         <b-input-group-text
@@ -12,15 +12,13 @@
             <Fa :icon="faExclamationCircle"/>
           </b-badge>
         </b-input-group-text>
-        {{valid}}
       </template>
       <b-form-input
         class="bg-light"
         :class="{ 'border-danger': !valid, 'border-info':valid }"
-        :value="value"
+        :name="inputName"
         :type="type"
-        @input.native="updateValue"
-        v-bind="$attrs"
+        v-model="valueTemp"
       />
     </b-input-group>
 
@@ -37,23 +35,33 @@
     },
     data(){
       return {
-        faExclamationCircle, faCheck
+        faExclamationCircle,
+        faCheck,
+        valueTemp: this.value
       }
     },
     props: {
-      value: '',
       name: { type: String, required: true },
       rules:{
         type: String,
         required:true
       },
       type: '',
-    },
-    methods: {
-      updateValue: function(e) {
-        console.log('veevalidate input')
-        this.$emit("input", e.target.value);
+      value:'',
+      mode:{
+        type: String,
+        default: 'eager'
       }
-    }
+    },
+    computed:{
+      inputName(){
+        return this.name + '_input'
+      }
+    },
+    watch:{
+      valueTemp: function (val) {
+        this.$emit('input', val);
+      }
+    },
   };
 </script>
