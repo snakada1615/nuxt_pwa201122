@@ -1,13 +1,12 @@
 <template>
   <div>
-    <vee-input2
+    <vee-input3
       name="inputtest"
       type="number"
-      :value="inputValueTemp"
+      v-model="inputValueTemp"
       rules="min_value:0|max_value:500"
-      @input="onInput"
     >
-    </vee-input2>
+    </vee-input3>
     {{inputValueTemp}}
     <dri-table-group
       :items="itemDat"
@@ -22,11 +21,11 @@
 </template>
 
 <script>
-  import veeInput2 from "../components/atoms/veeInput2";
+  import veeInput3 from "../components/atoms/veeInput3";
   import driTableGroup from "../components/organisms/driTableGroup";
   export default {
     components:{
-      veeInput2,
+      veeInput3,
       driTableGroup,
     },
     data(){
@@ -45,10 +44,6 @@
       }
     },
     methods: {
-      onInput(value){
-        console.log('inp' + value)
-        this.inputValueTemp = value
-      },
       onTargetGroupChange(value){
         console.log('population:' + value)
         this.itemDat = this.itemDat.map(function (element, index) {

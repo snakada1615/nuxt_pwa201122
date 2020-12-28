@@ -12,6 +12,7 @@
 
       <template #cell(number)="row">
         <vee-input2
+          mode="aggressive"
           type="number"
           :value="populationNumber[row.index]"
           :name="inputName"
@@ -53,7 +54,6 @@
           {key: 'Item', sortable: false},
           {key: 'Value', sortable: false},
         ],
-        populationNumber: this.items.map(a => a.number)
       }
     },
     props: {
@@ -77,6 +77,9 @@
             'number': value.number,
           }
         })
+      },
+      populationNumber: function () {
+        return this.items.map(a => a.number)
       },
     },
     methods: {
