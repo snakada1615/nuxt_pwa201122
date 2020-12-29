@@ -11,14 +11,14 @@
       small>
 
       <template #cell(number)="row">
-        <vee-input2
+        <vee-input3
           mode="aggressive"
           type="number"
           :value="populationNumber[row.index]"
           :name="inputName"
           :rules="rules"
           @input="onPopulationChange($event, row.index)"
-        ></vee-input2>
+        ></vee-input3>
       </template>
     </b-table>
 
@@ -34,11 +34,11 @@
 </template>
 
 <script>
-  import veeInput2 from "../atoms/veeInput2";
+  import veeInput3 from "../atoms/veeInput3";
 
   export default {
     components: {
-      veeInput2
+      veeInput3
     },
     data() {
       return {
@@ -60,13 +60,12 @@
       mySelection: null,
       items: {
         type: Array,
-        default: () => [
-        ],
+        default: () => [],
       },
       rules: {
         type: String,
       },
-      inputName:'',
+      inputName: '',
     },
     computed: {
       tableItems: function () {
@@ -83,7 +82,7 @@
       },
     },
     methods: {
-      onPopulationChange(event, index){
+      onPopulationChange(event, index) {
         this.populationNumber[index] = event
         this.$emit('input', this.populationNumber)
         console.log(this.populationNumber)
