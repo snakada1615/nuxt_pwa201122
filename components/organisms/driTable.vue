@@ -56,6 +56,12 @@
             'text': value.Name
           }
         })
+        result.push({
+          'value': '',
+          'text': 'Please select target',
+          disabled: true,
+          selected: true,
+        })
         return result
       }
     },

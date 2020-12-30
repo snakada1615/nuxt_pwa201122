@@ -11,14 +11,14 @@
       small>
 
       <template #cell(number)="row">
-        <vee-input3
+        <vee-input
           mode="aggressive"
           type="number"
           :value="populationNumber[row.index]"
           :name="inputName"
           :rules="rules"
           @input="onPopulationChange($event, row.index)"
-        ></vee-input3>
+        ></vee-input>
       </template>
     </b-table>
 
@@ -34,11 +34,11 @@
 </template>
 
 <script>
-  import veeInput3 from "../atoms/veeInput3";
+  import veeInput from "../atoms/veeInput";
 
   export default {
     components: {
-      veeInput3
+      veeInput
     },
     data() {
       return {

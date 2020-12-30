@@ -14,7 +14,8 @@
       :fields="fields"
     ></b-table>
     <vee-input
-      v-model="myWeight"
+      :value="value"
+      @input="$emit('input', Number($event))"
       :name="inputName"
       type="number"
       :rules="rules"
@@ -35,7 +36,7 @@
         type: Array,
         default: () => [],
       },
-      initWeight: {
+      value: {
         type: Number,
         default: 0,
       },
@@ -58,21 +59,12 @@
         return this.myName + '_input'
       }
     },
-    watch: {
-      initWeight:{
-        handler: function(){
-            this.myWeight = this.initWeight
-          },
-        immediate: true,
-        deep: true
-        }
-    },
     data() {
       return {
-        myWeight: this.initWeight,
         fields: [
           {key: 'id', sortable: false, tdClass: 'd-none', thClass: 'd-none'},
           {key: 'Name', sortable: true, thStyle: {width: "290px"}},
+          {key: 'Group', sortable: false, tdClass: 'd-none', thClass: 'd-none'},
           {key: 'En', sortable: true, thStyle: {width: "50px"}},
           {key: 'Pr', sortable: true, thStyle: {width: "50px"}},
           {key: 'Va', sortable: true, thStyle: {width: "50px"}},
@@ -86,7 +78,7 @@
         console.log('OK')
         let result = {}
         result.item = this.items
-        result.Wt = this.myWeight
+        result.Wt = this.value
         this.$emit('modalOk', result)
       },
       clickCancel() {

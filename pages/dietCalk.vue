@@ -1,7 +1,10 @@
 <template>
   <b-container style="max-width: 540px;">
     <b-row class="my-2" v-show="showFCT">
-      <b-card bg-variant="light" border-variant="success" class="mx-1 px-0">
+      <b-card header-bg-variant="success" bg-variant="light" border-variant="success" class="mx-1 px-0">
+        <template #header>
+          <b class="py-0 my-0">Food Composition Table</b>
+        </template>
         <fct-table
           :items="items"
           head-row-variant="success"
@@ -19,7 +22,10 @@
     </b-row>
     <b-row>
       <b-col class="px-0 mb-2 mt-1">
-        <b-card bg-variant="light" border-variant="success" class="mx-1 px-0">
+        <b-card header-bg-variant="success" bg-variant="light" border-variant="success" class="mx-1 px-0">
+          <template #header>
+            <b class="py-0 my-0">Nutrient requirement</b>
+          </template>
           <dri-table
             @changeTarget="onChangeTarget"
             :mySelection="driID"
@@ -32,7 +38,10 @@
     </b-row>
     <b-row>
       <b-col class="px-0 py-2">
-        <b-card bg-variant="light" border-variant="success" class="mx-1 px-2">
+        <b-card header-bg-variant="success" bg-variant="light" border-variant="success" class="mx-1 px-0">
+          <template #header>
+            <b class="py-0 my-0">Crop combination</b>
+          </template>
           <recepi-table
             @inputData="onChangeRecepi"
             :items="itemsRecepi"
@@ -47,7 +56,10 @@
     </b-row>
     <b-row>
       <b-col class="px-0">
-        <b-card bg-variant="light" border-variant="success" class="mx-1 px-2">
+        <b-card header-bg-variant="success" bg-variant="light" border-variant="success" class="mx-1 px-0">
+          <template #header>
+            <b class="py-0 my-0">Nutrition balance</b>
+          </template>
           <b-row class="mt-0 bg-success">
             <b-col cols="3" class="text-center mr-2 font-weight-bold">Nutrition</b-col>
             <b-col cols="3" class="font-weight-bold">Balance</b-col>
@@ -99,10 +111,26 @@
         </b-card>
       </b-col>
     </b-row>
+    <b-row class="mt-3">
+      <b-col class="px-0">
+        <b-card header-bg-variant="success" bg-variant="light" border-variant="success" class="mx-1 px-0">
+          <template #header>
+            <b class="py-0 my-0">Dietary diversity</b>
+          </template>
+          <b-form-checkbox-group
+            stacked
+            v-model="selectedCrops"
+            :options="cropGroup"
+          >
+          </b-form-checkbox-group>
+        </b-card>
+      </b-col>
+    </b-row>
+
     <b-button id="test" @click="test">test</b-button>
     <b-button @click="initWeight=8">change</b-button>
     <food-modal
-      :init-weight="initWeight"
+      v-model="initWeight"
       :items="itemSingleCrop"
       my-name="modalTest"
       my-type="Number"
@@ -173,11 +201,38 @@
           res = 0.33
         }
         return res
+      },
+      cropGroup: function () {
+        let uniqueGroup = []
+        let result = []
+        this.items.forEach(function (elem) {
+          if (uniqueGroup.indexOf(elem.Group) === -1) {
+            uniqueGroup.push(elem.Group)
+            result.push({
+              text: elem.Group,
+              value: elem.Group,
+              disabled: false
+            })
+          }
+        })
+        return result
+      },
+      selectedCrops: {
+        // getter 関数
+        get: function () {
+          let result=[]
+          this.itemsRecepi.forEach(function (value) {
+            result.push(
+              value.Group,
+            )
+          })
+          return result
+        },
       }
     },
     data() {
       return {
-        driID: "1",
+        driID: "",
         items: [],
         itemsDRI: [],
         itemSingleCrop: [],
@@ -200,7 +255,7 @@
           Wt: 10,
         },
         initWeight: 0,
-        groupFlag: false
+        groupFlag: false,
       }
     },
     mounted() {
@@ -222,16 +277,19 @@
         if (!(info.doc_count)) {
           vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
           vm.syncCloudant('dri').then(dataset => {
-            vm.setPouchDataDRI(dataset).then(
-              vm.setDRI(8)
-            )
+            vm.setPouchDataDRI(dataset)
           })
         } else {
-          vm.setPouchDataDRI(dri).then(
-            vm.setDRI(8)
-          )
+          vm.setPouchDataDRI(dri)
         }
       })
+    },
+    watch:{
+      itemsRecepi: {
+        handler(value){
+          console.log('itemRecipe changed')
+        }
+      }
     },
     methods: {
       setDRI(val) {
@@ -268,11 +326,9 @@
           .catch(function (err) {
             console.log(err)
           })
-        console.log('test03');
       },
       async setPouchDataDRI(dataset) {
         const vm = this;
-        console.log('test01');
 
         let promise = new Promise((resolve, reject) => {
           dataset.allDocs({include_docs: true})
@@ -344,6 +400,7 @@
         vm.itemSingleCrop.push({
           'id': rec.id,
           'Name': rec.Name,
+          'Group': rec.Group,
           'En': rec.En,
           'Pr': rec.Pr,
           'Va': rec.Va,
@@ -363,6 +420,7 @@
         this.itemSingleCrop.push({
           'id': rec.id,
           'Name': rec.Name,
+          'Group': rec.Group,
           'En': rec.En,
           'Pr': rec.Pr,
           'Va': rec.Va,
@@ -384,6 +442,7 @@
           this.itemsRecepi.push({
             'id': dat.item[0].id || 0,
             'Name': dat.item[0].Name || 0,
+            'Group': dat.item[0].Group || 0,
             'En': dat.item[0].En || 0,
             'Pr': dat.item[0].Pr || 0,
             'Va': dat.item[0].Va || 0,
