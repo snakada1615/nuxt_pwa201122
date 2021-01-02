@@ -6,9 +6,10 @@
       head-row-variant="success"
       table-variant="light"
       :items="tableItems"
-      :fields="fields1"
+      :fields="fieldDRI"
       :sort-by.sync="sortBy"
-      small>
+      small
+    >
 
       <template #cell(number)="row">
         <vee-input
@@ -24,40 +25,49 @@
 
     <b-table
       striped
-      :items="selectedData"
-      :fields="fields2"
+      bordered
       small
-      v-bind="$attrs"
+      head-row-variant="success"
+      table-variant="light"
+      :items="total"
+      :fields="fieldTotal"
     ></b-table>
-    {{ populationNumber }}
   </b-container>
 </template>
 
 <script>
   import veeInput from "../atoms/veeInput";
+  const formatRound = new Intl.NumberFormat('ja', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  })
 
   export default {
     components: {
       veeInput
     },
+    model: {
+      prop: 'items',
+      event: 'input'
+    },
     data() {
       return {
         selectedData: [],
         selectedValue: null,
-        fields1: [
+        fieldDRI: [
           {key: 'id', sortable: true, tdClass: 'd-none', thClass: 'd-none'},
-          {key: 'name', sortable: false},
+          {key: 'Name', sortable: false},
           {key: 'number', sortable: false},
         ],
         sortBy: 'id',
-        fields2: [
+        fieldTotal: [
           {key: 'Item', sortable: false},
           {key: 'Value', sortable: false},
         ],
+//        tableItems:[],
       }
     },
     props: {
-      mySelection: null,
       items: {
         type: Array,
         default: () => [],
@@ -68,43 +78,47 @@
       inputName: '',
     },
     computed: {
-      tableItems: function () {
-        return this.items.map(function (value) {
-          return {
-            'id': value.id,
-            'name': value.name,
-            'number': value.number,
-          }
+      tableItems: function(){
+        const vm = this
+        return vm.items.map(function (value, index) {
+          value.number = vm.populationNumber[index]
+          return value
         })
       },
       populationNumber: function () {
         return this.items.map(a => a.number)
       },
+      total: function () {
+        let result = {}
+        result.En = 0
+        result.Pr = 0
+        result.Va = 0
+        result.Fe = 0
+        this.items.forEach(function (value) {
+          result.En += Number(value.En) * Number(value.number)
+          result.Pr += Number(value.Pr) * Number(value.number)
+          result.Va += Number(value.Va) * Number(value.number)
+          result.Fe += Number(value.Fe) * Number(value.number)
+        })
+        return [
+          {Item: 'target', Value: 'mixed'},
+          {Item: 'Energy', Value: formatRound.format(result.En)},
+          {Item: 'Protein', Value: formatRound.format(result.Pr)},
+          {Item: 'Vita-A', Value: formatRound.format(result.Va)},
+          {Item: 'Iron', Value: formatRound.format(result.Fe)}
+        ]
+      }
     },
     methods: {
       onPopulationChange(event, index) {
-        this.populationNumber[index] = event
-        this.$emit('input', this.populationNumber)
-        console.log(this.populationNumber)
-      },
-      changeSelection() {
         const vm = this
-        vm.selectedData.length = 0
-        const dat = vm.items.filter(function (item) {
-          return item.id === vm.selectedValue
+        const result = vm.items.map(function (value, i) {
+          if (i === index) {
+            value.number = event
+          }
+          return value
         })
-        if (dat.length !== 1) {
-          console.log('Error in dri dataset')
-        } else {
-          vm.selectedData.push(
-            {Item: 'target', Value: dat[0].Name},
-            {Item: 'Energy', Value: dat[0].En},
-            {Item: 'Protein', Value: dat[0].Pr},
-            {Item: 'Vita-A', Value: dat[0].Va},
-            {Item: 'Iron', Value: dat[0].Fe}
-          )
-          vm.$emit('changeTarget', vm.selectedData)
-        }
+        this.$emit('input', result)
       },
     }
   }

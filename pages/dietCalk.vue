@@ -1,11 +1,26 @@
 <template>
   <b-container style="max-width: 540px;">
-    <b-row class="my-2" v-show="showFCT">
-      <b-card header-bg-variant="success" bg-variant="light" border-variant="success" class="mx-1 px-0">
+    <b-row class="my-2">
+      <b-card
+        style="min-width: 530px;"
+        header-bg-variant="success"
+        bg-variant="light"
+        border-variant="success"
+        class="mx-1 px-0">
         <template #header>
-          <b class="py-0 my-0">Food Composition Table</b>
+          <b-row>
+            <b-col>
+              <b class="py-0 my-0">Food Composition Table</b>
+            </b-col>
+            <b-col cols="4">
+              <b-form-checkbox v-model="showFCT" name="FCT-button" switch>
+                Show FCT
+              </b-form-checkbox>
+            </b-col>
+          </b-row>
         </template>
         <fct-table
+          v-show="showFCT"
           :items="items"
           head-row-variant="success"
           table-variant="light"
@@ -14,25 +29,44 @@
       </b-card>
     </b-row>
     <b-row>
-      <b-col>
-        <b-form-checkbox v-model="showFCT" name="FCT-button" switch>
-          Show FCT
-        </b-form-checkbox>
-      </b-col>
-    </b-row>
-    <b-row>
       <b-col class="px-0 mb-2 mt-1">
         <b-card header-bg-variant="success" bg-variant="light" border-variant="success" class="mx-1 px-0">
           <template #header>
-            <b class="py-0 my-0">Nutrient requirement</b>
+            <b-row class="my-0 py-0">
+              <b-col class="mx-0 px-0">
+                <b class="py-0 my-0 px-2">Nutrient requirement</b>
+              </b-col>
+              <b-col cols="4" class="mx-0 px-0">
+                <left-right-switch
+                  labelLeft="single"
+                  labelRight="multiple"
+                  name="check"
+                  v-model="targetSwitch"
+                ></left-right-switch>
+              </b-col>
+            </b-row>
           </template>
           <dri-table
+            v-show="!targetSwitch"
             @changeTarget="onChangeTarget"
             :mySelection="driID"
             :items="itemsDRI"
             head-row-variant="success"
             table-variant="light"
-          ></dri-table>
+          />
+          <dri-table-group
+            ref="table"
+            v-show="targetSwitch"
+            v-model="itemsDRI"
+            input-name='ahoaho'
+            rules="min_value:0|max_value:500"
+            head-row-variant="success"
+            table-variant="light"
+          />
+          <div v-show="targetSwitch">
+            <b-button @click="onPushMe">puch me!</b-button>
+          </div>
+
         </b-card>
       </b-col>
     </b-row>
@@ -220,7 +254,7 @@
       selectedCrops: {
         // getter 関数
         get: function () {
-          let result=[]
+          let result = []
           this.itemsRecepi.forEach(function (value) {
             result.push(
               value.Group,
@@ -228,6 +262,24 @@
           })
           return result
         },
+      },
+      itemTemp: {
+        get(){
+          // return this.itemsDRI
+
+          return [
+            {id:'1', name: 'nakada01', number: '7', En:'100', Pr:'80', Va:'80', Fe:'80'},
+            {id:'2', name: 'nakada02', number: '17', En:'100', Pr:'80', Va:'80', Fe:'80'},
+            {id:'3', name: 'nakada03', number: '37', En:'100', Pr:'80', Va:'80', Fe:'80'},
+            {id:'4', name: 'nakada04', number: '27', En:'100', Pr:'80', Va:'80', Fe:'80'},
+            {id:'5', name: 'nakada05', number: '75', En:'100', Pr:'80', Va:'80', Fe:'80'},
+          ]
+
+        },
+        set(value){
+          console.log('setter triggered')
+          console.log(value)
+        }
       }
     },
     data() {
@@ -235,10 +287,12 @@
         driID: "",
         items: [],
         itemsDRI: [],
+        itemsDriGroup: [],
         itemSingleCrop: [],
         itemsRecepi: [],
         iconNum: 1,
         driSwitch: false,
+        targetSwitch: false,
         showFCT: true,
         showFoodDialog: false,
         nutritionTarget: {
@@ -281,20 +335,19 @@
           })
         } else {
           vm.setPouchDataDRI(dri)
+          console.log('itemsDRI =' + vm.itemsDRI)
+          console.log('itemsDRIGroup =' + vm.itemsDriGroup)
         }
       })
     },
-    watch:{
+    watch: {
       itemsRecepi: {
-        handler(value){
+        handler(value) {
           console.log('itemRecipe changed')
         }
       }
     },
     methods: {
-      setDRI(val) {
-        this.driID = val
-      },
       makeToast(mes, append = false) {
         this.$bvToast.toast(mes, {
           autoHideDelay: 5000,
@@ -327,33 +380,27 @@
             console.log(err)
           })
       },
-      async setPouchDataDRI(dataset) {
+      setPouchDataDRI(dataset) {
         const vm = this;
-
-        let promise = new Promise((resolve, reject) => {
-          dataset.allDocs({include_docs: true})
-            .then(function (docs) {
-              $.each(docs.rows, function (index, val) {
-                vm.itemsDRI.push({
-                  'id': val.key,
-                  'Name': val.doc.nut_group,
-                  'En': val.doc.energy,
-                  'Pr': val.doc.protein,
-                  'Va': val.doc.vita,
-                  'Fe': val.doc.fe
-                })
+        dataset.allDocs({include_docs: true})
+          .then(function (docs) {
+            $.each(docs.rows, function (index, val) {
+              vm.itemsDRI.push({
+                'id': val.key,
+                'Name': val.doc.nut_group,
+                'En': val.doc.energy,
+                'Pr': val.doc.protein,
+                'Va': val.doc.vita,
+                'Fe': val.doc.fe,
+                'number': 0
               })
             })
-            .then(
-              resolve(true)
-            )
-            .catch(function (err) {
-              console.log(err)
-              reject(err)
-            })
-        })
-        let output = await promise
-        return output
+            console.log(vm.itemsDRI)
+            this.$refs.table.refresh()
+          })
+          .catch(function (err) {
+            console.log(err)
+          })
       },
       async syncCloudant(value) {
         const vm = this;
@@ -429,6 +476,12 @@
         this.initWeight = Number(rec.Wt)
         this.$bvModal.show('modalTest')
       },
+      onPushMe(){
+        console.log('hello onPushMe')
+        this.$root.$emit('bv::refresh::table', 'table01')
+        console.log('bye onPushMe')
+        //this.$refs.table.refresh()
+      },
       onCropWeightSet(dat) {
         console.log(dat)
         let res = false
@@ -451,6 +504,6 @@
           })
         }
       },
-    }
+    },
   }
 </script>
