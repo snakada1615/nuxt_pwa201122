@@ -1,6 +1,6 @@
 <template>
   <validation-provider :mode="mode" :name="name" :rules="rules" v-slot="{ errors, valid }">
-    <b-input-group>
+    <b-input-group size="sm">
       <template #append>
         <b-input-group-text
           class="bg-light"
@@ -19,6 +19,7 @@
         :name="inputName"
         :type="type"
         :value="value"
+        size="sm"
         @input.native="$emit('input', $event.target.value)"
       />
     </b-input-group>

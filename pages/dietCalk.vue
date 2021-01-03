@@ -161,7 +161,6 @@
       </b-col>
     </b-row>
 
-    <b-button id="test" @click="test">test</b-button>
     <b-button @click="initWeight=8">change</b-button>
     <food-modal
       v-model="initWeight"
@@ -245,39 +244,23 @@
             result.push({
               text: elem.Group,
               value: elem.Group,
-              disabled: false
+              disabled: true,
             })
           }
         })
         return result
       },
       selectedCrops: {
-        // getter 関数
         get: function () {
-          let result = []
-          this.itemsRecepi.forEach(function (value) {
-            result.push(
-              value.Group,
-            )
+          let uniqueGroup = []
+          this.itemsRecepi.forEach(function (elem) {
+            if (uniqueGroup.indexOf(elem.Group) === -1) {
+              uniqueGroup.push(elem.Group)
+            }
           })
-          return result
+          return uniqueGroup
         },
-      },
-      itemTemp: {
-        get(){
-          // return this.itemsDRI
-
-          return [
-            {id:'1', name: 'nakada01', number: '7', En:'100', Pr:'80', Va:'80', Fe:'80'},
-            {id:'2', name: 'nakada02', number: '17', En:'100', Pr:'80', Va:'80', Fe:'80'},
-            {id:'3', name: 'nakada03', number: '37', En:'100', Pr:'80', Va:'80', Fe:'80'},
-            {id:'4', name: 'nakada04', number: '27', En:'100', Pr:'80', Va:'80', Fe:'80'},
-            {id:'5', name: 'nakada05', number: '75', En:'100', Pr:'80', Va:'80', Fe:'80'},
-          ]
-
-        },
-        set(value){
-          console.log('setter triggered')
+        set: function (value) {
           console.log(value)
         }
       }
@@ -287,7 +270,6 @@
         driID: "",
         items: [],
         itemsDRI: [],
-        itemsDriGroup: [],
         itemSingleCrop: [],
         itemsRecepi: [],
         iconNum: 1,
@@ -310,6 +292,9 @@
         },
         initWeight: 0,
         groupFlag: false,
+        tmp: [
+          'Grains, roots and tubers \r'
+        ],
       }
     },
     mounted() {
@@ -335,8 +320,6 @@
           })
         } else {
           vm.setPouchDataDRI(dri)
-          console.log('itemsDRI =' + vm.itemsDRI)
-          console.log('itemsDRIGroup =' + vm.itemsDriGroup)
         }
       })
     },
@@ -396,7 +379,6 @@
               })
             })
             console.log(vm.itemsDRI)
-            this.$refs.table.refresh()
           })
           .catch(function (err) {
             console.log(err)
@@ -437,9 +419,6 @@
         this.nutritionTarget.Va = Number(value[3].Value) || 0
         this.nutritionTarget.Fe = Number(value[4].Value) || 0
       },
-      test() {
-        console.log('files1')
-      },
       onFCTclick(rec) {
         console.log('halo')
         const vm = this
@@ -476,11 +455,10 @@
         this.initWeight = Number(rec.Wt)
         this.$bvModal.show('modalTest')
       },
-      onPushMe(){
+      onPushMe() {
         console.log('hello onPushMe')
         this.$root.$emit('bv::refresh::table', 'table01')
         console.log('bye onPushMe')
-        //this.$refs.table.refresh()
       },
       onCropWeightSet(dat) {
         console.log(dat)
