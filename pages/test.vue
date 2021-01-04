@@ -1,33 +1,98 @@
 <template>
-  <div>
-    <dri-table-group
-      v-model="itemDat"
-      input-name='ahoaho'
-      rules="min_value:0|max_value:500"
-      head-row-variant="success"
-      table-variant="light"
-    >
-    </dri-table-group>
-    <b-button>dialog</b-button>
-  </div>
+  <b-container>
+    <FctTableModal
+      my-name="modalTest"
+      my-modal-header="Food Composition Table"
+      :items="items"
+    ></FctTableModal>
+    <b-button @click="showDialogue">click</b-button>
+  </b-container>
 </template>
 
 <script>
-  import driTableGroup from "../components/organisms/driTableGroup";
+  import FctTableModal from "../components/organisms/FctTableModal";
+  import PouchDB from "pouchdb";
+
   export default {
     components:{
-      driTableGroup,
+      FctTableModal,
     },
     data(){
-      return {
-        itemDat: [
-          {id:'1', Name: 'nakada01', number: '7', En:'100', Pr:'80', Va:'80', Fe:'80'},
-          {id:'2', Name: 'nakada02', number: '17', En:'100', Pr:'80', Va:'80', Fe:'80'},
-          {id:'3', Name: 'nakada03', number: '37', En:'100', Pr:'80', Va:'80', Fe:'80'},
-          {id:'4', Name: 'nakada04', number: '27', En:'100', Pr:'80', Va:'80', Fe:'80'},
-          {id:'5', Name: 'nakada05', number: '75', En:'100', Pr:'80', Va:'80', Fe:'80'},
-        ],
+      return{
+        items:[],
       }
     },
+    mounted() {
+      console.log(('yes mounted'))
+      const fct = new PouchDB('fct');
+      const vm = this;
+      this.makeToast('start fetching')
+      fct.info().then(function (info) {
+        if (!(info.doc_count)) {
+          vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
+          vm.syncCloudant('fct').then(dataset => {
+            vm.setPouchData(dataset)
+          })
+        } else {
+          console.log(('yes'))
+          vm.setPouchData(fct)
+        }
+      })
+    },
+    methods:{
+      makeToast(mes, append = false) {
+        this.$bvToast.toast(mes, {
+          autoHideDelay: 5000,
+          appendToast: append,
+          variant: "info",
+          noCloseButton: true
+        })
+      },
+      showDialogue(){
+        this.$bvModal.show('modalTest')
+      },
+      setPouchData(dataset) {
+        const vm = this;
+        dataset.allDocs({include_docs: true})
+          .then(function (docs) {
+            vm.items.length = 0           //initialize items value
+            docs.rows.forEach(function (val, index) {
+              vm.items.push({
+                'id': val.doc.food_item_id,
+                'Group': val.doc.food_group_unicef,
+                'Name': val.doc.Food_name,
+                'En': val.doc.Energy,
+                'Pr': val.doc.Protein,
+                'Va': val.doc.VITA_RAE,
+                'Fe': val.doc.FE
+              })
+            })
+          })
+          .catch(function (err) {
+            console.log(err)
+          })
+      },
+      async syncCloudant(value) {
+        const vm = this;
+        let sync_count = 0;
+        let url = "https://82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix:f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6@82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix.cloudantnosqldb.appdomain.cloud"
+        // Replicating a local database to Remote
+        let promise = new Promise((resolve, reject) => {
+          const localdb = new PouchDB(value)
+          const remotedb = new PouchDB(url + '/' + value)
+          localdb
+            .sync(remotedb)
+            .on('complete', function () {
+              resolve(localdb)
+            })
+            .on('error', function (err) {
+              console.log(err)
+              reject(err)
+            })
+        })
+        let output = await promise
+        return output
+      },
+    }
   }
 </script>

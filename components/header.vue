@@ -41,9 +41,8 @@
           {to: '/', val:'index'},
           {to: '/dietCalk', val:'dietCalk'},
           {to: '/test', val:'test'},
-          {to: '/modaltest', val:'modaltest'},
           {to: '/user_login', val:'user_login'},
-          {to: '/validate_test', val:'validate_test'},
+          {to: '/feasibilityCheck', val:'Feasiblity Check'},
         ]
       }
     }

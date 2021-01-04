@@ -63,10 +63,6 @@
             head-row-variant="success"
             table-variant="light"
           />
-          <div v-show="targetSwitch">
-            <b-button @click="onPushMe">puch me!</b-button>
-          </div>
-
         </b-card>
       </b-col>
     </b-row>
@@ -161,7 +157,6 @@
       </b-col>
     </b-row>
 
-    <b-button @click="initWeight=8">change</b-button>
     <food-modal
       v-model="initWeight"
       :items="itemSingleCrop"
