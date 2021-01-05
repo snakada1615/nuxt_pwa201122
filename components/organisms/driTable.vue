@@ -1,9 +1,15 @@
 <template>
   <b-container class="my-0 px-0">
     <div class="mb-2">
-      <b-form-select v-model="selectedValue" :options="menuOptions" @change="changeSelection"></b-form-select>
+      <b-form-select
+        v-model="selectedValue"
+        :options="menuOptions"
+        @change="changeSelection"
+        :state="selectedValue!==''"
+      ></b-form-select>
     </div>
     <b-table
+      v-show="showTable"
       striped
       :items="selectedData"
       :fields="fields1"
@@ -36,6 +42,10 @@
         default: () => [
         ],
       },
+      showTable:{
+        type: Boolean,
+        default: true
+      }
     },
     watch: {
       mySelection: { // 外からプロパティの中身が変更になったら実行される

@@ -1,11 +1,11 @@
 <template>
   <b-container class="my-0">
     <b-row class="my-0">
-      <b-col cols="3" class="px-0 d-flex justify-content-center">
+      <b-col :cols="colWidthFirst" class="px-0 d-flex justify-content-center">
         <div>{{ cropName }}</div>
       </b-col>
       <div v-show="showDri">
-        <b-col cols="2" class="px-0 d-flex justify-content-center">
+        <b-col :cols="colWidthSecond" class="px-0 d-flex justify-content-center">
           <div>{{ nutritionTarget }}</div>
         </b-col>
       </div>
@@ -66,10 +66,6 @@
         type: Number,
         default: 1
       },
-      activecol: {
-        type: String,
-        default: "red"
-      },
       cropName: {
         type: String,
         required: true
@@ -77,6 +73,14 @@
       nutritionTarget: {
         type: Number,
         default: 0
+      },
+      colWidthFirst: {
+        type: Number,
+        default: 3
+      },
+      colWidthSecond: {
+        type: Number,
+        default: 2
       }
     },
     data() {

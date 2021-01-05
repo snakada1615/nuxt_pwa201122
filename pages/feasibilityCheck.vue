@@ -22,6 +22,36 @@
         </b-card>
 
         <b-card
+          style="min-width: 530px;"
+          header-bg-variant="success"
+          bg-variant="light"
+          border-variant="success"
+          class="mx-1 px-0 my-2">
+          <template #header>
+            <div>Feasibility score</div>
+          </template>
+          <b-row>
+            <b-col class="text-center">Crop name:</b-col>
+            <b-col class="text-info">{{selectedItem.Name}}</b-col>
+          </b-row>
+          <b-row>
+            <b-col cols="6" class="text-center">total score:</b-col>
+            <b-col cols="6">{{qaScore[qaScore.length-1].value}} / 50</b-col>
+          </b-row>
+          <b-row v-for="(qa, index) in qaScore" :key="index">
+            <nutrition-bar
+              v-if="qa.id > 0"
+              :colWidthFirst=6
+              :colwidthSecond="0"
+              :cropName="qa.text"
+              :max="10"
+              :nutritionTarget="0"
+              :rating="qa.value"
+            ></nutrition-bar>
+          </b-row>
+        </b-card>
+
+        <b-card
           v-for="(qaGroup, index) in qaList"
           :key="index"
           style="min-width: 530px;"
@@ -32,6 +62,54 @@
           <template #header>
             <div>{{qaGroup.categoryText}}</div>
           </template>
+          <div v-show="index===0">
+            <dri-table
+              @changeTarget="onChangeTarget"
+              :mySelection="driID"
+              :items="itemsDRI"
+              :showTable = false
+              head-row-variant="success"
+              table-variant="light"
+            />
+            <b-card class="px-0 mx-0">
+              <b-row class="mt-0 bg-success">
+                <b-col cols="3" class="text-center mr-2 font-weight-bold">Nutrition</b-col>
+                <b-col cols="3" class="font-weight-bold">Balance</b-col>
+              </b-row>
+              <b-row class="mt-2">
+                <nutrition-bar
+                  cropName="Energy"
+                  :max="10"
+                  :nutritionTarget="nutritionTarget.En"
+                  :rating="nutritionRating.En"
+                ></nutrition-bar>
+              </b-row>
+              <b-row>
+                <nutrition-bar
+                  cropName="Protain"
+                  :max="10"
+                  :nutritionTarget="nutritionTarget.Pr"
+                  :rating="nutritionRating.Pr"
+                ></nutrition-bar>
+              </b-row>
+              <b-row>
+                <nutrition-bar
+                  cropName="Vit-A"
+                  :max="10"
+                  :nutritionTarget="nutritionTarget.Va"
+                  :rating="nutritionRating.Va"
+                ></nutrition-bar>
+              </b-row>
+              <b-row class="mb-2">
+                <nutrition-bar
+                  cropName="Iron"
+                  :max="10"
+                  :nutritionTarget="nutritionTarget.Fe"
+                  :rating="nutritionRating.Fe"
+                ></nutrition-bar>
+              </b-row>
+            </b-card>
+          </div>
           <ul class="pl-2 my-0">
             <li
               v-for="(qa, index2) in qaGroup.itemsQA"
@@ -43,10 +121,8 @@
                 v-model="ansList[qa.id-1]"
                 :options="qa.answerList"
                 size="sm"
+                :state="ansList[qa.id-1]!=-99"
               >
-                <template #first>
-                  <b-form-select-option value="" disabled>-- Please select an option --</b-form-select-option>
-                </template>
               </b-form-select>
             </li>
           </ul>
@@ -66,11 +142,12 @@
   import FctTableModal from "../components/organisms/FctTableModal";
 
   export default {
-    components:{
+    components: {
       FctTableModal,
     },
     mounted() {
       const fct = new PouchDB('fct');
+      const dri = new PouchDB('dri');
       const vm = this;
       this.makeToast('start fetching')
       fct.info().then(function (info) {
@@ -83,10 +160,32 @@
           vm.setPouchData(fct)
         }
       })
+      dri.info().then(function (info) {
+        if (!(info.doc_count)) {
+          vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
+          vm.syncCloudant('dri').then(dataset => {
+            vm.setPouchDataDRI(dataset)
+          })
+        } else {
+          vm.setPouchDataDRI(dri)
+        }
+      })
     },
-    methods:{
-      onitemSelected(val){
-        this.selectedItem = val
+    methods: {
+      onChangeTarget(value) {
+        console.log(value)
+        this.nutritionTarget.En = Number(value[1].Value) || 0
+        this.nutritionTarget.Pr = Number(value[2].Value) || 0
+        this.nutritionTarget.Va = Number(value[3].Value) || 0
+        this.nutritionTarget.Fe = Number(value[4].Value) || 0
+      },
+      onitemSelected(value) {
+        this.selectedItem = value
+        this.nutritionSum.En = value.En || 0
+        this.nutritionSum.Pr = value.Pr || 0
+        this.nutritionSum.Va = value.Va || 0
+        this.nutritionSum.Fe = value.Fe || 0
+        this.nutritionSum.Wt = value.Wt || 0
       },
       makeToast(mes, append = false) {
         this.$bvToast.toast(mes, {
@@ -96,7 +195,7 @@
           noCloseButton: true
         })
       },
-      showDialogue(){
+      showDialogue() {
         this.$bvModal.show('modalTest')
       },
       setPouchData(dataset) {
@@ -115,6 +214,27 @@
                 'Fe': val.doc.FE
               })
             })
+          })
+          .catch(function (err) {
+            console.log(err)
+          })
+      },
+      setPouchDataDRI(dataset) {
+        const vm = this;
+        dataset.allDocs({include_docs: true})
+          .then(function (docs) {
+            docs.rows.forEach(function (val, index) {
+              vm.itemsDRI.push({
+                'id': val.key,
+                'Name': val.doc.nut_group,
+                'En': val.doc.energy,
+                'Pr': val.doc.protein,
+                'Va': val.doc.vita,
+                'Fe': val.doc.fe,
+                'number': 0
+              })
+            })
+            console.log(vm.itemsDRI)
           })
           .catch(function (err) {
             console.log(err)
@@ -142,11 +262,69 @@
         return output
       },
     },
+    computed: {
+      qaScore: function () {
+        let sum = []
+        let vm = this
+        vm.qaList.forEach(function (categories) {
+          let sumTemp = 0
+          categories.itemsQA.forEach(function (question) {
+            if (vm.ansList[question.id - 1] > 0) {
+              sumTemp += vm.ansList[question.id - 1]
+            }
+          })
+          sum.push({
+            id: categories.categoryID,
+            text: categories.categoryText,
+            value: Math.round(10 * sumTemp / (3 * categories.itemsQA.length))
+          })
+        })
+        // add total score
+        const sumTemp = sum.reduce((p, x) => p + x.value, 0)
+        sum.push({
+          id: 0,
+          text: 'total score',
+          value: sumTemp
+        })
+        return sum
+      },
+      nutritionRating: function () {
+        let En = this.nutritionTarget.En ?
+          Math.round(100 * this.nutritionSum.En / this.nutritionTarget.En) / 10 : 0
+        let Pr = this.nutritionTarget.En ?
+          Math.round(100 * this.nutritionSum.Pr / this.nutritionTarget.Pr) / 10 : 0
+        let Va = this.nutritionTarget.En ?
+          Math.round(100 * this.nutritionSum.Va / this.nutritionTarget.Va) / 10 : 0
+        let Fe = this.nutritionTarget.En ?
+          Math.round(100 * this.nutritionSum.Fe / this.nutritionTarget.Fe) / 10 : 0
+        return {
+          En: En,
+          Pr: Pr,
+          Va: Va,
+          Fe: Fe,
+        }
+      },
+    },
     data() {
       return {
-        items:[],
-        selectedItem:'',
-        ansList: [-99,3,-99,-99,-99,-99,-99,-99,-99,-99,-99,-99],
+        items: [],
+        itemsDRI: [],
+        selectedItem: '',
+        driID: "",
+        nutritionTarget: {
+          En: 10,
+          Pr: 10,
+          Va: 10,
+          Fe: 10,
+        },
+        nutritionSum: {
+          En: 10,
+          Pr: 10,
+          Va: 10,
+          Fe: 10,
+          Wt: 10,
+        },
+        ansList: [-99, 3, -99, -99, -99, -99, -99, -99, -99, -99, -99, -99],
         qaList: [
           {
             categoryID: 1, categoryText: 'Nutrient balance',
@@ -156,10 +334,10 @@
                 questionText: 'Is required amount for nutrition target feasible?',
                 answerList: [
                   {value: -99, text: 'please select', disabled: true},
-                  {value: 4, text: 'yes'},
-                  {value: 3, text: 'maybe yes'},
-                  {value: 2, text: 'maybe no'},
-                  {value: 1, text: 'no'},
+                  {value: 3, text: 'yes'},
+                  {value: 2, text: 'maybe yes'},
+                  {value: 1, text: 'maybe no'},
+                  {value: 0, text: 'no'},
                 ]
               },
             ]
@@ -173,10 +351,10 @@
                 questionText: 'Is there any social barrier to consume this commodity in general?',
                 answerList: [
                   {value: -99, text: 'please select', disabled: true},
-                  {value: 4, text: 'no'},
-                  {value: 3, text: 'maybe no'},
-                  {value: 2, text: 'maybe yes'},
-                  {value: 1, text: 'yes'},
+                  {value: 3, text: 'no'},
+                  {value: 2, text: 'maybe no'},
+                  {value: 1, text: 'maybe yes'},
+                  {value: 0, text: 'yes'},
                 ]
               },
               {
@@ -184,10 +362,10 @@
                 questionText: 'Is there any social barrier to consume this commodity for women?',
                 answerList: [
                   {value: -99, text: 'please select', disabled: true},
-                  {value: 4, text: 'no'},
-                  {value: 3, text: 'maybe no'},
-                  {value: 2, text: 'maybe yes'},
-                  {value: 1, text: 'yes'},
+                  {value: 3, text: 'no'},
+                  {value: 2, text: 'maybe no'},
+                  {value: 1, text: 'maybe yes'},
+                  {value: 0, text: 'yes'},
                 ]
               },
               {
@@ -195,10 +373,10 @@
                 questionText: 'Is there any social barrier to consume this commodity for child?',
                 answerList: [
                   {value: -99, text: 'please select', disabled: true},
-                  {value: 4, text: 'no'},
-                  {value: 3, text: 'maybe no'},
-                  {value: 2, text: 'maybe yes'},
-                  {value: 1, text: 'yes'},
+                  {value: 3, text: 'no'},
+                  {value: 2, text: 'maybe no'},
+                  {value: 1, text: 'maybe yes'},
+                  {value: 0, text: 'yes'},
                 ]
               },
               {
@@ -206,10 +384,10 @@
                 questionText: 'Is this commodity affordable in the market for ordinary population?',
                 answerList: [
                   {value: -99, text: 'please select', disabled: true},
-                  {value: 4, text: 'no'},
-                  {value: 3, text: 'maybe no'},
-                  {value: 2, text: 'maybe yes'},
-                  {value: 1, text: 'yes'},
+                  {value: 3, text: 'no'},
+                  {value: 2, text: 'maybe no'},
+                  {value: 1, text: 'maybe yes'},
+                  {value: 0, text: 'yes'},
                 ]
               },
             ]
@@ -223,10 +401,10 @@
                 questionText: 'do target beneficiary have enough skill to grow this commodity?',
                 answerList: [
                   {value: -99, text: 'please select', disabled: true},
-                  {value: 4, text: 'yes'},
-                  {value: 3, text: 'maybe yes'},
-                  {value: 2, text: 'maybe no'},
-                  {value: 1, text: 'no'},
+                  {value: 3, text: 'yes'},
+                  {value: 2, text: 'maybe yes'},
+                  {value: 1, text: 'maybe no'},
+                  {value: 0, text: 'no'},
                 ]
               },
               {
@@ -234,10 +412,10 @@
                 questionText: 'Does this commodity imply incremental workload for women?',
                 answerList: [
                   {value: -99, text: 'please select', disabled: true},
-                  {value: 4, text: 'no'},
-                  {value: 3, text: 'maybe no'},
-                  {value: 2, text: 'maybe yes'},
-                  {value: 1, text: 'yes'},
+                  {value: 3, text: 'no'},
+                  {value: 2, text: 'maybe no'},
+                  {value: 1, text: 'maybe yes'},
+                  {value: 0, text: 'yes'},
                 ]
               },
               {
@@ -245,27 +423,27 @@
                 questionText: 'Is technical service available for this commodity?',
                 answerList: [
                   {value: -99, text: 'please select', disabled: true},
-                  {value: 4, text: 'yes / there is no need for it since beneficiaries already have enough skill'},
-                  {value: 3, text: 'maybe yes'},
-                  {value: 2, text: 'maybe no'},
-                  {value: 1, text: 'no'},
+                  {value: 3, text: 'yes / there is no need for it since beneficiaries already have enough skill'},
+                  {value: 2, text: 'maybe yes'},
+                  {value: 1, text: 'maybe no'},
+                  {value: 0, text: 'no'},
                 ]
               },
             ]
           },
           {
             categoryID: 4,
-            categoryText: 'Financial feasibility',
+            categoryText: 'Investment',
             itemsQA: [
               {
                 id: 9,
                 questionText: 'Is there need for specific infrastructure (irrigation / postharvest, etc.)?',
                 answerList: [
                   {value: -99, text: 'please select', disabled: true},
-                  {value: 4, text: 'no'},
-                  {value: 3, text: 'maybe no'},
-                  {value: 2, text: 'maybe yes'},
-                  {value: 1, text: 'yes'},
+                  {value: 3, text: 'no'},
+                  {value: 2, text: 'maybe no'},
+                  {value: 1, text: 'maybe yes'},
+                  {value: 0, text: 'yes'},
                 ]
               },
               {
@@ -273,10 +451,10 @@
                 questionText: 'Is production input (fertilizer, seed, feed) become financial burden for small farmer?',
                 answerList: [
                   {value: -99, text: 'please select', disabled: true},
-                  {value: 4, text: 'no'},
-                  {value: 3, text: 'maybe no'},
-                  {value: 2, text: 'maybe yes'},
-                  {value: 1, text: 'yes'},
+                  {value: 3, text: 'no'},
+                  {value: 2, text: 'maybe no'},
+                  {value: 1, text: 'maybe yes'},
+                  {value: 0, text: 'yes'},
                 ]
               },
             ]
@@ -290,10 +468,10 @@
                 questionText: 'How many month can you harvest this commodity in a year?',
                 answerList: [
                   {value: -99, text: 'please select', disabled: true},
-                  {value: 4, text: '10-12 mon'},
-                  {value: 3, text: '7-9 mon'},
-                  {value: 2, text: '4-6 mon'},
-                  {value: 1, text: '0-3 mon'},
+                  {value: 3, text: '10-12 mon'},
+                  {value: 2, text: '7-9 mon'},
+                  {value: 1, text: '4-6 mon'},
+                  {value: 0, text: '0-3 mon'},
                 ]
               },
               {
@@ -301,10 +479,10 @@
                 questionText: 'Are there any feasible storage method available for this commodity?',
                 answerList: [
                   {value: -99, text: 'please select', disabled: true},
-                  {value: 4, text: 'yes'},
-                  {value: 3, text: 'maybe yes'},
-                  {value: 2, text: 'maybe no'},
-                  {value: 1, text: 'no'},
+                  {value: 3, text: 'yes'},
+                  {value: 2, text: 'maybe yes'},
+                  {value: 1, text: 'maybe no'},
+                  {value: 0, text: 'no'},
                 ]
               },
             ]
