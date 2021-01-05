@@ -1,6 +1,11 @@
 <template>
   <b-container class="px-0" style="max-width: 540px;">
-    <b-row class="my-2">
+    <b-row class="mt-2">
+      <b-col class="mx-0 mb-0 py-2 bg-dark rounded text-light font-weight-bold">
+        Feasibility assessment result
+      </b-col>
+    </b-row>
+    <b-row>
       <b-col class="px-0 mx-0">
         <b-card
           style="min-width: 530px;"
@@ -12,8 +17,13 @@
             <div>Selected crop</div>
           </template>
           <b-row>
-            <b-col>
-              Name: <span class="font-weight-bold text-info">{{selectedItem.Name}}</span>
+            <b-col cols="2">
+              Name:
+            </b-col>
+            <b-col
+              cols="7" class="border"
+              :class="{'border-dark':selectedItem.Name, 'border-danger':!selectedItem.Name}">
+              <div class="font-weight-bold text-info">{{selectedItem.Name}}</div>
             </b-col>
             <b-col cols="3">
               <b-button @click="showDialogue" size="sm" variant="info">select crop</b-button>
@@ -50,7 +60,16 @@
             ></nutrition-bar>
           </b-row>
         </b-card>
+      </b-col>
+    </b-row>
 
+    <b-row class="mt-2">
+      <b-col class="mx-0 mb-0 py-2 bg-dark rounded text-light font-weight-bold">
+        Feasibility questions
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col class="px-0 mx-0">
         <b-card
           v-for="(qaGroup, index) in qaList"
           :key="index"
@@ -62,50 +81,26 @@
           <template #header>
             <div>{{qaGroup.categoryText}}</div>
           </template>
-          <div v-show="index===0">
+          <div v-show="index===0" class="mb-2">
             <dri-table
               @changeTarget="onChangeTarget"
               :mySelection="driID"
               :items="itemsDRI"
-              :showTable = false
+              :showTable=false
               head-row-variant="success"
               table-variant="light"
             />
             <b-card class="px-0 mx-0">
-              <b-row class="mt-0 bg-success">
+              <b-row class="mt-0 bg-success mb-3">
                 <b-col cols="3" class="text-center mr-2 font-weight-bold">Nutrition</b-col>
                 <b-col cols="3" class="font-weight-bold">Balance</b-col>
               </b-row>
-              <b-row class="mt-2">
+              <b-row v-for="(nut, index) in nutritionRatingSet" :key="index">
                 <nutrition-bar
-                  cropName="Energy"
+                  :cropName="nut.name"
                   :max="10"
-                  :nutritionTarget="nutritionTarget.En"
-                  :rating="nutritionRating.En"
-                ></nutrition-bar>
-              </b-row>
-              <b-row>
-                <nutrition-bar
-                  cropName="Protain"
-                  :max="10"
-                  :nutritionTarget="nutritionTarget.Pr"
-                  :rating="nutritionRating.Pr"
-                ></nutrition-bar>
-              </b-row>
-              <b-row>
-                <nutrition-bar
-                  cropName="Vit-A"
-                  :max="10"
-                  :nutritionTarget="nutritionTarget.Va"
-                  :rating="nutritionRating.Va"
-                ></nutrition-bar>
-              </b-row>
-              <b-row class="mb-2">
-                <nutrition-bar
-                  cropName="Iron"
-                  :max="10"
-                  :nutritionTarget="nutritionTarget.Fe"
-                  :rating="nutritionRating.Fe"
+                  :nutritionTarget="nut.target"
+                  :rating="nut.rating"
                 ></nutrition-bar>
               </b-row>
             </b-card>
@@ -288,21 +283,39 @@
         })
         return sum
       },
-      nutritionRating: function () {
-        let En = this.nutritionTarget.En ?
-          Math.round(100 * this.nutritionSum.En / this.nutritionTarget.En) / 10 : 0
+      nutritionRatingSet: function () {
         let Pr = this.nutritionTarget.En ?
           Math.round(100 * this.nutritionSum.Pr / this.nutritionTarget.Pr) / 10 : 0
         let Va = this.nutritionTarget.En ?
           Math.round(100 * this.nutritionSum.Va / this.nutritionTarget.Va) / 10 : 0
         let Fe = this.nutritionTarget.En ?
           Math.round(100 * this.nutritionSum.Fe / this.nutritionTarget.Fe) / 10 : 0
-        return {
-          En: En,
-          Pr: Pr,
-          Va: Va,
-          Fe: Fe,
-        }
+        return [
+          {
+            name: 'Energy',
+            target: this.nutritionTarget.En,
+            rating: this.nutritionTarget.En ?
+              Math.round(100 * this.nutritionSum.En / this.nutritionTarget.En) / 10 : 0
+          },
+          {
+            name: 'Protein',
+            target: this.nutritionTarget.Pr,
+            rating: this.nutritionTarget.Pr ?
+              Math.round(100 * this.nutritionSum.Pr / this.nutritionTarget.Pr) / 10 : 0
+          },
+          {
+            name: 'VitA',
+            target: this.nutritionTarget.Va,
+            rating: this.nutritionTarget.Va ?
+              Math.round(100 * this.nutritionSum.Va / this.nutritionTarget.Va) / 10 : 0
+          },
+          {
+            name: 'Fe',
+            target: this.nutritionTarget.Fe,
+            rating: this.nutritionTarget.Fe ?
+              Math.round(100 * this.nutritionSum.Fe / this.nutritionTarget.Fe) / 10 : 0
+          },
+        ]
       },
     },
     data() {

@@ -6,6 +6,7 @@
         :options="menuOptions"
         @change="changeSelection"
         :state="selectedValue!==''"
+        size="sm"
       ></b-form-select>
     </div>
     <b-table
