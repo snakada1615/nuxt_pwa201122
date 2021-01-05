@@ -12,22 +12,21 @@ export default {
   head: {
     title: 'nuxt-pwa-201122',
     meta: [
-      { charset: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { hid: 'description', name: 'description', content: '' }
+      {charset: 'utf-8'},
+      {name: 'viewport', content: 'width=device-width, initial-scale=1'},
+      {hid: 'description', name: 'description', content: ''}
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      {rel: 'icon', type: 'image/x-icon', href: '/favicon.ico'}
     ]
   },
 
   // Global CSS (https://go.nuxtjs.dev/config-css)
-  css: [
-  ],
+  css: [],
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
   plugins: [
-    { src: '@/plugins/vee-validate' }
+    {src: '@/plugins/vee-validate'}
   ],
 
   // Auto import components (https://go.nuxtjs.dev/config-components)
@@ -35,12 +34,20 @@ export default {
 
   // Modules for dev and build (recommended) (https://go.nuxtjs.dev/config-modules)
   buildModules: [
-    '@nuxtjs/fontawesome'
+    '@nuxtjs/fontawesome',
+    '@nuxtjs/pwa',
   ],
+
+  pwa: {
+    manifest: {
+      name: 'NFA App',
+      lang: 'en',
+    }
+  },
 
   fontawesome: {
     icons: {
-      solid:true,
+      solid: true,
       brands: true
     }
   },
@@ -48,9 +55,6 @@ export default {
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
     "@nuxtjs/axios",
-
-    // https://go.nuxtjs.dev/pwa
-    '@nuxtjs/pwa',
 
     // https://go.nuxtjs.dev/bootstrap
     'bootstrap-vue/nuxt',
@@ -63,5 +67,5 @@ export default {
 
   // Customize the progress-bar color
   //
-  loading: { color: "#00FFFF" },
+  loading: {color: "#00FFFF"},
 }

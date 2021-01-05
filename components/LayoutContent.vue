@@ -1,5 +1,5 @@
 <template>
-  <div class="layout-content" :class="{ 'content--top': top, 'content--bottom': bottom }">
+  <div class="layout-content" :class="{ 'content--top': top, 'content--bottom': bottom }" >
     <slot></slot>
   </div>
 </template>

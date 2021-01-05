@@ -4,7 +4,7 @@
       <div>
         <!-- As a link -->
         <b-navbar variant="info" type="dark" fixed="top" class="p-1" style="color: white">
-          <b-navbar-brand href="#"><Fa :icon="faHome"/></b-navbar-brand>
+          <b-navbar-brand href="/"><Fa :icon="faHome"/></b-navbar-brand>
           <span>NFA tool</span>
           <b-navbar-nav class="ml-auto">
             <b-nav-item-dropdown text="Link" right>
