@@ -1,5 +1,7 @@
 <template>
   <div class="container" style="max-width: 540px">
+    <p>login user: {{ $store.state.user.email }}</p>
+    <p>login status: {{ $store.state.user.login }}</p>
     <b-form @submit.prevent>
       <b-row>
         <b-col>

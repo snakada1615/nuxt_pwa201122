@@ -7,6 +7,7 @@
           <b-navbar-brand href="/"><Fa :icon="faHome"/></b-navbar-brand>
           <span>NFA tool</span>
           <b-navbar-nav class="ml-auto">
+            <b-nav-text>user: {{$store.state.user.email}}</b-nav-text>
             <b-nav-item-dropdown text="Link" right>
               <b-dropdown-item
                 v-for="(link, index) in links"

@@ -1,7 +1,7 @@
 import Vuex from 'vuex'
 import firebase from '~/plugins/firebase'
 
-const createStore = () => {
+const store = () => {
   return new Vuex.Store({
     state: function () {
       return {
@@ -61,59 +61,6 @@ const createStore = () => {
       },
     }
   })
-}
+  }
 
-export default createStore
-
-
-/*
-import Vuex from 'vuex'
-
-const createStore = () => {
-  return new Vuex.Store({
-    state: function () {
-      return {
-        user: {
-          uid: '',
-          email: '',
-          // ログイン状態の真偽値を追加
-          login: false,
-        },
-        dummy: 'halo'
-      }
-    },
-    mutations: {
-      updateMessage: function (state, payload) {
-        state.user = payload
-      }
-    },
-    actions: {
-      login(context, userInfo) {
-        firebase.auth().signInWithEmailAndPassword(userInfo.email, userInfo.password)
-          .then(user => {
-            console.log('login ok！')
-            userInfo.login = true
-            context.commit('updateMessage', userInfo)
-          }).catch((error) => {
-          console.log('login failed')
-          alert(error)
-        })
-      },
-      register(context, userInfo) {
-        firebase.auth().createUserWithEmailAndPassword(userInfo.email, userInfo.password)
-          .then((user) => {
-            console.log('regist ok！')
-            userInfo.login = true
-            context.commit('updateMessage', userInfo)
-          })
-          .catch((error) => {
-            console.log('registration failed')
-            alert(error)
-          });
-      },
-    }
-  })
-}
-
-export default createStore
-*/
+export default store

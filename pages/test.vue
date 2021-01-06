@@ -6,6 +6,7 @@
       :items="items"
     ></FctTableModal>
     <b-button @click="showDialogue">click</b-button>
+    <p>login user: {{ $store.state.user.email }}</p>
   </b-container>
 </template>
 

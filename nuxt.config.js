@@ -60,6 +60,10 @@ export default {
     'bootstrap-vue/nuxt',
   ],
 
+  router: {
+    middleware: 'pages'
+  },
+
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
     transpile: ["vee-validate/dist/rules"]
