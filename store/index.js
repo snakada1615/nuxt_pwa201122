@@ -14,12 +14,6 @@ const store = () => {
     },
     data() {
       return {
-        dbInfo: {
-          dbName: 'firebaseLocalStorageDb',
-          version: 1,
-          tableName: 'firebaseLocalStorage',
-        },
-
         db: null,
         ready: false,
         records: []
@@ -36,43 +30,49 @@ const store = () => {
         }
       },
       setLoginChecked: function (state) {
-        state.isLoginCheked = true
+        state.isLoginChecked = true
       }
     },
     actions: {
       async autoLogin({dispatch}) {
-        this.db = await dispatch('getDb');
-        this.records = await dispatch('getRecordsFromDb');
-        if (this.records.length === 0) {
-          dispatch('setOffUser')
-        } else {
-          dispatch('setUser', {
-            'email': this.records[0].value.email,
-            'uid': this.records[0].value.uid
-          })
+        const DBName = 'firebaseLocalStorageDb'
+        const tableName = 'firebaseLocalStorage'
+        const DBstatus = await dispatch('DBexists', DBName)
+        console.log('DBExistrs:' + DBstatus)
+        if (DBstatus) {
+          this.db = await dispatch('getDb', DBName);
+          this.records = await dispatch('getRecordsFromDb', tableName);
+          if (this.records.length === 0) {
+            dispatch('setOffUser')
+          } else {
+            dispatch('setUser', {
+              'email': this.records[0].value.email,
+              'uid': this.records[0].value.uid
+            })
+          }
         }
         dispatch('setLoginChecked')
       },
       login(context, userInfo) {
-        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-          .then(function () {
-            firebase.auth().signInWithEmailAndPassword(userInfo.email, userInfo.password)
-              .then(user => {
-                context.commit('setUser', {
-                  'email': user.user.email,
-                  'uid': user.user.uid
-                })
-                console.log('firebase:login ok！')
-              }).catch((error) => {
-              context.commit('setOffUser')
-              console.log('firebase: login failed')
-              alert(error)
+        firebase.auth().signInWithEmailAndPassword(userInfo.email, userInfo.password)
+          .then(user => {
+            context.commit('setUser', {
+              'email': user.user.email,
+              'uid': user.user.uid
             })
-          })
+            console.log('firebase:login ok！')
+          }).catch((error) => {
+          context.commit('setOffUser')
+          console.log('firebase: login failed')
+          alert(error)
+        })
           .catch(function (error) {
             // Handle Errors here.
             let errorCode = error.code;
             let errorMessage = error.message;
+            alert('login failed')
+            alert(errorMessage)
+            alert(errorCode)
           });
       },
       logout(context) {
@@ -86,22 +86,19 @@ const store = () => {
         });
       },
       registUser(context, userInfo) {
-        firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-          .then(function () {
-            firebase.auth().createUserWithEmailAndPassword(userInfo.email, userInfo.password)
-              .then((user) => {
-                console.log('regist ok！')
-                context.commit('setUser', {
-                  'email': user.user.email,
-                  'uid': user.user.uid
-                })
-              })
-              .catch((error) => {
-                context.commit('setOffUser')
-                console.log('registration failed')
-                alert(error)
-              });
+        firebase.auth().createUserWithEmailAndPassword(userInfo.email, userInfo.password)
+          .then((user) => {
+            console.log('regist ok！')
+            context.commit('setUser', {
+              'email': user.user.email,
+              'uid': user.user.uid
+            })
           })
+          .catch((error) => {
+            context.commit('setOffUser')
+            console.log('registration failed')
+            alert(error)
+          });
       },
       setUser(context, payload) {
         context.commit('setUser', payload)
@@ -109,17 +106,17 @@ const store = () => {
       setOffUser(context) {
         context.commit('setOffUser')
       },
-      setLoginChecked(context){
+      setLoginChecked(context) {
         context.commit('setLoginChecked')
       },
-      async getRecordsFromDb() {
+      async getRecordsFromDb(context, storeName) {
         return new Promise((resolve, reject) => {
-          let trans = this.db.transaction(['firebaseLocalStorage'], 'readonly');
+          let trans = this.db.transaction(storeName, 'readonly');
           trans.oncomplete = e => {
             resolve(this.records);
           };
 
-          let store = trans.objectStore('firebaseLocalStorage');
+          let store = trans.objectStore(storeName);
           this.records = [];
 
           store.openCursor().onsuccess = e => {
@@ -131,9 +128,9 @@ const store = () => {
           };
         });
       },
-      async getDb() {
+      async getDb(context, DBName) {
         return new Promise((resolve, reject) => {
-          let request = window.indexedDB.open('firebaseLocalStorageDb', 1);
+          let request = window.indexedDB.open(DBName, 1);
 
           request.onerror = e => {
             console.log('Error opening db', e);
@@ -141,9 +138,20 @@ const store = () => {
           };
 
           request.onsuccess = e => {
+            //console.log(e.target.result)
             resolve(e.target.result);
           };
         });
+      },
+      async DBexists(context,targetDB) {
+        let res = false
+        const nameList = await window.indexedDB.databases()
+        for (let i=0; i < nameList.length; i++) {
+          if (nameList[i].name === targetDB) {
+            res = true
+          }
+        }
+        return res
       }
     },
   })
