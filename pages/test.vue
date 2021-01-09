@@ -7,6 +7,8 @@
     ></FctTableModal>
     <b-button @click="showDialogue">click</b-button>
     <p>login user: {{ $store.state.user.email }}</p>
+    <b-button @click="getLocalDB">localdata</b-button>
+    <p>localDB: {{ localdata }}</p>
   </b-container>
 </template>
 
@@ -15,12 +17,13 @@
   import PouchDB from "pouchdb";
 
   export default {
-    components:{
+    components: {
       FctTableModal,
     },
-    data(){
-      return{
-        items:[],
+    data() {
+      return {
+        items: [],
+        localdata: '',
       }
     },
     mounted() {
@@ -40,7 +43,11 @@
         }
       })
     },
-    methods:{
+    methods: {
+      getLocalDB() {
+        this.localdata = localStorage.getItem('_pouch_fct')
+        console.log(this.localdata)
+      },
       makeToast(mes, append = false) {
         this.$bvToast.toast(mes, {
           autoHideDelay: 5000,
@@ -49,7 +56,7 @@
           noCloseButton: true
         })
       },
-      showDialogue(){
+      showDialogue() {
         this.$bvModal.show('modalTest')
       },
       setPouchData(dataset) {
