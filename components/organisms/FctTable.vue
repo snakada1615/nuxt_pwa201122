@@ -1,33 +1,28 @@
 <template>
   <b-container class="my-0">
-    <b-form-group
-      label="Filter"
-      label-cols-sm="3"
-      label-align-sm="right"
-      label-size="sm"
-      label-for="filterInput"
-      class="mb-1"
-    >
-      <b-input-group size="sm">
-        <b-form-input
-          v-model="filter"
-          type="search"
-          id="filterInput"
-          placeholder="Type to Search"
-        ></b-form-input>
-        <b-dropdown right size="sm" id="dropdown1" text="Food Group" class="m-md-2" variant="primary">
-          <b-dropdown-item v-for="grpName in FoodGrp"
-                           :key="grpName.name"
-                           :value="grpName.name"
-                           @click="filter = grpName.name">{{ grpName.name }}
-          </b-dropdown-item>
+    <b-input-group>
+      <b-form-input
+        v-model="filter"
+        type="search"
+        id="filterInput"
+        placeholder="Type to Search"
+      ></b-form-input>
+
+      <template #append>
+        <b-dropdown text="Dropdown" variant="primary" >
+          <b-dropdown-item
+            v-for="grpName in FoodGrp"
+            :key="grpName.name"
+            :value="grpName.name"
+            @click="filter = grpName.name"
+          >{{ grpName.name }}</b-dropdown-item>
         </b-dropdown>
-        <b-input-group-append>
-          <b-button :disabled="!filter" @click="filter = ''">Clear</b-button>
-        </b-input-group-append>
-      </b-input-group>
-    </b-form-group>
-    <div>
+        <b-button variant="info" :disabled="!filter" @click="filter = ''">clear</b-button>
+      </template>
+
+    </b-input-group>
+
+    <div class="mt-3">
       <b-table
         striped
         bordered
@@ -80,65 +75,65 @@
 
 <script>
 
-export default {
-  props: {
-    items: {
-      type: Array,
-      default: () => [],
+  export default {
+    props: {
+      items: {
+        type: Array,
+        default: () => [],
+      },
+      FoodGrp: {
+        type: Array,
+        default: () => [
+          {name: 'Grains, roots and tubers'},
+          {name: 'Legumes and nuts'},
+          {name: 'Vitamin A rich fruits and Vegetable'},
+          {name: 'Other fruits and vegetables'},
+          {name: 'Flesh foods'},
+          {name: 'Dairy products'},
+          {name: 'Eggs'},
+          {name: 'non-category'}
+        ],
+      }
     },
-    FoodGrp: {
-      type: Array,
-      default: () => [
-        {name: 'Grains, roots and tubers'},
-        {name: 'Legumes and nuts'},
-        {name: 'Vitamin A rich fruits and Vegetable'},
-        {name: 'Other fruits and vegetables'},
-        {name: 'Flesh foods'},
-        {name: 'Dairy products'},
-        {name: 'Eggs'},
-        {name: 'non-category'}
-      ],
-    }
-  },
-  data() {
-    return {
-      fields: [
-        {key: 'id', sortable: false, tdClass: 'd-none', thClass: 'd-none'},
-        {key: 'Group', sortable: true, tdClass: 'd-none', thClass: 'd-none'},
-        {key: 'Name', sortable: true, thStyle:{width: "290px"}},
-        {key: 'En', sortable: true, thStyle:{width: "50px"}},
-        {key: 'Pr', sortable: true, thStyle:{width: "50px"}},
-        {key: 'Va', sortable: true, thStyle:{width: "50px"}},
-        {key: 'Fe', sortable: true, thStyle:{width: "50px"}},
-      ],
-      colWidth: [0,0,120,30,30,30,30],
-      totalRows: 1,
-      currentPage: 1,
-      perPage: 5,
-      pageOptions: [5, 10, 15, {value: 100, text: "Show a lot"}],
-      sortBy: 'Name',
-      sortDesc: false,
-      filter: null,
-      filterOn: ['Group'],
-    }
-  },
-  methods: {
-    hello(){
-      console.log('hello refreshed!')
+    data() {
+      return {
+        fields: [
+          {key: 'id', sortable: false, tdClass: 'd-none', thClass: 'd-none'},
+          {key: 'Group', sortable: true, tdClass: 'd-none', thClass: 'd-none'},
+          {key: 'Name', sortable: true, thStyle: {width: "290px"}},
+          {key: 'En', sortable: true, thStyle: {width: "50px"}},
+          {key: 'Pr', sortable: true, thStyle: {width: "50px"}},
+          {key: 'Va', sortable: true, thStyle: {width: "50px"}},
+          {key: 'Fe', sortable: true, thStyle: {width: "50px"}},
+        ],
+        colWidth: [0, 0, 120, 30, 30, 30, 30],
+        totalRows: 1,
+        currentPage: 1,
+        perPage: 5,
+        pageOptions: [5, 10, 15, {value: 100, text: "Show a lot"}],
+        sortBy: 'Name',
+        sortDesc: false,
+        filter: null,
+        filterOn: ['Group', 'Name'],
+      }
     },
-    onFiltered(filteredItems) {
-      // Trigger pagination to update the number of buttons/pages due to filtering
-      this.totalRows = filteredItems.length
-      this.currentPage = 1
-      console.log('filtered!!')
+    methods: {
+      hello() {
+        console.log('hello refreshed!')
+      },
+      onFiltered(filteredItems) {
+        // Trigger pagination to update the number of buttons/pages due to filtering
+        this.totalRows = filteredItems.length
+        this.currentPage = 1
+        console.log('filtered!!')
+      },
+      onInput() {
+        // Set the initial number of items
+        this.totalRows = this.items.length
+      },
+      rowClick(record) {
+        this.$emit('fctClick', record)
+      }
     },
-    onInput() {
-      // Set the initial number of items
-      this.totalRows = this.items.length
-    },
-    rowClick(record){
-      this.$emit('fctClick', record)
-    }
-  },
-}
+  }
 </script>
