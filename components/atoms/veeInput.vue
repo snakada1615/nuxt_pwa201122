@@ -15,6 +15,7 @@
       </template>
       <b-form-input
         class="bg-light"
+        :placeholder="placeholder"
         :class="{ 'border-danger': !valid, 'border-info':valid }"
         :name="inputName"
         :type="type"
@@ -47,6 +48,7 @@
         type: String,
         required:true
       },
+      placeholder:'',
       type: '',
       value:'',
       mode:{

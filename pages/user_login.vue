@@ -1,31 +1,33 @@
 <template>
   <div class="container" style="max-width: 540px">
-    <p>login user: <span v-if="$store.state.user">{{ $store.state.user.email }}</span></p>
-    <p>login uid: <span v-if="$store.state.user">{{ $store.state.user.uid }}</span></p>
+    <p>current user: <span v-if="$store.state.user">{{ $store.state.user.email }}</span></p>
     <b-form @submit.prevent>
-      <b-row>
+      <b-row class="my-2">
         <b-col>
-          <b-form-input
-            id="email_input"
-            class="mb-2 mr-sm-2 mb-sm-0"
+          <vee-input
+            name="input_email"
+            rules="required|email"
             placeholder="email"
             type="email"
             v-model="email"
-          ></b-form-input>
+          />
         </b-col>
+      </b-row>
+      <b-row class="my-2">
         <b-col>
-          <b-form-input
-            id="pass_input"
-            class="mb-2 mr-sm-2 mb-sm-0"
+          <vee-input
+            name="input_pass"
+            rules="required|min:6"
             placeholder="password"
-            s type="password"
+            type="password"
             v-model="password"
-          ></b-form-input>
+          />
         </b-col>
+      </b-row>
+      <b-row class="my-2">
         <b-col>
-          <b-button @click="login()" variant="primary">login</b-button>
-          <b-button @click="logout()">logout</b-button>
-          <b-button @click="DBexists('firebaseLocalStorageDb')">list DB nmes</b-button>
+          <b-button @click="login()" variant="primary" size="sm">login</b-button>
+          <b-button @click="logout()" size="sm">logout</b-button>
         </b-col>
       </b-row>
     </b-form>
@@ -33,7 +35,12 @@
 </template>
 
 <script>
+  import veeInput from "../components/atoms/veeInput";
+
   export default {
+    components: {
+      veeInput,
+    },
     data() {
       return {
         email: '',

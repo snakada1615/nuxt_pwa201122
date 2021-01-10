@@ -15,7 +15,6 @@ const store = () => {
     data() {
       return {
         db: null,
-        ready: false,
         records: []
       }
     },

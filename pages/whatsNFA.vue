@@ -2,6 +2,7 @@
   <b-container>
     <b-card
       body-bg-variant="secondary"
+      style="max-width: 540px;"
     >
       <b-card-header class="bg-warning">
         <h5 class="font-weight-bolder">Objective</h5>

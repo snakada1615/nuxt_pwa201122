@@ -43,6 +43,7 @@
           {to: '/dietCalk', val:'dietCalk'},
           {to: '/test', val:'test'},
           {to: '/user_login', val:'user_login'},
+          {to: '/user_reg', val:'user_register'},
           {to: '/feasibilityCheck', val:'Feasiblity Check'},
         ]
       }
