@@ -2,13 +2,12 @@
   <b-container>
     halo
     <b-button @click="myMes('ごめん')" variant="info">toast</b-button>
-    <div>{{ docs }}</div>
   </b-container>
 </template>
 
 <script>
   import PouchDB from 'pouchdb'
-  import {setPouchData, syncCloudant} from '@/plugins/pouchHelper'
+  import {getPouchData, syncCloudant} from '@/plugins/pouchHelper'
 
   export default {
     data() {
@@ -24,13 +23,13 @@
         if (!(info.doc_count)) {
           toastID = vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
           syncCloudant('fct').then(dataset => {
-            setPouchData(dataset).then(result => {
+            getPouchData(dataset).then(result => {
               vm.docs = result
             })
           })
         } else {
           toastID = vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
-          setPouchData(testDat).then(result => {
+          getPouchData(testDat).then(result => {
             vm.docs = result
             vm.hideToast(toastID)
           })

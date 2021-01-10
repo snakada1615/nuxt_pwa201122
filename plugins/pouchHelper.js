@@ -11,7 +11,7 @@ export function makeToast(mes) {
   return id
 }
 
-export async function setPouchData(dataset) {
+export async function getPouchData(dataset) {
   const vm = this;
   let res = []
   let promise = new Promise((resolve, reject) => {

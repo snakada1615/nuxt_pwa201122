@@ -192,7 +192,7 @@
   import driTableGroup from "../components/organisms/driTableGroup";
   import foodModal from '../components/organisms/foodModal'
   import leftRightSwitch from "@/components/atoms/leftRightSwitch";
-  import {setPouchData, syncCloudant} from '@/plugins/pouchHelper'
+  import {getPouchData, syncCloudant} from '@/plugins/pouchHelper'
   import PouchDB from 'pouchdb'
 
   var $ = require('jquery');
@@ -302,13 +302,13 @@
       fct.info().then(function (info) {
         if (!(info.doc_count)) {
           vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
-          vm.syncCloudant('fct').then(dataset => {
-            setPouchData(dataset).then(docs => {
+          syncCloudant('fct').then(dataset => {
+            getPouchData(dataset).then(docs => {
               vm.setFTC(docs)
             })
           })
         } else {
-          setPouchData(fct).then(docs => {
+          getPouchData(fct).then(docs => {
             vm.setFTC(docs)
           })
         }
@@ -316,13 +316,13 @@
       dri.info().then(function (info) {
         if (!(info.doc_count)) {
           vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
-          vm.syncCloudant('dri').then(dataset => {
-            setPouchData(dataset).then(docs => {
+          syncCloudant('dri').then(dataset => {
+            getPouchData(dataset).then(docs => {
               vm.setDRI(docs)
             })
           })
         } else {
-          setPouchData(dri).then(docs => {
+          getPouchData(dri).then(docs => {
             vm.setDRI(docs)
           })
         }
