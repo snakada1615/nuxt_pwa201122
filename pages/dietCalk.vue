@@ -49,21 +49,13 @@
             </b-row>
           </template>
           driID: {{driID}}
-          <dri-table2
+          <dri-table
             v-show="!targetSwitch"
             v-model="driID"
             :items="itemsDRI"
             head-row-variant="success"
             table-variant="light"
             @changeTarget="onChangeTarget"
-          />
-          <dri-table
-            v-show="!targetSwitch"
-            @changeTarget="onChangeTarget"
-            :mySelection="driID"
-            :items="itemsDRI"
-            head-row-variant="success"
-            table-variant="light"
           />
           <dri-table-group
             ref="table"
@@ -200,7 +192,6 @@
   import nutritionBar from "~/components/organisms/nutritionBar";
   import recepiTable from "~/components/organisms/recepiTable";
   import driTable from "../components/organisms/driTable";
-  import driTable2 from "../components/organisms/driTable2";
   import driTableGroup from "../components/organisms/driTableGroup";
   import foodModal from '../components/organisms/foodModal'
   import leftRightSwitch from "@/components/atoms/leftRightSwitch";
@@ -215,7 +206,6 @@
       nutritionBar,
       recepiTable,
       driTable,
-      driTable2,
       foodModal,
       leftRightSwitch,
       driTableGroup,

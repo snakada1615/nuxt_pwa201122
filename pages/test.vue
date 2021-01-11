@@ -1,6 +1,6 @@
 <template>
   <b-container>
-    <dri-table2 v-model="selected" :items="itemsDRI"></dri-table2>
+    <dri-table v-model="selected" :items="itemsDRI"></dri-table>
     seleceted by main: {{selected}}
     <b-input v-model="selected">selection</b-input>
   </b-container>
@@ -9,11 +9,11 @@
 <script>
   import PouchDB from 'pouchdb'
   import {getPouchData, syncCloudant} from '@/plugins/pouchHelper'
-  import driTable2 from "../components/organisms/driTable2";
+  import driTable from "../components/organisms/driTable";
 
   export default {
     components: {
-      driTable2
+      driTable
     },
     data() {
       return {

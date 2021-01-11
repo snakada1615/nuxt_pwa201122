@@ -1,68 +1,41 @@
 <template>
-  <b-container class="my-0 px-0">
-    <div class="mb-2">
-      <b-form-select
-        v-model="selectedValue"
-        :options="menuOptions"
-        @change="changeSelection"
-        :state="selectedValue!==''"
-        size="sm"
-      ></b-form-select>
-      selected: {{selectedValue}}
-      prop: {{mySelection}}
-    </div>
+  <b-container>
+    <b-form-select v-model="selectedItem" :options="options" size="sm"></b-form-select>
     <b-table
-      v-show="showTable"
       striped
-      :items="selectedData"
-      :fields="fields1"
       small
+      :items="selectedDRI"
+      :fields="fields1"
       v-bind="$attrs"
-    ></b-table>
+    >
+    </b-table>
   </b-container>
 </template>
 
 <script>
-  import PouchDB from 'pouchdb'
-
-  var $ = require('jquery');
-
   export default {
-    data() {
+    model: {
+      prop: 'selected',
+      event: 'change'
+    },
+    data(){
       return {
-        selectedData: [],
-        selectedValue: null,
         fields1: [
           {key: 'Item', sortable: false},
           {key: 'Value', sortable: false},
         ],
       }
     },
-    props: {
-      mySelection: null,
-      items: {
-        type: Array,
-        default: () => [
-        ],
-      },
-      showTable:{
-        type: Boolean,
-        default: true
-      }
-    },
-    watch: {
-      mySelection: { // 外からプロパティの中身が変更になったら実行される
-        immediate: true,
-        handler(value) {
-          console.log('watching...' + value)
-          this.selectedValue = String(value);
-          this.changeSelection()
-          console.log('working?...')
+    computed:{
+      selectedItem:{
+        get: function () {
+          return this.selected
+        },
+        set: function (selectedItem) {
+          this.$emit('change', selectedItem)
         }
-      }
-    },
-    computed: {
-      menuOptions: function () {
+      },
+      options: function () {
         let result = this.items.map(function (value) {
           return {
             'value': value.id,
@@ -71,33 +44,40 @@
         })
         result.push({
           'value': '',
-          'text': 'Please select target',
+          'text': 'Please select target beneficiary',
           disabled: true,
           selected: true,
         })
         return result
-      }
-    },
-    methods: {
-      changeSelection() {
+      },
+      selectedDRI: function () {
         const vm = this
-        vm.selectedData.length = 0
+        let tableItem = []
+        //vm.selectedData.length = 0
         const dat = vm.items.filter(function (item) {
-          return item.id === vm.selectedValue
+          return item.id === vm.selected
         })
         if (dat.length !== 1) {
-          console.log('Error in dri dataset')
+          return []
         } else {
-          vm.selectedData.push(
+          tableItem.push(
             {Item: 'target', Value: dat[0].Name},
             {Item: 'Energy', Value: dat[0].En},
             {Item: 'Protein', Value: dat[0].Pr},
             {Item: 'Vita-A', Value: dat[0].Va},
             {Item: 'Iron', Value: dat[0].Fe}
           )
-          vm.$emit('changeTarget', vm.selectedData)
+          vm.$emit('changeTarget', tableItem)
+          return tableItem
         }
-      },
+      }
+    },
+    props:{
+      selected:null,
+      items:{
+        type: Array,
+        required: true
+      }
     }
   }
 </script>
