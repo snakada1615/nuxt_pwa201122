@@ -219,14 +219,6 @@
         this.nutritionSum.Fe = value.Fe || 0
         this.nutritionSum.Wt = value.Wt || 0
       },
-      makeToast(mes, append = false) {
-        this.$bvToast.toast(mes, {
-          autoHideDelay: 5000,
-          appendToast: append,
-          variant: "info",
-          noCloseButton: true
-        })
-      },
       showDialogue() {
         this.$bvModal.show('modalTest')
       },

@@ -8,6 +8,8 @@
         :state="selectedValue!==''"
         size="sm"
       ></b-form-select>
+      selected: {{selectedValue}}
+      prop: {{mySelection}}
     </div>
     <b-table
       v-show="showTable"

@@ -1,5 +1,7 @@
 <template>
   <b-container style="max-width: 540px;">
+    <b-button variant="primary" @click="saveDiet">test</b-button>
+    <b-button variant="primary" @click="loadDiet">get</b-button>
     <b-row class="my-2">
       <b-card
         style="min-width: 530px;"
@@ -46,6 +48,15 @@
               </b-col>
             </b-row>
           </template>
+          driID: {{driID}}
+          <dri-table2
+            v-show="!targetSwitch"
+            v-model="driID"
+            :items="itemsDRI"
+            head-row-variant="success"
+            table-variant="light"
+            @changeTarget="onChangeTarget"
+          />
           <dri-table
             v-show="!targetSwitch"
             @changeTarget="onChangeTarget"
@@ -74,7 +85,7 @@
           </template>
           <recepi-table
             @inputData="onChangeRecepi"
-            :items="itemsRecepi"
+            :items="dietCase.itemsRecepi"
             head-row-variant="success"
             table-variant="light"
             foot-row-variant="light"
@@ -107,7 +118,7 @@
               cropName="Energy"
               :iconNum=iconNum
               :max="10"
-              :nutritionTarget="nutritionTarget.En"
+              :nutritionTarget="dietCase.nutritionTarget.En"
               :rating="nutritionRating.En"
             ></nutrition-bar>
           </b-row>
@@ -116,7 +127,7 @@
               cropName="Protain"
               :iconNum=iconNum
               :max="10"
-              :nutritionTarget="nutritionTarget.Pr"
+              :nutritionTarget="dietCase.nutritionTarget.Pr"
               :rating="nutritionRating.Pr"
             ></nutrition-bar>
           </b-row>
@@ -125,7 +136,7 @@
               cropName="Vit-A"
               :iconNum=iconNum
               :max="10"
-              :nutritionTarget="nutritionTarget.Va"
+              :nutritionTarget="dietCase.nutritionTarget.Va"
               :rating="nutritionRating.Va"
             ></nutrition-bar>
           </b-row>
@@ -134,7 +145,7 @@
               cropName="Iron"
               :iconNum=iconNum
               :max="10"
-              :nutritionTarget="nutritionTarget.Fe"
+              :nutritionTarget="dietCase.nutritionTarget.Fe"
               :rating="nutritionRating.Fe"
             ></nutrition-bar>
           </b-row>
@@ -189,6 +200,7 @@
   import nutritionBar from "~/components/organisms/nutritionBar";
   import recepiTable from "~/components/organisms/recepiTable";
   import driTable from "../components/organisms/driTable";
+  import driTable2 from "../components/organisms/driTable2";
   import driTableGroup from "../components/organisms/driTableGroup";
   import foodModal from '../components/organisms/foodModal'
   import leftRightSwitch from "@/components/atoms/leftRightSwitch";
@@ -203,20 +215,21 @@
       nutritionBar,
       recepiTable,
       driTable,
+      driTable2,
       foodModal,
       leftRightSwitch,
       driTableGroup,
     },
     computed: {
       nutritionRating: function () {
-        let En = this.nutritionTarget.En ?
-          Math.round(100 * this.nutritionSum.En * this.driRange / this.nutritionTarget.En) / 10 : 0
-        let Pr = this.nutritionTarget.En ?
-          Math.round(100 * this.nutritionSum.Pr * this.driRange / this.nutritionTarget.Pr) / 10 : 0
-        let Va = this.nutritionTarget.En ?
-          Math.round(100 * this.nutritionSum.Va * this.driRange / this.nutritionTarget.Va) / 10 : 0
-        let Fe = this.nutritionTarget.En ?
-          Math.round(100 * this.nutritionSum.Fe * this.driRange / this.nutritionTarget.Fe) / 10 : 0
+        let En = this.dietCase.nutritionTarget.En ?
+          Math.round(100 * this.dietCase.nutritionSum.En * this.driRange / this.dietCase.nutritionTarget.En) / 10 : 0
+        let Pr = this.dietCase.nutritionTarget.En ?
+          Math.round(100 * this.dietCase.nutritionSum.Pr * this.driRange / this.dietCase.nutritionTarget.Pr) / 10 : 0
+        let Va = this.dietCase.nutritionTarget.En ?
+          Math.round(100 * this.dietCase.nutritionSum.Va * this.driRange / this.dietCase.nutritionTarget.Va) / 10 : 0
+        let Fe = this.dietCase.nutritionTarget.En ?
+          Math.round(100 * this.dietCase.nutritionSum.Fe * this.driRange / this.dietCase.nutritionTarget.Fe) / 10 : 0
         return {
           En: En,
           Pr: Pr,
@@ -249,7 +262,7 @@
       selectedCrops: {
         get: function () {
           let uniqueGroup = []
-          this.itemsRecepi.forEach(function (elem) {
+          this.dietCase.itemsRecepi.forEach(function (elem) {
             if (uniqueGroup.indexOf(elem.Group) === -1) {
               uniqueGroup.push(elem.Group)
             }
@@ -263,34 +276,34 @@
     },
     data() {
       return {
-        driID: "",
+        dietCase:{
+          itemsRecepi: [],
+          targetName:'',
+          nutritionTarget: {
+            En: 10,
+            Pr: 10,
+            Va: 10,
+            Fe: 10,
+          },
+          nutritionSum: {
+            En: 10,
+            Pr: 10,
+            Va: 10,
+            Fe: 10,
+            Wt: 10,
+          },
+        },
+        driID: '5',
         items: [],
         itemsDRI: [],
         itemSingleCrop: [],
-        itemsRecepi: [],
         iconNum: 1,
         driSwitch: false,
         targetSwitch: false,
         showFCT: true,
         showFoodDialog: false,
-        nutritionTarget: {
-          En: 10,
-          Pr: 10,
-          Va: 10,
-          Fe: 10,
-        },
-        nutritionSum: {
-          En: 10,
-          Pr: 10,
-          Va: 10,
-          Fe: 10,
-          Wt: 10,
-        },
         initWeight: 0,
         groupFlag: false,
-        tmp: [
-          'Grains, roots and tubers \r'
-        ],
       }
     },
     mounted() {
@@ -328,20 +341,21 @@
         }
       })
     },
-    watch: {
-      itemsRecepi: {
-        handler(value) {
-          console.log('itemRecipe changed')
-        }
-      }
-    },
     methods: {
-      makeToast(mes, append = false) {
-        this.$bvToast.toast(mes, {
-          autoHideDelay: 5000,
-          appendToast: append,
-          variant: "info",
-          noCloseButton: true
+      saveDiet(){
+        const db = new PouchDB('test')
+        this.dietCase._id = this.$store.state.user.email + 1
+        db.put(this.dietCase)
+      },
+      loadDiet(){
+        const vm = this
+        const db = new PouchDB('test')
+        const _id = this.$store.state.user.email + 1
+        db.get(_id).then(function (doc) {
+          vm.dietCase = doc
+          vm.dietCase._id = _id
+          console.log(vm.dietCase)
+          console.log('driID:' + vm.driID)
         })
       },
       setIcon() {
@@ -377,18 +391,18 @@
         })
       },
       onChangeRecepi(value) {
-        this.nutritionSum.En = value.En || 0
-        this.nutritionSum.Pr = value.Pr || 0
-        this.nutritionSum.Va = value.Va || 0
-        this.nutritionSum.Fe = value.Fe || 0
-        this.nutritionSum.Wt = value.Wt || 0
+        this.dietCase.nutritionSum.En = value.En || 0
+        this.dietCase.nutritionSum.Pr = value.Pr || 0
+        this.dietCase.nutritionSum.Va = value.Va || 0
+        this.dietCase.nutritionSum.Fe = value.Fe || 0
+        this.dietCase.nutritionSum.Wt = value.Wt || 0
       },
       onChangeTarget(value) {
         console.log(value)
-        this.nutritionTarget.En = Number(value[1].Value) || 0
-        this.nutritionTarget.Pr = Number(value[2].Value) || 0
-        this.nutritionTarget.Va = Number(value[3].Value) || 0
-        this.nutritionTarget.Fe = Number(value[4].Value) || 0
+        this.dietCase.nutritionTarget.En = Number(value[1].Value) || 0
+        this.dietCase.nutritionTarget.Pr = Number(value[2].Value) || 0
+        this.dietCase.nutritionTarget.Va = Number(value[3].Value) || 0
+        this.dietCase.nutritionTarget.Fe = Number(value[4].Value) || 0
       },
       onFCTclick(rec) {
         console.log('halo')
@@ -404,7 +418,7 @@
           'Fe': rec.Fe,
         })
         vm.initWeight = 0
-        vm.itemsRecepi.forEach(function (item) {
+        vm.dietCase.itemsRecepi.forEach(function (item) {
           console.log(item.id)
           if (item.id === rec.id) {
             vm.initWeight = Number(item.Wt)
@@ -434,14 +448,14 @@
       onCropWeightSet(dat) {
         console.log(dat)
         let res = false
-        this.itemsRecepi.forEach(function (val) {
+        this.dietCase.itemsRecepi.forEach(function (val) {
           if (val.id === dat.item[0].id) {
             val.Wt = dat.Wt
             res = true
           }
         })
         if (!res) {
-          this.itemsRecepi.push({
+          this.dietCase.itemsRecepi.push({
             'id': dat.item[0].id || 0,
             'Name': dat.item[0].Name || 0,
             'Group': dat.item[0].Group || 0,
