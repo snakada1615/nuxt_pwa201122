@@ -48,6 +48,7 @@ const store = () => {
               'email': this.records[0].value.email,
               'uid': this.records[0].value.uid
             })
+            console.log('email:' + this.records[0].value.email)
           }
         }
         dispatch('setLoginChecked')

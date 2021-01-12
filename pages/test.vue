@@ -4,12 +4,13 @@
       <b-tabs content-class="mt-3">
         <b-tab v-for="index in tabNumber" :key="index" :title="String(index)">
           <p>I'm the {{index}} tab</p>
-          <b-button variant="primary" @click="saveDiet(index)">save</b-button>
-          <b-button variant="primary" @click="loadDiet(index)">load</b-button>
+          <div>diet case: {{ dietCases[Number(index-1)] }}</div>
+          <b-button variant="primary" @click="saveDiet(index-1)">save</b-button>
+          <b-button variant="primary" @click="loadDiet(index-1)">load</b-button>
           <diet-calk-comp
             :fct-org="items"
             :dri-org="itemsDRI"
-            :diet-case="dietCases[index]"
+            :diet-case="dietCases[Number(index-1)]"
           />
         </b-tab>
       </b-tabs>
@@ -31,15 +32,16 @@
         items: [],
         itemsDRI: [],
         pageId: 5,
-        tabNumber:10,
+        tabNumber: 10,
         dietCases: [],
       }
     },
     mounted() {
       console.log('mounting main program')
       //initialize dietCases
-      for (let inedex in this.tabNumber){
-        connsole.log('index:'+index)
+      console.log('mount koko ed main : ' + this.tabNumber)
+      for (let index = 0; index < this.tabNumber; index++) {
+        console.log('mounted moain index:' + typeof(this.$store.state.user.email) +index)
         this.dietCases.push({
           itemsRecepi: [],
           targetName: '',
@@ -57,7 +59,8 @@
             Wt: 0,
           },
           driID: '',
-          _id: index
+          _id: this.$store.state.user.email + index,
+          pageId: index
         })
       }////////////////////////////
       const fct = new PouchDB('fct');
@@ -154,11 +157,11 @@
         db.get(_id).then(function (doc) {
           vm.dietCases[index] = doc
           vm.dietCases[index]._id = _id
+          console.log('added data to index:' + index)
           console.log(doc)
-          console.log(index)
         }).catch(function (e) {
             console.log(e)
-            console.log(index)
+            console.log('added default data to index:' + index)
             vm.dietCases[index] = {
               itemsRecepi: [],
               targetName: '',
@@ -176,7 +179,8 @@
                 Wt: 0,
               },
               driID: '',
-              _id: _id
+              _id: _id,
+              pageId: index
             }
           }
         )
