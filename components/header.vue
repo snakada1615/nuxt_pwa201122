@@ -44,6 +44,7 @@
           {to: '/test', val:'test'},
           {to: '/user_login', val:'user_login'},
           {to: '/user_reg', val:'user_register'},
+          {to: '/updateSW', val:'updateSW'},
           {to: '/feasibilityCheck', val:'Feasiblity Check'},
         ]
       }

@@ -1,6 +1,6 @@
 <template>
   <b-container>
-    <b-form-select v-model="selectedItem" :options="options" size="sm"></b-form-select>
+    <b-form-select v-model="selectedItem" :options="options" size="sm" class="mb-2"></b-form-select>
     <b-table
       striped
       small
