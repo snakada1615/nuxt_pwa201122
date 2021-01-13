@@ -30,10 +30,15 @@ const store = () => {
       },
       setLoginChecked: function (state) {
         state.isLoginChecked = true
+      },
+      setLoginUnChecked: function (state) {
+        state.isLoginChecked = false
       }
     },
     actions: {
       async autoLogin({dispatch}) {
+        dispatch('setLoginUnChecked')
+        console.log('store initialize start:' + this.state.user.isLoginChecked)
         const DBName = 'firebaseLocalStorageDb'
         const tableName = 'firebaseLocalStorage'
         const DBstatus = await dispatch('DBexists', DBName)
@@ -52,6 +57,7 @@ const store = () => {
           }
         }
         dispatch('setLoginChecked')
+        console.log('store initialize complete:' + this.state.isLoginChecked)
       },
       login(context, userInfo) {
         firebase.auth().signInWithEmailAndPassword(userInfo.email, userInfo.password)
@@ -108,6 +114,9 @@ const store = () => {
       },
       setLoginChecked(context) {
         context.commit('setLoginChecked')
+      },
+      setLoginUnChecked(context) {
+        context.commit('setLoginUnChecked')
       },
       async getRecordsFromDb(context, storeName) {
         return new Promise((resolve, reject) => {

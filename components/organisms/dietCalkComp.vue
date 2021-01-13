@@ -54,7 +54,7 @@
             :items="itemsDRI"
             head-row-variant="success"
             table-variant="light"
-            @changeTarget="onChangeTarget"
+            @change="onChangeTarget($event, dietCase.pageId)"
           />
           <dri-table-group
             ref="table"
@@ -360,8 +360,13 @@
           this.dietCase.nutritionSum.Wt = value.Wt || 0
         }
       },
-      onChangeTarget(value) {
-        console.log(value)
+      onChangeTarget(value, pageId) {
+        console.log('target selected?:' + value)
+        console.log('target selected?:' + pageId)
+        if (pageId !== this.dietCase.pageId) {
+          return
+        }
+        console.log('target selected')
         if (this.dietCase.nutritionSum) {
           this.dietCase.nutritionTarget.En = Number(value[1].Value) || 0
           this.dietCase.nutritionTarget.Pr = Number(value[2].Value) || 0
