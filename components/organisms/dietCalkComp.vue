@@ -54,7 +54,7 @@
             :items="itemsDRI"
             head-row-variant="success"
             table-variant="light"
-            @change="onChangeTarget($event, dietCase.pageId)"
+            @changeTarget="onChangeTarget($event, dietCase.pageId)"
           />
           <dri-table-group
             ref="table"
@@ -75,12 +75,12 @@
             <b class="py-0 my-0">Crop combination</b>
           </template>
           <recepi-table
-            @inputData="onChangeRecepi"
+            @inputData="onChangeRecepi($event, dietCase.pageId)"
             :items="dietCase.itemsRecepi"
             head-row-variant="success"
             table-variant="light"
             foot-row-variant="light"
-            @rowClick="onRecepiclick"
+            @rowClick="onRecepiclick($event, dietCase.pageId)"
           >
           </recepi-table>
         </b-card>
@@ -305,14 +305,12 @@
         })
       },
       fctOrg: {
-        type: Array,
-        required: true
+        type: Array
       },
       driOrg: {
         type: Array,
         required: true
       },
-      pageId: null,
     },
     data() {
       return {
@@ -351,7 +349,11 @@
         this.iconNum += 1
         console.log(this.iconNum)
       },
-      onChangeRecepi(value) {
+      onChangeRecepi(value, pageId) {
+        console.log('onChangeRecepi')
+        if (pageId !== this.dietCase.pageId) {
+          return
+        }
         if (this.dietCase.nutritionSum) {
           this.dietCase.nutritionSum.En = value.En || 0
           this.dietCase.nutritionSum.Pr = value.Pr || 0
@@ -361,13 +363,10 @@
         }
       },
       onChangeTarget(value, pageId) {
-        console.log('target selected?:' + value)
-        console.log('target selected?:' + pageId)
         if (pageId !== this.dietCase.pageId) {
           return
         }
-        console.log('target selected')
-        if (this.dietCase.nutritionSum) {
+        if (this.dietCase.nutritionTarget) {
           this.dietCase.nutritionTarget.En = Number(value[1].Value) || 0
           this.dietCase.nutritionTarget.Pr = Number(value[2].Value) || 0
           this.dietCase.nutritionTarget.Va = Number(value[3].Value) || 0
@@ -376,8 +375,6 @@
       },
       onFCTclick(rec, pageId) {
         const vm = this
-        console.log('param: ' + pageId)
-        console.log('DOM: ' + vm.dietCase.pageId)
         if (pageId !== vm.dietCase.pageId) {
           return
         }
@@ -398,10 +395,12 @@
             vm.initWeight = Number(item.Wt)
           }
         })
-        console.log('modalTest' + String(pageId))
         vm.$bvModal.show('modalTest' + String(pageId))
       },
-      onRecepiclick(rec) {
+      onRecepiclick(rec, pageId) {
+        if (pageId !== this.dietCase.pageId) {
+          return
+        }
         this.itemSingleCrop.length = 0
         this.itemSingleCrop.push({
           'id': rec.id,
@@ -413,7 +412,7 @@
           'Fe': rec.Fe,
         })
         this.initWeight = Number(rec.Wt)
-        this.$bvModal.show('modalTest')
+        this.$bvModal.show('modalTest' + String(pageId))
       },
       onCropWeightSet(dat) {
         console.log(dat)

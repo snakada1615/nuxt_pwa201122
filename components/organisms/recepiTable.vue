@@ -102,9 +102,11 @@
     },
     methods: {
       inputData() {
+        console.log('inputData')
         this.$emit('inputData', this.nutritionSum)
       },
       rowClick(record){
+        console.log('rowClick')
         this.$emit('rowClick', record)
       }
     }

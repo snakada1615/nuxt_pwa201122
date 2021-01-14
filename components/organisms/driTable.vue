@@ -24,6 +24,7 @@
           {key: 'Item', sortable: false},
           {key: 'Value', sortable: false},
         ],
+        selectedDRI:[],
       }
     },
     computed:{
@@ -32,7 +33,10 @@
           return this.selected
         },
         set: function (selectedItem) {
+          console.log('selectedItem changed')
+          this.selectedDRI = this.setDRI(selectedItem)
           this.$emit('change', selectedItem)
+          this.$emit('changeTarget', this.selectedDRI)
         }
       },
       options: function () {
@@ -50,12 +54,21 @@
         })
         return result
       },
-      selectedDRI: function () {
+    },
+    props:{
+      selected:null,
+      items:{
+        type: Array,
+        required: true
+      }
+    },
+    methods:{
+      setDRI: function (selectedId) {
         const vm = this
         let tableItem = []
         //vm.selectedData.length = 0
         const dat = vm.items.filter(function (item) {
-          return item.id === vm.selected
+          return item.id === selectedId
         })
         if (dat.length !== 1) {
           return []
@@ -67,16 +80,8 @@
             {Item: 'Vita-A', Value: dat[0].Va},
             {Item: 'Iron', Value: dat[0].Fe}
           )
-          vm.$emit('changeTarget', tableItem)
           return tableItem
         }
-      }
-    },
-    props:{
-      selected:null,
-      items:{
-        type: Array,
-        required: true
       }
     }
   }

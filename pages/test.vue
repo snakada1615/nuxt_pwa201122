@@ -53,7 +53,7 @@ export default {
         })
       } else {
         getPouchData(fct).then(docs => {
-          vm.setFTC(docs)
+          vm.items = vm.setFTC(docs)
         })
       }
     }).then(
@@ -91,16 +91,16 @@ export default {
       if (value){
         for (let index = 0; index < this.tabNumber; index++) {
           console.log('forloop:' + index)
-          this.dietCases["indexOf"] = this.loadDiet(this.dietCases, index)
+          this.dietCases[index] = this.loadDiet(this.dietCases, index)
         }
       }
     }
   },
   methods: {
     setFTC(docs) {
-      let vm = this
+      let res = []
       docs.forEach(function (val, index) {
-        vm.items.push({
+        res.push({
           'id': val.doc.food_item_id,
           'Group': val.doc.food_group_unicef,
           'Name': val.doc.Food_name,
@@ -110,6 +110,7 @@ export default {
           'Fe': val.doc.FE
         })
       })
+      return res
     },
     setDRI(docs) {
       let vm = this
