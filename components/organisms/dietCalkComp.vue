@@ -158,7 +158,6 @@
         </b-card>
       </b-col>
     </b-row>
-    pageId: modalTest{{dietCase.pageId}}
     <food-modal
       v-model="initWeight"
       :items="itemSingleCrop"
@@ -366,7 +365,7 @@
         if (pageId !== this.dietCase.pageId) {
           return
         }
-        if (this.dietCase.nutritionTarget) {
+        if (this.dietCase.nutritionTarget && value) {
           this.dietCase.nutritionTarget.En = Number(value[1].Value) || 0
           this.dietCase.nutritionTarget.Pr = Number(value[2].Value) || 0
           this.dietCase.nutritionTarget.Va = Number(value[3].Value) || 0

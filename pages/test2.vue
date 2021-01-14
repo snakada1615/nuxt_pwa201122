@@ -1,15 +1,15 @@
 <template>
   <b-container>
-    <diet-calk-comp
-      :fct-org="items"
-      :dri-org="itemsDRI"
-      :diet-case="dietCase"
-    />
-    <diet-calk-comp
-      :fct-org="items"
-      :dri-org="itemsDRI"
-      :diet-case="dietCase2"
-    />
+    <b-tabs v-show="$store.state.isLoginChecked" content-class="mt-3">
+      <b-tab v-for="(diet, index) in dietCases" :key="index" :title="String(index)">
+        <p>Tab-{{ index }}</p>
+        <diet-calk-comp
+          :fct-org="items"
+          :dri-org="itemsDRI"
+          :diet-case="diet"
+        />
+      </b-tab>
+    </b-tabs>
   </b-container>
 </template>
 
@@ -17,7 +17,7 @@
 <script>
   import driTable from "../components/organisms/driTable";
   import PouchDB from 'pouchdb'
-  import {getPouchData} from '@/plugins/pouchHelper'
+  import {getPouchData, syncCloudant} from '@/plugins/pouchHelper'
   import dietCalkComp from "../components/organisms/dietCalkComp";
 
   export default {
@@ -27,55 +27,31 @@
     },
     data(){
       return{
-        dietCase : {
-          itemsRecepi: [],
-          targetName: '',
-          nutritionTarget: {
-            En: 0,
-            Pr: 0,
-            Va: 0,
-            Fe: 0,
-          },
-          nutritionSum: {
-            En: 0,
-            Pr: 0,
-            Va: 0,
-            Fe: 0,
-            Wt: 0,
-          },
-          driID: '',
-          _id: 'baka',
-          pageId: 1
-        },
-        dietCase2 : {
-          itemsRecepi: [],
-          targetName: '',
-          nutritionTarget: {
-            En: 0,
-            Pr: 0,
-            Va: 0,
-            Fe: 0,
-          },
-          nutritionSum: {
-            En: 0,
-            Pr: 0,
-            Va: 0,
-            Fe: 0,
-            Wt: 0,
-          },
-          driID: '',
-          _id: 'baka',
-          pageId: 2
-        },
         itemsDRI:[],
         items:[],
+        tabNumber: 10,
+        dietCases:[]
+      }
+    },
+    computed:{
+      loginChecked: function () {
+        return this.$store.state.isLoginChecked
+      },
+    },
+    watch:{
+      loginChecked: function (value) {
+        const vm = this
+        if (value){
+          for (let index = 0; index < this.tabNumber; index++) {
+            console.log('forloop:' + index)
+            vm.loadDiet(index).then(function (doc) {
+              vm.dietCases.push(doc)
+            })
+          }
+        }
       }
     },
     methods:{
-      onChangeTarget:function (val, target) {
-        console.log('val:'+val)
-        console.log('target:'+target)
-      },
       setFTC(docs) {
         let res = []
         docs.forEach(function (val, index) {
@@ -106,26 +82,83 @@
         })
         return res
       },
+      loadDiet(index) {
+        const vm = this
+        const db = new PouchDB('test')
+        const _id = this.$store.state.user.email + index
+        let promise = new Promise((resolve, reject) => {
+          db.get(_id).then(function (doc) {
+            doc._id = _id
+            console.log('added pre-input to index:' + index)
+            console.log(doc)
+            resolve(doc)
+          }).catch(function (e) {
+              const dat = {
+                itemsRecepi: [],
+                targetName: '',
+                nutritionTarget: {
+                  En: 0,
+                  Pr: 0,
+                  Va: 0,
+                  Fe: 0,
+                },
+                nutritionSum: {
+                  En: 0,
+                  Pr: 0,
+                  Va: 0,
+                  Fe: 0,
+                  Wt: 0,
+                },
+                driID: '',
+                _id: _id,
+                pageId: index
+              }
+              resolve(dat)
+            }
+          )
+        })
+        return promise
+      },
     },
     mounted() {
-      const vm = this
-      const dri = new PouchDB('dri')
-      const fct = new PouchDB('fct')
-      dri.info().then(function (info) {
-        if (info.doc_count){
-          getPouchData(dri).then(docs => {
-            vm.itemsDRI = vm.setDRI(docs)
+      console.log('mounted: new!!!')
+      const fct = new PouchDB('fct');
+      const dri = new PouchDB('dri');
+      const vm = this;
+      const idToast1 = this.makeToast('start fetching')
+      fct.info().then(function (info) {
+        if (!(info.doc_count)) {
+          const idToast2 = vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
+          syncCloudant('fct').then(dataset => {
+            getPouchData(dataset).then(docs => {
+              vm.items = vm.setFTC(docs)
+              vm.hideToast(idToast2)
+            })
+          })
+        } else {
+          getPouchData(fct).then(docs => {
+            vm.items = vm.setFTC(docs)
           })
         }
       }).then(
-        fct.info().then(function (info) {
-          if (info.doc_count){
-            getPouchData(fct).then(docs => {
-              vm.items = vm.setFTC(docs)
+        dri.info().then(function (info) {
+          if (!(info.doc_count)) {
+            const idToast2 = vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
+            syncCloudant('dri').then(dataset => {
+              getPouchData(dataset).then(docs => {
+                vm.itemsDRI = vm.setDRI(docs)
+                vm.hideToast(idToast2)
+                vm.hideToast(idToast1)
+              })
+            })
+          } else {
+            getPouchData(dri).then(docs => {
+              vm.itemsDRI = vm.setDRI(docs)
+              vm.hideToast(idToast1)
             })
           }
         })
       )
-    }
+    },
   }
 </script>
