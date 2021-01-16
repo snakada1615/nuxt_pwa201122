@@ -82,7 +82,6 @@
         sum_Va = Math.round(sum_Va)
         sum_Fe = Math.round(sum_Fe)
         sum_Wt = Math.round(sum_Wt)
-        console.log('sum_Wt=' + sum_Wt)
         return {En: sum_En, Pr: sum_Pr, Va: sum_Va, Fe: sum_Fe, Wt: sum_Wt}
       }
     },
@@ -102,11 +101,9 @@
     },
     methods: {
       inputData() {
-        console.log('inputData')
         this.$emit('inputData', this.nutritionSum)
       },
       rowClick(record){
-        console.log('rowClick')
         this.$emit('rowClick', record)
       }
     }

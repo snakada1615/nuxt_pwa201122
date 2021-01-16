@@ -46,9 +46,6 @@ export default {
     }
   },
   methods: {
-    halo() {
-      console.log('halo')
-    },
     registUser() {
       this.$store.dispatch('registUser', {email: this.email, password: this.password})
       this.email = ''

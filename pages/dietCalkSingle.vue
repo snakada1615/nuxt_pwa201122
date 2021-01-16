@@ -1,7 +1,9 @@
 <template>
   <b-container style="max-width: 540px;">
+    <b-button variant="primary" @click="saveDiet">save</b-button>
+    <b-button variant="primary" @click="loadDiet">load</b-button>
     <b-row class="my-2">
-      <b-col class="px-0 mb-2 mt-1">
+      <b-col>
         <b-card
           style="min-width: 530px;"
           header-bg-variant="success"
@@ -25,7 +27,7 @@
             :items="items"
             head-row-variant="success"
             table-variant="light"
-            @fctClick="onFCTclick($event, dietCase.pageId)"
+            @fctClick="onFCTclick"
           ></fct-table>
         </b-card>
       </b-col>
@@ -54,7 +56,7 @@
             :items="itemsDRI"
             head-row-variant="success"
             table-variant="light"
-            @changeTarget="onChangeTarget($event, dietCase.pageId)"
+            @changeTarget="onChangeTarget"
           />
           <dri-table-group
             ref="table"
@@ -75,12 +77,12 @@
             <b class="py-0 my-0">Crop combination</b>
           </template>
           <recepi-table
-            @inputData="onChangeRecepi($event, dietCase.pageId)"
+            @inputData="onChangeRecepi"
             :items="dietCase.itemsRecepi"
             head-row-variant="success"
             table-variant="light"
             foot-row-variant="light"
-            @rowClick="onRecepiclick($event, dietCase.pageId)"
+            @rowClick="onRecepiclick"
           >
           </recepi-table>
         </b-card>
@@ -109,7 +111,7 @@
               cropName="Energy"
               :iconNum=iconNum
               :max="10"
-              :nutritionTarget="nutritionTargetComputed.En"
+              :nutritionTarget="dietCase.nutritionTarget.En"
               :rating="nutritionRating.En"
             ></nutrition-bar>
           </b-row>
@@ -118,7 +120,7 @@
               cropName="Protain"
               :iconNum=iconNum
               :max="10"
-              :nutritionTarget="nutritionTargetComputed.Pr"
+              :nutritionTarget="dietCase.nutritionTarget.Pr"
               :rating="nutritionRating.Pr"
             ></nutrition-bar>
           </b-row>
@@ -127,7 +129,7 @@
               cropName="Vit-A"
               :iconNum=iconNum
               :max="10"
-              :nutritionTarget="nutritionTargetComputed.Va"
+              :nutritionTarget="dietCase.nutritionTarget.Va"
               :rating="nutritionRating.Va"
             ></nutrition-bar>
           </b-row>
@@ -136,7 +138,7 @@
               cropName="Iron"
               :iconNum=iconNum
               :max="10"
-              :nutritionTarget="nutritionTargetComputed.Fe"
+              :nutritionTarget="dietCase.nutritionTarget.Fe"
               :rating="nutritionRating.Fe"
             ></nutrition-bar>
           </b-row>
@@ -158,10 +160,11 @@
         </b-card>
       </b-col>
     </b-row>
+
     <food-modal
       v-model="initWeight"
       :items="itemSingleCrop"
-      :my-name="'modalTest' + dietCase.pageId"
+      my-name="modalTest"
       my-type="Number"
       rules="min_value:0|max_value:500"
       @modalOk="onCropWeightSet"
@@ -169,29 +172,13 @@
   </b-container>
 </template>
 
-<style>
-  /* force rotate when screen width less than 450 */
-  @media screen and (min-width: 320px) and (max-width: 450px) and (orientation: portrait) {
-    html {
-      transform: rotate(-90deg);
-      transform-origin: left top;
-      width: 100vh;
-      overflow-x: hidden;
-      position: absolute;
-      top: 100%;
-      left: 0;
-    }
-  }
-
-</style>
-
 <script>
   import fctTable from '~/components/organisms/FctTable'
   import nutritionBar from "~/components/organisms/nutritionBar";
   import recepiTable from "~/components/organisms/recepiTable";
-  import driTable from "@/components/organisms/driTable";
-  import driTableGroup from "@/components/organisms/driTableGroup";
-  import foodModal from '@/components/organisms/foodModal'
+  import driTable from "../components/organisms/driTable";
+  import driTableGroup from "../components/organisms/driTableGroup";
+  import foodModal from '../components/organisms/foodModal'
   import leftRightSwitch from "@/components/atoms/leftRightSwitch";
   import {getPouchData, syncCloudant} from '@/plugins/pouchHelper'
   import PouchDB from 'pouchdb'
@@ -207,13 +194,7 @@
       driTableGroup,
     },
     computed: {
-      nutritionTargetComputed: function () {
-        return this.dietCase.nutritionTarget ? this.dietCase.nutritionTarget : []
-      },
       nutritionRating: function () {
-        if (!this.dietCase.nutritionTarget) {
-          return []
-        }
         let En = this.dietCase.nutritionTarget.En ?
           Math.round(100 * this.dietCase.nutritionSum.En * this.driRange / this.dietCase.nutritionTarget.En) / 10 : 0
         let Pr = this.dietCase.nutritionTarget.En ?
@@ -253,9 +234,6 @@
       },
       selectedCrops: {
         get: function () {
-          if (!this.dietCase.itemsRecepi) {
-            return []
-          }
           let uniqueGroup = []
           this.dietCase.itemsRecepi.forEach(function (elem) {
             if (uniqueGroup.indexOf(elem.Group) === -1) {
@@ -267,27 +245,14 @@
         set: function (value) {
           console.log(value)
         }
-      },
-      items: {
-        get: function () {
-          return this.fctOrg
-        }
-      },
-      itemsDRI: {
-        get: function () {
-          return this.driOrg
-        }
-      },
+      }
     },
-    props: {
-      dietCase: {
-        type: Object,
-        default: () => ({
-          _id: '',
-          driID: 2,
-          pageId: 1,
+    data() {
+      return {
+        dietCase:{
+          user: this.$store.state.user.email,
           itemsRecepi: [],
-          targetName: '',
+          targetName:'',
           nutritionTarget: {
             En: 10,
             Pr: 10,
@@ -301,18 +266,10 @@
             Fe: 10,
             Wt: 10,
           },
-        })
-      },
-      fctOrg: {
-        type: Array
-      },
-      driOrg: {
-        type: Array,
-        required: true
-      },
-    },
-    data() {
-      return {
+          driID: '',
+        },
+        items: [],
+        itemsDRI: [],
         itemSingleCrop: [],
         iconNum: 1,
         driSwitch: false,
@@ -323,57 +280,113 @@
         groupFlag: false,
       }
     },
+    mounted() {
+      const fct = new PouchDB('fct');
+      const dri = new PouchDB('dri');
+      const vm = this;
+      let docs = []
+      const idToast1 = this.makeToast('start fetching')
+      fct.info().then(function (info) {
+        if (!(info.doc_count)) {
+          const idToast2 = vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
+          syncCloudant('fct').then(dataset => {
+            getPouchData(dataset).then(docs => {
+              vm.setFTC(docs)
+              vm.hideToast(idToast2)
+              vm.hideToast(idToast1)
+            })
+          })
+        } else {
+          getPouchData(fct).then(docs => {
+            vm.setFTC(docs)
+            vm.hideToast(idToast1)
+          })
+        }
+      })
+      dri.info().then(function (info) {
+        if (!(info.doc_count)) {
+          const idToast1 = vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
+          syncCloudant('dri').then(dataset => {
+            getPouchData(dataset).then(docs => {
+              vm.setDRI(docs)
+              vm.hideToast(idToast1)
+            })
+          })
+        } else {
+          getPouchData(dri).then(docs => {
+            vm.setDRI(docs)
+          })
+        }
+      })
+    },
     methods: {
-      saveDiet(index) {
+      saveDiet(){
         const vm = this
         const db = new PouchDB('test')
-        const id = this.$store.state.user.email + index
+        const id = this.$store.state.user.email + 2
         db.get(id).then(function (doc) {
           vm.dietCase._rev = doc._rev
           doc = vm.dietCase
           return db.put(doc);
         })
       },
-      loadDiet(index) {
+      loadDiet(){
         const vm = this
         const db = new PouchDB('test')
-        const _id = this.$store.state.user.email + index
+        const _id = this.$store.state.user.email + 2
         db.get(_id).then(function (doc) {
           vm.dietCase = doc
           vm.dietCase._id = _id
+          console.log(doc)
         })
       },
       setIcon() {
         this.iconNum += 1
+        console.log(this.iconNum)
       },
-      onChangeRecepi(value, pageId) {
-        if (pageId !== this.dietCase.pageId) {
-          return
-        }
-        if (this.dietCase.nutritionSum) {
-          this.dietCase.nutritionSum.En = value.En || 0
-          this.dietCase.nutritionSum.Pr = value.Pr || 0
-          this.dietCase.nutritionSum.Va = value.Va || 0
-          this.dietCase.nutritionSum.Fe = value.Fe || 0
-          this.dietCase.nutritionSum.Wt = value.Wt || 0
-        }
+      setFTC(docs){
+        let vm = this
+        docs.forEach(function (val, index) {
+          vm.items.push({
+            'id': val.doc.food_item_id,
+            'Group': val.doc.food_group_unicef,
+            'Name': val.doc.Food_name,
+            'En': val.doc.Energy,
+            'Pr': val.doc.Protein,
+            'Va': val.doc.VITA_RAE,
+            'Fe': val.doc.FE
+          })
+        })
       },
-      onChangeTarget(value, pageId) {
-        if (pageId !== this.dietCase.pageId || !value.length) {
-          return
-        }
-        if (this.dietCase.nutritionTarget) {
-          this.dietCase.nutritionTarget.En = Number(value[1].Value) || 0
-          this.dietCase.nutritionTarget.Pr = Number(value[2].Value) || 0
-          this.dietCase.nutritionTarget.Va = Number(value[3].Value) || 0
-          this.dietCase.nutritionTarget.Fe = Number(value[4].Value) || 0
-        }
+      setDRI(docs){
+        let vm = this
+        docs.forEach(function (val, index) {
+          vm.itemsDRI.push({
+            'id': val.key,
+            'Name': val.doc.nut_group,
+            'En': val.doc.energy,
+            'Pr': val.doc.protein,
+            'Va': val.doc.vita,
+            'Fe': val.doc.fe,
+            'number': 0
+          })
+        })
       },
-      onFCTclick(rec, pageId) {
+      onChangeRecepi(value) {
+        this.dietCase.nutritionSum.En = value.En || 0
+        this.dietCase.nutritionSum.Pr = value.Pr || 0
+        this.dietCase.nutritionSum.Va = value.Va || 0
+        this.dietCase.nutritionSum.Fe = value.Fe || 0
+        this.dietCase.nutritionSum.Wt = value.Wt || 0
+      },
+      onChangeTarget(value) {
+        this.dietCase.nutritionTarget.En = Number(value[1].Value) || 0
+        this.dietCase.nutritionTarget.Pr = Number(value[2].Value) || 0
+        this.dietCase.nutritionTarget.Va = Number(value[3].Value) || 0
+        this.dietCase.nutritionTarget.Fe = Number(value[4].Value) || 0
+      },
+      onFCTclick(rec) {
         const vm = this
-        if (pageId !== vm.dietCase.pageId) {
-          return
-        }
         vm.itemSingleCrop.length = 0
         vm.itemSingleCrop.push({
           'id': rec.id,
@@ -386,16 +399,14 @@
         })
         vm.initWeight = 0
         vm.dietCase.itemsRecepi.forEach(function (item) {
+          console.log(item.id)
           if (item.id === rec.id) {
             vm.initWeight = Number(item.Wt)
           }
         })
-        vm.$bvModal.show('modalTest' + String(pageId))
+        vm.$bvModal.show('modalTest')
       },
-      onRecepiclick(rec, pageId) {
-        if (pageId !== this.dietCase.pageId) {
-          return
-        }
+      onRecepiclick(rec) {
         this.itemSingleCrop.length = 0
         this.itemSingleCrop.push({
           'id': rec.id,
@@ -407,9 +418,10 @@
           'Fe': rec.Fe,
         })
         this.initWeight = Number(rec.Wt)
-        this.$bvModal.show('modalTest' + String(pageId))
+        this.$bvModal.show('modalTest')
       },
       onCropWeightSet(dat) {
+        console.log(dat)
         let res = false
         this.dietCase.itemsRecepi.forEach(function (val) {
           if (val.id === dat.item[0].id) {

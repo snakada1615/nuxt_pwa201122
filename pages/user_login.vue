@@ -35,7 +35,7 @@
 </template>
 
 <script>
-  import veeInput from "../components/atoms/veeInput";
+  import veeInput from "@/components/atoms/veeInput";
 
   export default {
     components: {
@@ -48,9 +48,6 @@
       }
     },
     methods: {
-      halo() {
-        console.log('halo')
-      },
       login() {
         this.$store.dispatch('login', {email: this.email, password: this.password})
         this.email = ''

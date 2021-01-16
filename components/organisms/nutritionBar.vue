@@ -85,18 +85,13 @@
     },
     data() {
       return {
-        halo: "hello",
         myicon: '', // declare the icon
       }
     },
     created() {
-      console.log("halo")
       this.myicon = stop
     },
     methods: {
-      mybar() {
-        console.log('haloooo')
-      },
       setIcon(index) {
         switch (index) {
           case 1:

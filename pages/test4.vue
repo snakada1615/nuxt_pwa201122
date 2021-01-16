@@ -1,12 +1,8 @@
 <template>
-  <b-container style="max-width: 540px;">
-    <b-tabs lazy pills align="center" v-show="$store.state.isLoginChecked" content-class="mt-3">
+  <b-container>
+    <b-tabs v-show="$store.state.isLoginChecked" content-class="mt-3">
       <b-tab v-for="(diet, index) in dietCases" :key="index" :title="String(index + 1)">
-        <span class="mr-4">Tab-{{ index + 1 }}</span>
-        <b-button size="sm" variant="warning"
-                  @click="saveDiet(index)" class="mb-4 float-right"
-        >save this page
-        </b-button>
+        <p>Tab-{{ index + 1 }}</p>
         <diet-calk-comp
           :fct-org="items"
           :dri-org="itemsDRI"
@@ -23,54 +19,38 @@
   import PouchDB from 'pouchdb'
   import {getPouchData, syncCloudant} from '@/plugins/pouchHelper'
   import dietCalkComp from "../components/organisms/dietCalkComp";
-  import {objectSort} from "../plugins/helper";
 
   export default {
-    components: {
+    components:{
       driTable,
       dietCalkComp,
     },
-    data() {
-      return {
-        itemsDRI: [],
-        items: [],
-        tabNumber: 10,
-        dietCases: []
+    data(){
+      return{
+        itemsDRI:[],
+        items:[],
+        tabNumber: 5,
+        dietCases:[]
       }
     },
-    computed: {
+    computed:{
       loginChecked: function () {
         return this.$store.state.isLoginChecked
       },
-      tabNumberTotal: function () {
-        let res = 0
-        for (let index = 1; index <= this.tabNumber; index++) {
-          res += index
-        }
-        return res
-      }
     },
-    watch: {
+    watch:{
       loginChecked: function (value) {
         const vm = this
-        if (value) {
-          let indexSum = 0
-          for (let index = 0; index < vm.tabNumber; index++) {
+        if (value){
+          for (let index = 0; index < this.tabNumber; index++) {
             vm.loadDiet(index).then(function (doc) {
-              indexSum += index
               vm.dietCases.push(doc)
-              if (indexSum === vm.tabNumberTotal - vm.tabNumber) {
-                objectSort(vm.dietCases, 'pageId')
-              }
             })
           }
         }
       }
     },
-    methods: {
-      sortMe() {
-        objectSort(this.dietCases, 'pageId')
-      },
+    methods:{
       setFTC(docs) {
         let res = []
         docs.forEach(function (val, index) {
@@ -101,18 +81,6 @@
         })
         return res
       },
-      saveDiet(index) {
-        const vm = this
-        const db = new PouchDB('test')
-        const id = this.$store.state.user.email + index
-        db.get(id).then(function (doc) {
-          vm.dietCases[index]._rev = doc._rev
-          doc = vm.dietCases[index]
-          return db.put(doc);
-        }).catch(function (e) {
-          return db.put(vm.dietCases[index])
-        })
-      },
       loadDiet(index) {
         const vm = this
         const db = new PouchDB('test')
@@ -120,6 +88,8 @@
         let promise = new Promise((resolve, reject) => {
           db.get(_id).then(function (doc) {
             doc._id = _id
+            console.log('added pre-input to index:' + index)
+            console.log(doc)
             resolve(doc)
           }).catch(function (e) {
               const dat = {
@@ -150,6 +120,7 @@
       },
     },
     mounted() {
+      console.log('mounted: new!!!')
       const fct = new PouchDB('fct');
       const dri = new PouchDB('dri');
       const vm = this;

@@ -7,8 +7,21 @@
           <b-navbar-brand to="/"><Fa :icon="faHome"/></b-navbar-brand>
           <span>NFA tool</span>
           <b-navbar-nav class="ml-auto">
-            <b-nav-text v-if="$store.state.isLoginChecked">user: <span>{{$store.state.user.email}}</span></b-nav-text>
-            <b-nav-item-dropdown text="Link" right>
+            <b-nav-text right class="mr-2"><h6>{{$store.state.user.email}}</h6></b-nav-text>
+            <b-nav-item-dropdown right>
+              <template #button-content>
+                <Fa :icon="faUser"/>
+              </template>
+              <b-dropdown-item disabled>user name: <span class="text-danger">{{$store.state.user.name}}</span></b-dropdown-item>
+              <b-dropdown-item disabled>user email: <span class="text-danger">{{$store.state.user.email}}</span></b-dropdown-item>
+              <b-dropdown-item disabled>user country:<span class="text-danger">{{$store.state.user.country}}</span></b-dropdown-item>
+              <b-dropdown-item disabled>user profession:<span class="text-danger">{{$store.state.user.profession}}</span></b-dropdown-item>
+              <b-dropdown-item @click="openLogin"><span class="text-primary font-weight-bold">login</span></b-dropdown-item>
+            </b-nav-item-dropdown>
+            <b-nav-item-dropdown right>
+              <template #button-content>
+                <Fa :icon="faCaretSquareDown"/>
+              </template>
               <b-dropdown-item
                 v-for="(link, index) in links"
                 :to="link.to"
@@ -17,6 +30,9 @@
             </b-nav-item-dropdown>
           </b-navbar-nav>
         </b-navbar>
+        <user_login
+          dialog-id="loginModal"
+        ></user_login>
       </div>
     </header>
     <layout-content></layout-content>
@@ -26,27 +42,37 @@
 <script>
   import LayoutContent from '~/components/LayoutContent' // パスは適宜変更
   import Fa from 'vue-fa'
-  import { faHome } from '@fortawesome/free-solid-svg-icons'
-  import user_login from "../pages/user_login";
+  import { faHome, faUser, faCaretSquareDown } from '@fortawesome/free-solid-svg-icons'
+  import user_login from "./molecules/user_login";
 
 
   export default {
     components: {
       LayoutContent,
-      Fa
+      Fa,
+      user_login,
     },
     data(){
       return {
-        faHome,
+        faHome, faUser, faCaretSquareDown,
         links:[
           {to: '/', val:'index'},
           {to: '/dietCalk', val:'dietCalk'},
           {to: '/test', val:'test'},
+          {to: '/test3', val:'test3'},
+          {to: '/test4', val:'test4'},
+          {to: '/test5', val:'test5'},
           {to: '/user_login', val:'user_login'},
           {to: '/user_reg', val:'user_register'},
           {to: '/updateSW', val:'updateSW'},
           {to: '/feasibilityCheck', val:'Feasiblity Check'},
         ]
+      }
+    },
+    methods:{
+      openLogin() {
+        console.log('open login')
+        this.$bvModal.show('loginModal')
       }
     }
   }

@@ -1,6 +1,7 @@
 <template>
   <validation-provider :mode="mode" :name="name" :rules="rules" v-slot="{ errors, valid }">
     <b-input-group size="sm">
+      <div hidden name="isvalid" :class="{ 'is-valid': valid }"/>
       <template #append>
         <b-input-group-text
           class="bg-light"

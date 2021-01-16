@@ -30,6 +30,7 @@
     computed:{
       selectedItem:{
         get: function () {
+          this.selectedDRI = this.setDRI(this.selected)
           return this.selected
         },
         set: function (selectedItem) {
