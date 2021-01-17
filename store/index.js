@@ -1,15 +1,26 @@
 import Vuex from 'vuex'
 import firebase from '~/plugins/firebase'
+import PouchDB from 'pouchdb'
 
 export const state = () => ({
   user: {
+    name: '',
     email: 'NOT_REGISTERED',
+    country: '',
+    profession: '',
     uid: ''
   },
-  isLoginChecked: false
+  isLoginChecked: false,
+  dietCases: {},
+  tabNumber: 10,
+  dbUser: 'currentState',
+  caseId: 'case01'
 })
 
 export const mutations = {
+  setDiet: function (state, payload) {
+    state.dietCases = payload
+  },
   setUser: function (state, payload) {
     state.user = payload
   },
@@ -27,7 +38,7 @@ export const mutations = {
   }
 }
 
-export const actions={
+export const actions = {
   async autoLogin({dispatch}) {
     dispatch('setLoginUnChecked')
     const DBName = 'firebaseLocalStorageDb'
@@ -37,7 +48,7 @@ export const actions={
     let db = null
     if (DBstatus) {
       db = await dispatch('getDb', DBName);
-      records = await dispatch('getRecordsFromDb', {'dbName':db, 'tableName':tableName});
+      records = await dispatch('getRecordsFromDb', {'dbName': db, 'tableName': tableName});
       if (records.length === 0) {
         dispatch('setOffUser')
       } else {
@@ -46,6 +57,7 @@ export const actions={
           'uid': records[0].value.uid
         })
       }
+      dispatch('loadInitialInfo')
     }
     dispatch('setLoginChecked')
     console.log('store initialize complete:' + this.state.isLoginChecked)
@@ -84,6 +96,60 @@ export const actions={
       return false
     });
   },
+  saveUserInfo(context){
+
+  },
+  loadInitialInfo(context) {
+    const initStateDb = new PouchDB(this.state.dbUser)
+    let promise = new Promise((resolve, reject) => {
+      initStateDb.info().then(function (info) {
+        if (!(info.doc_count)) {
+          context.commit('setOffUserUser')
+          let dietTemp = []
+          for (let index = 0; index < context.state.tabNumber; index++) {
+            dietTemp.push({
+              'itemsRecepi': [],
+              'targetName': '',
+              'nutritionTarget': {
+                En: 0,
+                Pr: 0,
+                Va: 0,
+                Fe: 0,
+              },
+              'nutritionSum': {
+                En: 0,
+                Pr: 0,
+                Va: 0,
+                Fe: 0,
+                Wt: 0,
+              },
+              'driID': '',
+              '_id': context.state.user.email + '_' + context.state.caseId + '_' + index,
+              'pageId': index
+            })
+          }
+          context.commit('setDiet', {
+            'caseId':context.state.caseId,
+            'dietCase':dietTemp
+          })
+          resolve(true)
+        } else {
+          initStateDb.allDocs({include_docs: true}, function (err, docs) {
+            if (err) {
+              console.log(err);
+              reject(err)
+            } else {
+              console.log(docs.rows);
+              context.commit('setUser', docs.user)
+              context.commit('setDiet', docs.diet)
+              resolve(true)
+            }
+          });
+        }
+      })
+    })
+    return promise
+  },
   registUser(context, userInfo) {
     firebase.auth().createUserWithEmailAndPassword(userInfo.email, userInfo.password)
       .then((user) => {
@@ -98,6 +164,9 @@ export const actions={
         console.log('registration failed')
         alert(error)
       });
+  },
+  setDiet(context, payload) {
+    context.commit('setDiet', payload)
   },
   setUser(context, payload) {
     context.commit('setUser', payload)

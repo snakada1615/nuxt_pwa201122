@@ -1,19 +1,28 @@
 <template>
-  <b-container style="max-width: 540px;">
-    <b-tabs lazy pills align="center" v-show="$store.state.isLoginChecked" content-class="mt-3">
-      <b-tab v-for="(diet, index) in dietCases" :key="index" :title="String(index + 1)">
-        <span class="mr-4">Tab-{{ index + 1 }}</span>
+  <b-container style="max-width: 540px; min-width: 530px;">
+    <b-row>
+      <b-col>
         <b-button size="sm" variant="warning"
-                  @click="saveDiet(index)" class="mb-4 float-right"
-        >save this page
+                  @click="saveWorkSpace" class="float-right mx-2"
+        >save to Store
         </b-button>
-        <diet-calk-comp
-          :fct-org="items"
-          :dri-org="itemsDRI"
-          :diet-case="diet"
-        />
-      </b-tab>
-    </b-tabs>
+        <b-button size="sm" variant="warning"
+                  @click="saveDietAll(tabNumber-1)" class="float-right"
+        >save current workspace
+        </b-button>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-tabs lazy pills justified v-show="$store.state.isLoginChecked" content-class="mt-3">
+        <b-tab v-for="(diet, index) in dietCases" :key="index" :title="String(index + 1)">
+          <diet-calk-comp
+            :fct-org="items"
+            :dri-org="itemsDRI"
+            :diet-case="diet"
+          />
+        </b-tab>
+      </b-tabs>
+    </b-row>
   </b-container>
 </template>
 
@@ -35,7 +44,10 @@
         itemsDRI: [],
         items: [],
         tabNumber: 10,
-        dietCases: []
+        dietCases: [],
+        userDatabaseName: 'userWorkSpace',
+        userDb: null,
+        caseId: 'first'
       }
     },
     computed: {
@@ -65,7 +77,7 @@
             })
           }
         }
-      }
+      },
     },
     methods: {
       sortMe() {
@@ -101,21 +113,53 @@
         })
         return res
       },
-      saveDiet(index) {
+      saveWorkSpace() {
+        if (!this.loginChecked){
+          return
+        }
+        const result = {
+          'caseId':this.caseId,
+          'dietCase':this.dietCases
+        }
+        this.$store.dispatch('setDiet', result)
+        console.log('save work space ')
+      },
+      saveDietAll(counter) {
+        if (!this.loginChecked){
+          return
+        }
         const vm = this
-        const db = new PouchDB('test')
-        const id = this.$store.state.user.email + index
-        db.get(id).then(function (doc) {
-          vm.dietCases[index]._rev = doc._rev
-          doc = vm.dietCases[index]
-          return db.put(doc);
-        }).catch(function (e) {
-          return db.put(vm.dietCases[index])
+        vm.saveDiet(vm.userDb, counter).then(function () {
+          if (counter > 0) {
+            vm.saveDietAll(counter - 1)
+          }
         })
+      },
+      saveDiet(db, index) {
+        const vm = this
+        const id = this.$store.state.user.email + index
+        console.log(index)
+        console.log(vm.dietCases[index])
+        let promise = new Promise((resolve) => {
+          db.get(id).then(function (doc) {
+            vm.dietCases[index]._rev = doc._rev
+            doc = vm.dietCases[index]
+            db.put(doc).then(function (res) {
+              console.log('record-id [' + id + '] has been updated')
+              resolve(true)
+            })
+          }).catch(function (e) {
+            db.put(vm.dietCases[index]).then(function (res) {
+              console.log('new record [' + id + '] has been saved')
+              resolve(true)
+            })
+          })
+        })
+        return promise
       },
       loadDiet(index) {
         const vm = this
-        const db = new PouchDB('test')
+        const db = new PouchDB(vm.userDatabaseName)
         const _id = this.$store.state.user.email + index
         let promise = new Promise((resolve, reject) => {
           db.get(_id).then(function (doc) {
@@ -147,12 +191,21 @@
           )
         })
         return promise
-      },
+      }
+    },
+    beforeRouteLeave (to, from, next) {
+      console.log('moving')
+      this.saveWorkSpace()
+      next()
+    },
+    destroyed () {
+      window.removeEventListener("beforeunload", this.saveDietAll(this.tabNumber-1));
     },
     mounted() {
+      const vm = this;
       const fct = new PouchDB('fct');
       const dri = new PouchDB('dri');
-      const vm = this;
+      vm.userDb = new PouchDB(vm.userDatabaseName)
       const idToast1 = this.makeToast('start fetching')
       fct.info().then(function (info) {
         if (!(info.doc_count)) {
@@ -187,6 +240,7 @@
           }
         })
       )
+      window.addEventListener("beforeunload", this.saveDietAll(this.tabNumber-1));
     },
   }
 </script>

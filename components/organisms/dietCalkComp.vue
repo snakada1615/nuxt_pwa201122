@@ -7,7 +7,7 @@
           header-bg-variant="success"
           bg-variant="light"
           border-variant="success"
-          class="mx-1 px-0">
+          class="mr-1 ml-1 px-0">
           <template #header>
             <b-row>
               <b-col>
@@ -32,7 +32,8 @@
     </b-row>
     <b-row>
       <b-col class="px-0 mb-2 mt-1">
-        <b-card header-bg-variant="success" bg-variant="light" border-variant="success" class="mx-1 px-0">
+        <b-card header-bg-variant="success" bg-variant="light"
+                border-variant="success" class="mr-1 ml-1 px-0" style="min-width: 530px;">
           <template #header>
             <b-row class="my-0 py-0">
               <b-col class="mx-0 px-0">
@@ -70,7 +71,8 @@
     </b-row>
     <b-row>
       <b-col class="px-0 py-2">
-        <b-card header-bg-variant="success" bg-variant="light" border-variant="success" class="mx-1 px-0">
+        <b-card header-bg-variant="success" bg-variant="light"
+                border-variant="success" class="mr-1 ml-1 px-0" style="min-width: 530px;">
           <template #header>
             <b class="py-0 my-0">Crop combination</b>
           </template>
@@ -88,7 +90,8 @@
     </b-row>
     <b-row>
       <b-col class="px-0">
-        <b-card header-bg-variant="success" bg-variant="light" border-variant="success" class="mx-1 px-0">
+        <b-card header-bg-variant="success" bg-variant="light"
+                border-variant="success" class="mr-1 ml-1 px-0" style="min-width: 530px;">
           <template #header>
             <b class="py-0 my-0">Nutrition balance</b>
           </template>
@@ -145,7 +148,8 @@
     </b-row>
     <b-row class="mt-3">
       <b-col class="px-0">
-        <b-card header-bg-variant="success" bg-variant="light" border-variant="success" class="mx-1 px-0">
+        <b-card header-bg-variant="success" bg-variant="light"
+                border-variant="success" class="mr-1 ml-1 px-0" style="min-width: 530px;">
           <template #header>
             <b class="py-0 my-0">Dietary diversity</b>
           </template>
@@ -168,22 +172,6 @@
     ></food-modal>
   </b-container>
 </template>
-
-<style>
-  /* force rotate when screen width less than 450 */
-  @media screen and (min-width: 320px) and (max-width: 450px) and (orientation: portrait) {
-    html {
-      transform: rotate(-90deg);
-      transform-origin: left top;
-      width: 100vh;
-      overflow-x: hidden;
-      position: absolute;
-      top: 100%;
-      left: 0;
-    }
-  }
-
-</style>
 
 <script>
   import fctTable from '~/components/organisms/FctTable'

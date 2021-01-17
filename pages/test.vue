@@ -1,7 +1,7 @@
 <template>
   <b-container>
     halo
-    <b-button variant="primary" v-b-modal="'test'">login</b-button>
+    <div>{{$store.state.dietCases}}</div>
     <user_login
       dialog-id="test"
     />
