@@ -5,6 +5,7 @@
     <user_login
       dialog-id="test"
     />
+    <b-button @click="showRoute">route:{{$nuxt.$route.path}}</b-button>
   </b-container>
 </template>
 
@@ -13,6 +14,11 @@
   export default {
     components:{
       user_login,
+    },
+    methods:{
+      showRoute(){
+        console.log($nuxt.$route.path)
+      }
     }
   }
 </script>

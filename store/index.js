@@ -106,7 +106,9 @@ export const actions = {
             'email': user.user.email,
             'uid': user.user.uid
           })
-        })
+        }).then(function (user){
+
+      })
         .catch((error) => {
           console.log('firebase: login failed')
           alert(error)
@@ -150,6 +152,44 @@ export const actions = {
         })
       })
     })
+    return promise
+  },
+  loadUserFromPouch(context){
+    const initStateDb = new PouchDB(context.state.dbUser)
+    let promise = new Promise((resolve, reject) => {
+      initStateDb.info().then(function (info){
+        if (info.doc_count){
+
+        } else {
+
+        }
+      })
+    })
+/*
+      async autoLogin({dispatch}) {
+        dispatch('setLoginUnChecked')
+        console.log('store initialize start:' + this.$store.state.user.isLoginChecked)
+        const DBName = 'firebaseLocalStorageDb'
+        const tableName = 'firebaseLocalStorage'
+        const DBstatus = await dispatch('DBexists', DBName)
+        console.log('DBExistrs:' + DBstatus)
+        if (DBstatus) {
+          this.db = await dispatch('getDb', DBName);
+          this.records = await dispatch('getRecordsFromDb', tableName);
+          if (this.records.length === 0) {
+            dispatch('setOffUser')
+          } else {
+            dispatch('setUser', {
+              'email': this.records[0].value.email,
+              'uid': this.records[0].value.uid
+            })
+            console.log('email:' + this.records[0].value.email)
+          }
+        }
+        dispatch('setLoginChecked')
+        console.log('store initialize complete:' + this.$store.state.isLoginChecked)
+      },
+*/
     return promise
   },
   loadInitialInfo(context) {

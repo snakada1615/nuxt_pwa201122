@@ -23,7 +23,6 @@
         </b-tab>
       </b-tabs>
     </b-row>
-    {{dietCases}}
   </b-container>
 </template>
 

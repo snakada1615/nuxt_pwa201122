@@ -35,7 +35,6 @@
         },
         set: function (selectedItem) {
           console.log('selectedItem changed')
-          this.selectedDRI = this.setDRI(selectedItem)
           this.$emit('change', selectedItem)
           this.$emit('changeTarget', this.selectedDRI)
         }
