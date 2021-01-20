@@ -1,4 +1,41 @@
-import Vuex from 'vuex'
+//import Vuex from 'vuex'
+/*
+data structure
+dietCases[] = ({
+  'itemsRecepi': [],
+  'targetName': '',
+  'nutritionTarget': {
+    'En': 0,
+    'Pr': 0,
+    'Va': 0,
+    'Fe': 0,
+  },
+  'nutritionSum': {
+    'En': 0,
+    'Pr': 0,
+    'Va': 0,
+    'Fe': 0,
+    'Wt': 0,
+},
+'driID': '',
+'_id': id + '_' + index,
+'pageId': index
+})
+
+user = {
+  name: '',
+    email: 'NOT_REGISTERED',
+    country: '',
+    profession: '',
+    uid: ''
+},
+
+isLoginChecked: false,
+tabNumber: 10,
+caseId: ''
+
+*/
+
 import firebase from '~/plugins/firebase'
 import PouchDB from 'pouchdb'
 
@@ -13,13 +50,22 @@ export const state = () => ({
   isLoginChecked: false,
   dietCases: {},
   tabNumber: 10,
-  dbUser: 'currentState',
-  caseId: 'case01'
+  dbUser: 'userWorkSpace',
+  caseId: ''
 })
+
+export const getters = {
+  currentPouchID: state => {
+    return state.user.email + '_' + state.caseId
+  }
+}
 
 export const mutations = {
   setDiet: function (state, payload) {
     state.dietCases = payload
+  },
+  setCaseId: function (state, payload) {
+    state.caseId = payload
   },
   setUser: function (state, payload) {
     state.user = payload
@@ -41,26 +87,11 @@ export const mutations = {
 export const actions = {
   async autoLogin({dispatch}) {
     dispatch('setLoginUnChecked')
-    const DBName = 'firebaseLocalStorageDb'
-    const tableName = 'firebaseLocalStorage'
-    const DBstatus = await dispatch('DBexists', DBName)
-    let records = []
-    let db = null
-    if (DBstatus) {
-      db = await dispatch('getDb', DBName);
-      records = await dispatch('getRecordsFromDb', {'dbName': db, 'tableName': tableName});
-      if (records.length === 0) {
-        dispatch('setOffUser')
-      } else {
-        dispatch('setUser', {
-          'email': records[0].value.email,
-          'uid': records[0].value.uid
-        })
-      }
-      dispatch('loadInitialInfo')
-    }
-    dispatch('setLoginChecked')
-    console.log('store initialize complete:' + this.state.isLoginChecked)
+    dispatch('loadInitialInfo').then(function (res) {
+      console.log('resolved')
+      dispatch('setLoginChecked')
+      console.log('store initialize complete:')
+    })
   },
   login(context, userInfo) {
     let promise = new Promise((resolve) => {
@@ -96,55 +127,83 @@ export const actions = {
       return false
     });
   },
-  saveUserInfo(context){
-
-  },
-  loadInitialInfo(context) {
+  saveUserInfo(context) {
     const initStateDb = new PouchDB(this.state.dbUser)
     let promise = new Promise((resolve, reject) => {
+      const id = context.state.user.email + '_' + context.state.caseId
+      const dat = {}
+      dat._id = id
+      dat.caseId = context.state.caseId
+      dat.dietCases = context.state.dietCases
+      dat.user = context.state.user
+      initStateDb.get(dat._id).then(function (doc) {
+        dat._rev = doc._rev
+        initStateDb.put(dat).then(function (res) {
+          console.log('record-id [' + id + '] has been updated')
+          resolve(true)
+        })
+      }).catch(function (e) {
+        console.log('now put new record')
+        initStateDb.put(dat).then(function (res) {
+          console.log('new record [' + id + '] has been saved')
+          resolve(true)
+        })
+      })
+    })
+    return promise
+  },
+  loadInitialInfo(context) {
+    const initStateDb = new PouchDB(context.state.dbUser)
+
+    function initStatus() {
+      context.commit('setOffUser')
+      context.commit('setCaseId', 'case01')
+      const id = context.getters.currentPouchID
+      const iCount = context.state.tabNumber
+      let dat = []
+      for (let index = 0; index < iCount; index++) {
+        dat.push({
+          'itemsRecepi': [],
+          'targetName': '',
+          'nutritionTarget': {
+            'En': 0,
+            'Pr': 0,
+            'Va': 0,
+            'Fe': 0,
+          },
+          'nutritionSum': {
+            'En': 0,
+            'Pr': 0,
+            'Va': 0,
+            'Fe': 0,
+            'Wt': 0,
+          },
+          'driID': '',
+          '_id': id + '_' + index,
+          'pageId': index
+        })
+      }
+      context.commit('setDiet', dat)
+    }
+
+    let promise = new Promise((resolve, reject) => {
       initStateDb.info().then(function (info) {
-        if (!(info.doc_count)) {
-          context.commit('setOffUserUser')
-          let dietTemp = []
-          for (let index = 0; index < context.state.tabNumber; index++) {
-            dietTemp.push({
-              'itemsRecepi': [],
-              'targetName': '',
-              'nutritionTarget': {
-                En: 0,
-                Pr: 0,
-                Va: 0,
-                Fe: 0,
-              },
-              'nutritionSum': {
-                En: 0,
-                Pr: 0,
-                Va: 0,
-                Fe: 0,
-                Wt: 0,
-              },
-              'driID': '',
-              '_id': context.state.user.email + '_' + context.state.caseId + '_' + index,
-              'pageId': index
-            })
-          }
-          context.commit('setDiet', {
-            'caseId':context.state.caseId,
-            'dietCase':dietTemp
-          })
+        if (info.doc_count === 0) {
+          initStatus()
           resolve(true)
         } else {
-          initStateDb.allDocs({include_docs: true}, function (err, docs) {
-            if (err) {
-              console.log(err);
-              reject(err)
-            } else {
-              console.log(docs.rows);
+          initStateDb.get(id)
+            .then(function (docs) {
+              console.log(docs);
               context.commit('setUser', docs.user)
-              context.commit('setDiet', docs.diet)
+              context.commit('setDiet', docs.dietCases)
+              context.commit('setCaseId', docs.caseId)
               resolve(true)
-            }
-          });
+            })
+            .catch(function (err) {
+              initStatus()
+              resolve(true)
+            })
         }
       })
     })
@@ -193,7 +252,6 @@ export const actions = {
           cursor.continue();
         }
       };
-
       trans.oncomplete = e => {
         resolve(records);
       };

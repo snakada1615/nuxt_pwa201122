@@ -7,13 +7,13 @@
         >save to Store
         </b-button>
         <b-button size="sm" variant="warning"
-                  @click="saveDietAll(tabNumber-1)" class="float-right"
+                  @click="saveToPouch" class="float-right"
         >save current workspace
         </b-button>
       </b-col>
     </b-row>
     <b-row>
-      <b-tabs lazy pills justified v-show="$store.state.isLoginChecked" content-class="mt-3">
+      <b-tabs lazy pills justified disabled="$store.state.isLoginChecked" content-class="mt-3">
         <b-tab v-for="(diet, index) in dietCases" :key="index" :title="String(index + 1)">
           <diet-calk-comp
             :fct-org="items"
@@ -23,6 +23,7 @@
         </b-tab>
       </b-tabs>
     </b-row>
+    {{dietCases}}
   </b-container>
 </template>
 
@@ -54,28 +55,13 @@
       loginChecked: function () {
         return this.$store.state.isLoginChecked
       },
-      tabNumberTotal: function () {
-        let res = 0
-        for (let index = 1; index <= this.tabNumber; index++) {
-          res += index
-        }
-        return res
-      }
     },
     watch: {
       loginChecked: function (value) {
         const vm = this
         if (value) {
-          let indexSum = 0
-          for (let index = 0; index < vm.tabNumber; index++) {
-            vm.loadDiet(index).then(function (doc) {
-              indexSum += index
-              vm.dietCases.push(doc)
-              if (indexSum === vm.tabNumberTotal - vm.tabNumber) {
-                objectSort(vm.dietCases, 'pageId')
-              }
-            })
-          }
+          vm.dietCases = this.$store.state.dietCases
+          vm.user = this.$store.state.user
         }
       },
     },
@@ -114,18 +100,14 @@
         return res
       },
       saveWorkSpace() {
-        if (!this.loginChecked){
+        if (!this.loginChecked) {
           return
         }
-        const result = {
-          'caseId':this.caseId,
-          'dietCase':this.dietCases
-        }
-        this.$store.dispatch('setDiet', result)
+        this.$store.dispatch('setDiet', this.dietCases)
         console.log('save work space ')
       },
       saveDietAll(counter) {
-        if (!this.loginChecked){
+        if (!this.loginChecked) {
           return
         }
         const vm = this
@@ -157,49 +139,17 @@
         })
         return promise
       },
-      loadDiet(index) {
-        const vm = this
-        const db = new PouchDB(vm.userDatabaseName)
-        const _id = this.$store.state.user.email + index
-        let promise = new Promise((resolve, reject) => {
-          db.get(_id).then(function (doc) {
-            doc._id = _id
-            resolve(doc)
-          }).catch(function (e) {
-              const dat = {
-                itemsRecepi: [],
-                targetName: '',
-                nutritionTarget: {
-                  En: 0,
-                  Pr: 0,
-                  Va: 0,
-                  Fe: 0,
-                },
-                nutritionSum: {
-                  En: 0,
-                  Pr: 0,
-                  Va: 0,
-                  Fe: 0,
-                  Wt: 0,
-                },
-                driID: '',
-                _id: _id,
-                pageId: index
-              }
-              resolve(dat)
-            }
-          )
-        })
-        return promise
-      }
-    },
-    beforeRouteLeave (to, from, next) {
-      console.log('moving')
-      this.saveWorkSpace()
-      next()
-    },
-    destroyed () {
-      window.removeEventListener("beforeunload", this.saveDietAll(this.tabNumber-1));
+      saveToPouch() {
+        this.$store.dispatch('saveUserInfo')
+      },
+      beforeRouteLeave(to, from, next) {
+        console.log('moving')
+        this.saveWorkSpace()
+        next()
+      },
+      destroyed() {
+        window.removeEventListener("beforeunload", this.saveDietAll(this.tabNumber - 1));
+      },
     },
     mounted() {
       const vm = this;
@@ -240,7 +190,7 @@
           }
         })
       )
-      window.addEventListener("beforeunload", this.saveDietAll(this.tabNumber-1));
+      window.addEventListener("beforeunload", this.saveDietAll(this.tabNumber - 1));
     },
   }
 </script>
