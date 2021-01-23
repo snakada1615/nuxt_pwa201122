@@ -195,8 +195,15 @@
       driTableGroup,
     },
     computed: {
-      nutritionTargetComputed: function () {
-        return this.dietCase.nutritionTarget ? this.dietCase.nutritionTarget : []
+      nutritionTargetComputed: {
+        get(){
+          return this.dietCase.nutritionTarget ? this.dietCase.nutritionTarget : []
+        },
+        set(value){
+          const res = this.dietCase
+          res.nutritionTarget = value
+          this.$store.dispatch('setDiet', res)
+        }
       },
       nutritionRating: function () {
         if (!this.dietCase.nutritionTarget) {

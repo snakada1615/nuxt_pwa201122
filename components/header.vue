@@ -17,7 +17,7 @@
               <b-dropdown-item disabled>user country:<span class="text-danger">{{$store.state.user.country}}</span></b-dropdown-item>
               <b-dropdown-item disabled>user profession:<span class="text-danger">{{$store.state.user.profession}}</span></b-dropdown-item>
               <b-dropdown-item @click="openLogin"><span class="text-primary font-weight-bold">login</span></b-dropdown-item>
-              <b-dropdown-item @click="$store.dispatch('saveUserInfo')"><span class="text-primary font-weight-bold">save workspace</span></b-dropdown-item>
+              <b-dropdown-item @click="$store.dispatch('saveInfoPouch')"><span class="text-primary font-weight-bold">save workspace</span></b-dropdown-item>
             </b-nav-item-dropdown>
             <b-nav-item-dropdown right>
               <template #button-content>

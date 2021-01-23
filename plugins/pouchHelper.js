@@ -11,6 +11,63 @@ export function makeToast(mes) {
   return id
 }
 
+export function pouchGetDoc(db, id){
+  let promise = new Promise((resolve, reject) => {
+    db.get(id).then(function (doc) {
+      resolve(doc)
+    }).catch(function (err) {
+      reject(err)
+    })
+  })
+  return promise
+}
+export function pouchUpdateDoc(db, id, newDoc){
+  let promise = new Promise((resolve, reject) => {
+    db.get(id).then(function (doc) {
+      newDoc._rev = doc._rev
+      db.put(newDoc).then(function () {
+        resolve(true)
+      })
+    }).catch(function (err) {
+      reject(err)
+    })
+  })
+  return promise
+}
+
+export function pouchPutNewDoc(db, newDoc){
+  let promise = new Promise((resolve, reject) => {
+    db.put(newDoc).then(function () {
+        resolve(true)
+    }).catch(function (err) {
+      console.log(err)
+      reject(false)
+    })
+  })
+  return promise
+}
+
+export function pouchPutNewOrUpdate(db, doc){
+  let promise = new Promise( (resolve, reject) => {
+    if (!doc._id){
+      console.log('_id is missing')
+      reject(false)
+    } else {
+      db.get(doc._id).then(function (currentDoc) {
+        doc._rev = currentDoc._rev
+        pouchUpdateDoc(db, doc._id, doc).then(function (res) {
+          resolve(res)
+        })
+      }).catch(function(err){
+        pouchPutNewDoc(db, doc).then(function (res) {
+          resolve(res)
+        })
+      })
+    }
+  })
+  return promise
+}
+
 export async function getPouchData(dataset) {
   const vm = this;
   let res = []

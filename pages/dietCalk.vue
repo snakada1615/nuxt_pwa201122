@@ -1,13 +1,20 @@
 <template>
   <b-container style="max-width: 540px; min-width: 530px;">
+    <b-button variant="primary" @click="getpouch">getpouch</b-button>
+    <b-button variant="primary" @click="refreshScreen">refresh</b-button>
+    <b-button variant="primary" @click="$store.dispatch('loadDietInfoFromPouch')">login</b-button>
+    <b-container class="my-2 bg-info">
+      <div>{{$store.state.user}}</div>
+      <div>{{$store.state.caseId}}</div>
+      <div>{{$store.getters.currentPouchID}}</div>
+    </b-container>
+    <b-container class="my-2 bg-info">
+      {{$store.state.dietCases}}
+    </b-container>
     <b-row>
       <b-col>
-        <b-button size="sm" variant="warning"
+        <b-button size="sm" variant="info"
                   @click="saveWorkSpace" class="float-right mx-2"
-        >save to Store
-        </b-button>
-        <b-button size="sm" variant="warning"
-                  @click="saveToPouch" class="float-right"
         >save current workspace
         </b-button>
       </b-col>
@@ -23,7 +30,6 @@
         </b-tab>
       </b-tabs>
     </b-row>
-    {{dietCases}}
   </b-container>
 </template>
 
@@ -52,22 +58,40 @@
       }
     },
     computed: {
+      currentUserComputed: function () {
+        return this.$store.state.user
+      },
       loginChecked: function () {
         return this.$store.state.isLoginChecked
       },
+      dietComputed:function () {
+        return this.$store.state.dietCases
+      }
     },
     watch: {
-      loginChecked: function (value) {
-        const vm = this
-        if (value) {
-          vm.dietCases = this.$store.state.dietCases
-          vm.user = this.$store.state.user
-        }
+      loginChecked: function () {
+        this.refreshScreen()
       },
+    },
+    beforeDestroy() {
+      console.log('beforeDestroy')
+      this.saveWorkSpace()
     },
     methods: {
       sortMe() {
         objectSort(this.dietCases, 'pageId')
+      },
+      getpouch(){
+        const vm = this
+        // conduct deep copy for store value
+        vm.dietCases = JSON.parse(JSON.stringify(vm.dietComputed))
+        vm.user = JSON.parse(JSON.stringify(vm.currentUserComputed))
+      },
+      refreshScreen(){
+        const vm = this
+        // conduct deep copy for store value
+        vm.dietCases = JSON.parse(JSON.stringify(vm.dietComputed))
+        vm.user = JSON.parse(JSON.stringify(vm.currentUserComputed))
       },
       setFTC(docs) {
         let res = []
@@ -100,22 +124,14 @@
         return res
       },
       saveWorkSpace() {
-        if (!this.loginChecked) {
-          return
-        }
+        console.log('saveWorkSpace')
         this.$store.dispatch('setDiet', this.dietCases)
-        console.log('save work space ')
+        this.$store.dispatch('saveInfoPouch')
       },
-      saveDietAll(counter) {
-        if (!this.loginChecked) {
-          return
-        }
-        const vm = this
-        vm.saveDiet(vm.userDb, counter).then(function () {
-          if (counter > 0) {
-            vm.saveDietAll(counter - 1)
-          }
-        })
+      sayHello(event) {
+        alert('hi')
+        const res = confirm('are you sure?')
+        event.returnValue = res
       },
       saveDiet(db, index) {
         const vm = this
@@ -139,17 +155,15 @@
         })
         return promise
       },
-      saveToPouch() {
-        this.$store.dispatch('saveUserInfo')
-      },
-      beforeRouteLeave(to, from, next) {
-        console.log('moving')
-        this.saveWorkSpace()
-        next()
-      },
-      destroyed() {
-        window.removeEventListener("beforeunload", this.saveDietAll(this.tabNumber - 1));
-      },
+    },
+    destroyed() {
+//      console.log('destroyed')
+//      alert('destroy')
+//      window.removeEventListener("beforeunload", this.sayHello);
+    },
+    created() {
+//      console.log('created')
+//      window.addEventListener("beforeunload", this.sayHello)
     },
     mounted() {
       const vm = this;
@@ -190,7 +204,7 @@
           }
         })
       )
-      window.addEventListener("beforeunload", this.saveDietAll(this.tabNumber - 1));
+      //window.addEventListener("beforeunload", this.saveDietAll(this.tabNumber - 1));
     },
   }
 </script>

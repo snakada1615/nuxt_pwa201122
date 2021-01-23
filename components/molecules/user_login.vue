@@ -80,8 +80,11 @@
           vm.email = ''
           vm.password = ''
           if (res){
+            console.log('login success')
             vm.$bvModal.hide(vm.dialogId)
           }
+        }).catch(function(err){
+          console.log(err)
         })
       },
       logout() {
