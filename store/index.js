@@ -95,12 +95,9 @@ export const actions = {
             'email': user.user.email,
             'uid': user.user.uid
           })
-          console.log('login info')
-          console.log(state.user)
           console.log('firebase successfully login:' + user.user.email)
           dispatch('saveUserPouch').then(function () {
-            dispatch('loadDietInfoFromPouch').then(function () {
-              console.log('userCase successfully set:' + state.caseId)
+            dispatch('autoLogin').then(function(res){
               resolve(user)
             })
           }).catch((err)=> {
@@ -110,6 +107,7 @@ export const actions = {
           })
         })
         .catch((error) => {
+          alert('login failed')
           console.log('firebase: login failed')
           console.log(error)
           resolve(null)
@@ -117,17 +115,20 @@ export const actions = {
     })
     return promise
   },
-  logout(context) {
+  logout({dispatch}) {
     firebase.auth().signOut().then(function () {
       // Sign-out successful.
-      context.commit('setOffUser')
-      context.dispatch('saveUserPouch').then(function () {
-        console.log('firebase:successfully sign out')
-        return true
+      dispatch('setOffUser')
+      dispatch('saveUserPouch').then(function () {
+        dispatch('autoLogin').then(function(res){
+          console.log('firebase:successfully sign out')
+          return true
+        })
       })
     }).catch(function (error) {
       // An error happened.
       console.log('firebase:sign out failed')
+      console.log(error)
       return false
     });
   },

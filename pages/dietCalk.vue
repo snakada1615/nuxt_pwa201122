@@ -82,11 +82,6 @@
         this.$store.dispatch('setDiet', this.dietCases)
       },
       onRecepiChanged(value){
-        console.log('いくよ')
-        console.log(value)
-        console.log(value.pageId)
-        console.log(this.$store.state.dietCases[value.pageId].itemsRecepi)
-
         this.$store.dispatch('setRecepi', value)
       },
       refreshScreen(){
