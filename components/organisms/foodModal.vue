@@ -75,7 +75,6 @@
     methods: {
       // ...
       clickOk() {
-        console.log('OK')
         let result = {}
         result.item = this.items
         result.Wt = this.value

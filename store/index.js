@@ -11,7 +11,7 @@ export const state = () => ({
     uid: ''
   },
   isLoginChecked: false,
-  dietCases: {},
+  dietCases: [],
   tabNumber: 10,
   dbUser: 'userWorkSpace',
   caseId: 'case01',
@@ -26,6 +26,28 @@ export const getters = {
 export const mutations = {
   setDiet: function (state, payload) {
     state.dietCases = payload
+  },
+  setRecepi: function (state, payload) {
+    let res = false
+    state.dietCases[payload.pageId].itemsRecepi.forEach(function (val) {
+      if (val.id === payload.itemsRecepi.item[0].id) {
+        val.Wt = payload.itemsRecepi.Wt
+        res = true
+      }
+    })
+    if (!res) {
+      state.dietCases[payload.pageId].itemsRecepi.push({
+        'id': payload.itemsRecepi.item[0].id || 0,
+        'Name': payload.itemsRecepi.item[0].Name || 0,
+        'Group': payload.itemsRecepi.item[0].Group || 0,
+        'En': payload.itemsRecepi.item[0].En || 0,
+        'Pr': payload.itemsRecepi.item[0].Pr || 0,
+        'Va': payload.itemsRecepi.item[0].Va || 0,
+        'Fe': payload.itemsRecepi.item[0].Fe || 0,
+        "Wt": payload.itemsRecepi.Wt || 0
+      })
+    }
+    //state.dietCases[payload.pageId].itemsRecepi = payload
   },
   setCaseId: function (state, payload) {
     state.caseId = payload
@@ -228,6 +250,9 @@ export const actions = {
   },
   setDiet(context, payload) {
     context.commit('setDiet', payload)
+  },
+  setRecepi(context, payload) {
+    context.commit('setRecepi', payload)
   },
   setUser(context, payload) {
     context.commit('setUser', payload)

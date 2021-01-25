@@ -362,6 +362,7 @@
           this.dietCase.nutritionTarget.Pr = Number(value[2].Value) || 0
           this.dietCase.nutritionTarget.Va = Number(value[3].Value) || 0
           this.dietCase.nutritionTarget.Fe = Number(value[4].Value) || 0
+          this.$emit('changeTarget', this.dietCase)
         }
       },
       onFCTclick(rec, pageId) {
@@ -424,6 +425,7 @@
             "Wt": dat.Wt || 0
           })
         }
+        this.$emit('changeRecepi', {pageId: this.dietCase.pageId ,itemsRecepi: dat})
       },
     },
   }

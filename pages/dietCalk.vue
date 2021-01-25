@@ -1,15 +1,11 @@
 <template>
   <b-container style="max-width: 540px; min-width: 530px;">
-    <b-button variant="primary" @click="getpouch">getpouch</b-button>
     <b-button variant="primary" @click="refreshScreen">refresh</b-button>
     <b-button variant="primary" @click="$store.dispatch('loadDietInfoFromPouch')">login</b-button>
     <b-container class="my-2 bg-info">
       <div>{{$store.state.user}}</div>
       <div>{{$store.state.caseId}}</div>
       <div>{{$store.getters.currentPouchID}}</div>
-    </b-container>
-    <b-container class="my-2 bg-info">
-      {{$store.state.dietCases}}
     </b-container>
     <b-row>
       <b-col>
@@ -22,10 +18,18 @@
     <b-row>
       <b-tabs lazy pills justified disabled="$store.state.isLoginChecked" content-class="mt-3">
         <b-tab v-for="(diet, index) in dietCases" :key="index" :title="String(index + 1)">
+          <b-container class="my-2 bg-info">
+            {{$store.state.dietCases[index]}}
+          </b-container>
+          <b-container class="my-2 bg-info">
+            {{diet}}
+          </b-container>
           <diet-calk-comp
             :fct-org="items"
             :dri-org="itemsDRI"
             :diet-case="diet"
+            @changeTarget = "onTargetChanged"
+            @changeRecepi = "onRecepiChanged"
           />
         </b-tab>
       </b-tabs>
@@ -39,7 +43,6 @@
   import PouchDB from 'pouchdb'
   import {getPouchData, syncCloudant} from '@/plugins/pouchHelper'
   import dietCalkComp from "../components/organisms/dietCalkComp";
-  import {objectSort} from "../plugins/helper";
 
   export default {
     components: {
@@ -64,9 +67,6 @@
       loginChecked: function () {
         return this.$store.state.isLoginChecked
       },
-      dietComputed:function () {
-        return this.$store.state.dietCases
-      }
     },
     watch: {
       loginChecked: function () {
@@ -78,19 +78,21 @@
       this.saveWorkSpace()
     },
     methods: {
-      sortMe() {
-        objectSort(this.dietCases, 'pageId')
+      onTargetChanged(value){
+        this.$store.dispatch('setDiet', this.dietCases)
       },
-      getpouch(){
-        const vm = this
-        // conduct deep copy for store value
-        vm.dietCases = JSON.parse(JSON.stringify(vm.dietComputed))
-        vm.user = JSON.parse(JSON.stringify(vm.currentUserComputed))
+      onRecepiChanged(value){
+        console.log('いくよ')
+        console.log(value)
+        console.log(value.pageId)
+        console.log(this.$store.state.dietCases[value.pageId].itemsRecepi)
+
+        this.$store.dispatch('setRecepi', value)
       },
       refreshScreen(){
         const vm = this
         // conduct deep copy for store value
-        vm.dietCases = JSON.parse(JSON.stringify(vm.dietComputed))
+        vm.dietCases = JSON.parse(JSON.stringify(this.$store.state.dietCases))
         vm.user = JSON.parse(JSON.stringify(vm.currentUserComputed))
       },
       setFTC(docs) {
@@ -125,13 +127,9 @@
       },
       saveWorkSpace() {
         console.log('saveWorkSpace')
+        console.log(this.dietCases)
         this.$store.dispatch('setDiet', this.dietCases)
         this.$store.dispatch('saveInfoPouch')
-      },
-      sayHello(event) {
-        alert('hi')
-        const res = confirm('are you sure?')
-        event.returnValue = res
       },
       saveDiet(db, index) {
         const vm = this
