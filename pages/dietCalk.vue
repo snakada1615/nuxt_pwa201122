@@ -79,10 +79,12 @@
     },
     methods: {
       onTargetChanged(value){
-        this.$store.dispatch('setDiet', this.dietCases)
+        console.log('recepi changed')
+        //this.$store.dispatch('setDiet', this.dietCases)
       },
       onRecepiChanged(value){
-        this.$store.dispatch('setRecepi', value)
+        console.log('recepi changed')
+        //this.$store.dispatch('setRecepi', value)
       },
       refreshScreen(){
         const vm = this
