@@ -1,35 +1,17 @@
 <template>
   <b-container style="max-width: 540px; min-width: 530px;">
-    <b-button variant="primary" @click="refreshScreen">refresh</b-button>
-    <b-button variant="primary" @click="$store.dispatch('loadDietInfoFromPouch')">login</b-button>
-    <b-container class="my-2 bg-info">
-      <div>{{$store.state.user}}</div>
-      <div>{{$store.state.caseId}}</div>
-      <div>{{$store.getters.currentPouchID}}</div>
-    </b-container>
     <b-row>
       <b-col>
-        <b-button size="sm" variant="info"
-                  @click="saveWorkSpace" class="float-right mx-2"
-        >save current workspace
-        </b-button>
+        <b-button size="sm" variant="warning" @click="saveWS" class="mb-2 float-right">save workspace</b-button>
       </b-col>
     </b-row>
     <b-row>
       <b-tabs lazy pills justified disabled="$store.state.isLoginChecked" content-class="mt-3">
-        <b-tab v-for="(diet, index) in dietCases" :key="index" :title="String(index + 1)">
-          <b-container class="my-2 bg-info">
-            {{$store.state.dietCases[index]}}
-          </b-container>
-          <b-container class="my-2 bg-info">
-            {{diet}}
-          </b-container>
+        <b-tab v-for="(diet, index) in WS.dietCases" :key="index" :title="String(index + 1)">
           <diet-calk-comp
             :fct-org="items"
             :dri-org="itemsDRI"
             :diet-case="diet"
-            @changeTarget = "onTargetChanged"
-            @changeRecepi = "onRecepiChanged"
           />
         </b-tab>
       </b-tabs>
@@ -41,7 +23,7 @@
 <script>
   import driTable from "../components/organisms/driTable";
   import PouchDB from 'pouchdb'
-  import {getPouchData, syncCloudant} from '@/plugins/pouchHelper'
+  import {getPouchData, syncCloudant, pouchPutNewOrUpdate} from '@/plugins/pouchHelper'
   import dietCalkComp from "../components/organisms/dietCalkComp";
 
   export default {
@@ -54,10 +36,13 @@
         itemsDRI: [],
         items: [],
         tabNumber: 10,
-        dietCases: [],
         userDatabaseName: 'userWorkSpace',
         userDb: null,
-        caseId: 'first'
+        WS: {
+          caseId: 'case01',
+          dietCases: [],
+          user: '',
+        }
       }
     },
     computed: {
@@ -75,22 +60,14 @@
     },
     beforeDestroy() {
       console.log('beforeDestroy')
-      this.saveWorkSpace()
+      //this.saveWS()
     },
     methods: {
-      onTargetChanged(value){
-        console.log('recepi changed')
-        //this.$store.dispatch('setDiet', this.dietCases)
-      },
-      onRecepiChanged(value){
-        console.log('recepi changed')
-        //this.$store.dispatch('setRecepi', value)
-      },
-      refreshScreen(){
+      refreshScreen() {
         const vm = this
         // conduct deep copy for store value
-        vm.dietCases = JSON.parse(JSON.stringify(this.$store.state.dietCases))
-        vm.user = JSON.parse(JSON.stringify(vm.currentUserComputed))
+        vm.WS.dietCases = JSON.parse(JSON.stringify(this.$store.state.dietCases))
+        vm.WS.user = JSON.parse(JSON.stringify(vm.currentUserComputed))
       },
       setFTC(docs) {
         let res = []
@@ -122,30 +99,15 @@
         })
         return res
       },
-      saveWorkSpace() {
-        console.log('saveWorkSpace')
-        console.log(this.dietCases)
-        this.$store.dispatch('setDiet', this.dietCases)
-        this.$store.dispatch('saveInfoPouch')
-      },
-      saveDiet(db, index) {
+      saveWS() {
         const vm = this
-        const id = this.$store.state.user.email + index
-        console.log(index)
-        console.log(vm.dietCases[index])
+        const db = new PouchDB(vm.userDatabaseName)
+        vm.WS._id = this.$store.getters.currentPouchID
         let promise = new Promise((resolve) => {
-          db.get(id).then(function (doc) {
-            vm.dietCases[index]._rev = doc._rev
-            doc = vm.dietCases[index]
-            db.put(doc).then(function (res) {
-              console.log('record-id [' + id + '] has been updated')
-              resolve(true)
-            })
-          }).catch(function (e) {
-            db.put(vm.dietCases[index]).then(function (res) {
-              console.log('new record [' + id + '] has been saved')
-              resolve(true)
-            })
+          pouchPutNewOrUpdate(db, vm.WS).then(function (res) {
+            res ? resolve(true) : reject(false)
+          }).catch(function (err) {
+            reject(err)
           })
         })
         return promise
@@ -199,7 +161,7 @@
           }
         })
       )
-      //window.addEventListener("beforeunload", this.saveDietAll(this.tabNumber - 1));
+      //window.addEventListener("beforeunload", this.saveWSAll(this.tabNumber - 1));
     },
   }
 </script>
