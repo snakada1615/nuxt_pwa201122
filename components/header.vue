@@ -4,7 +4,7 @@
       <div>
         <!-- As a link -->
         <b-navbar variant="info" type="dark" fixed="top" class="p-1" style="color: white">
-          <b-navbar-brand to="/"><Fa :icon="faHome"/></b-navbar-brand>
+          <b-navbar-brand to="/" Nuxt><Fa :icon="faHome"/></b-navbar-brand>
           <span>NFA tool</span>
           <b-navbar-nav class="ml-auto">
             <b-nav-text right class="mr-2"><h6>{{$store.state.user.email}}</h6></b-nav-text>
@@ -29,6 +29,7 @@
                 :key="link.val"
               >{{ link.val }}</b-dropdown-item>
             </b-nav-item-dropdown>
+            <b-nav-text :class="{'text-light':$nuxt.isOnline, 'text-info':$nuxt.isOffline}"><Fa :icon="faWifi"/> </b-nav-text>
           </b-navbar-nav>
         </b-navbar>
         <user_login
@@ -43,7 +44,7 @@
 <script>
   import LayoutContent from '~/components/LayoutContent' // パスは適宜変更
   import Fa from 'vue-fa'
-  import { faHome, faUser, faCaretSquareDown } from '@fortawesome/free-solid-svg-icons'
+  import { faHome, faUser, faCaretSquareDown, faWifi } from '@fortawesome/free-solid-svg-icons'
   import user_login from "./molecules/user_login";
 
 
@@ -55,7 +56,7 @@
     },
     data(){
       return {
-        faHome, faUser, faCaretSquareDown,
+        faHome, faUser, faCaretSquareDown, faWifi,
         links:[
           {to: '/', val:'index'},
           {to: '/dietCalk', val:'dietCalk'},

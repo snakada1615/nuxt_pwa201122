@@ -44,9 +44,13 @@ export default {
 
   pwa: {
     manifest: {
-      name: 'NFA App',
-      lang: 'en',
-    }
+      "theme_color": "#c2f1c3",
+      "background_color": "#066308",
+      "display": "standalone",
+      "scope": "/",
+      "start_url": "/",
+      "app_name": "NFA-tool",
+      "short_name": "nfa",    }
   },
 
   fontawesome: {

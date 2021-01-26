@@ -1,41 +1,38 @@
 <template>
   <b-container>
     halo:{{$store.state.user}}
-    <b-button @click="test1">test1</b-button>
-    <b-button @click="test2">test2</b-button>
+    online:{{$nuxt.isOnline}}
   </b-container>
 </template>
 
 <script>
-  import PouchDB from 'pouchdb'
-  import {pouchGetDoc, pouchPutNewDoc} from "../plugins/pouchHelper";
   export default {
     data(){
       return {
-        db:'',
+        stop: true
       }
     },
-    mounted() {
-       this.db = new PouchDB('myTest')
+    methods: {
+      handler (event) {
+        if (this.stop) {
+          event.returnValue = "Data you've inputted won't be synced"
+        }
+      }
     },
-    methods:{
-      async test1(){
-        const res = await pouchGetDoc(this.db, 'baka').catch((err)=>err)
-        if (res.error){
-          console.log(res.message)
-        } else {
-          console.log(res)
-        }
-      },
-      async test2(){
-        const dat = {_id:'baka', name: 'aho'}
-        const res = await pouchPutNewDoc(this.db, dat).catch((err)=>err)
-        if (res.error){
-          console.log(res.message)
-        } else {
-          console.log(res)
-        }
-      },
-    }
-  }
+    created () {
+      console.log('created')
+      window.addEventListener("beforeunload", this.handler)
+    },
+    destroyed () {
+      console.log('destroyed')
+      window.removeEventListener("beforeunload", this.handler)
+    },
+    beforeRouteLeave (to, from, next) {
+      let answer = window.confirm("Data you've inputted won't be synced, OK?")
+      if (answer) {
+        next()
+      } else {
+        next(false)
+      }
+    }  }
 </script>
