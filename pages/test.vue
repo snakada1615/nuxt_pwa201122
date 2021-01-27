@@ -15,7 +15,6 @@
     beforeRouteLeave (to, from, next) {
       // If the form is dirty and the user did not confirm leave,
       // prevent losing unsaved changes by canceling navigation
-      console.log('leaving')
       if (this.confirmStayInDirtyForm()){
         next(false)
       } else {

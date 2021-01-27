@@ -1,6 +1,8 @@
 <template>
   <b-container style="max-width: 540px; min-width: 530px;">
     <b-row>
+      <div>isEdited:{{isEdited}}</div>
+      <div>user:{{WS.user}}</div>
       <b-col>
         <b-button size="sm" variant="warning" @click="saveWS" class="mb-2 float-right">save workspace</b-button>
       </b-col>
@@ -42,7 +44,8 @@
           caseId: 'case01',
           dietCases: [],
           user: '',
-        }
+        },
+        isEdited: false,
       }
     },
     computed: {
@@ -52,10 +55,22 @@
       loginChecked: function () {
         return this.$store.state.isLoginChecked
       },
+      dietStatus: function (){
+        return this.WS.dietCases
+      },
+      userStatus: function (){
+        return this.WS.user
+      },
     },
     watch: {
       loginChecked: function () {
         this.refreshScreen()
+      },
+      dietStatus: function (){
+        this.isEdited = true
+      },
+      userStatus: function (){
+        this.isEdited = true
       },
     },
     beforeDestroy() {
@@ -103,9 +118,14 @@
         const vm = this
         const db = new PouchDB(vm.userDatabaseName)
         vm.WS._id = this.$store.getters.currentPouchID
-        let promise = new Promise((resolve) => {
+        let promise = new Promise((resolve, reject) => {
           pouchPutNewOrUpdate(db, vm.WS).then(function (res) {
-            res ? resolve(true) : reject(false)
+            if (res){
+              vm.isEdited = false
+              resolve(true)
+            } else {
+              reject(false)
+            }
           }).catch(function (err) {
             reject(err)
           })
