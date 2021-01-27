@@ -6,33 +6,50 @@
 </template>
 
 <script>
-  export default {
+ export default {
     data(){
       return {
-        stop: true
+        form_dirty: true
       }
-    },
-    methods: {
-      handler (event) {
-        if (this.stop) {
-          event.returnValue = "Data you've inputted won't be synced"
-        }
-      }
-    },
-    created () {
-      console.log('created')
-      window.addEventListener("beforeunload", this.handler)
-    },
-    destroyed () {
-      console.log('destroyed')
-      window.removeEventListener("beforeunload", this.handler)
     },
     beforeRouteLeave (to, from, next) {
-      let answer = window.confirm("Data you've inputted won't be synced, OK?")
-      if (answer) {
-        next()
-      } else {
+      // If the form is dirty and the user did not confirm leave,
+      // prevent losing unsaved changes by canceling navigation
+      console.log('leaving')
+      if (this.confirmStayInDirtyForm()){
         next(false)
+      } else {
+        // Navigate to next view
+        next()
       }
-    }  }
+    },
+
+    created() {
+      window.addEventListener('beforeunload', this.beforeWindowUnload)
+    },
+
+    beforeDestroy() {
+      window.removeEventListener('beforeunload', this.beforeWindowUnload)
+    },
+
+    methods: {
+      confirmLeave() {
+        return window.confirm('Do you really want to leave? you have unsaved changes!')
+      },
+
+      confirmStayInDirtyForm() {
+        return this.form_dirty && !this.confirmLeave()
+      },
+
+      beforeWindowUnload(e) {
+        if (this.confirmStayInDirtyForm()) {
+          // Cancel the event
+          e.preventDefault()
+          // Chrome requires returnValue to be set
+          e.returnValue = ''
+        }
+      },
+    },
+ }
 </script>
+
