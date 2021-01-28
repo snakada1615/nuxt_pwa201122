@@ -2,8 +2,6 @@
   <b-container style="max-width: 540px; min-width: 530px;">
     <b-row>
       <navigation-guard :form_dirty="$store.state.isEdited"/>
-      <div>isEdited:{{$store.state.isEdited}}</div>
-      <div>user:{{WS.user}}</div>
       <b-col>
         <b-button size="sm" variant="warning" @click="saveWS" class="mb-2 float-right">save workspace</b-button>
       </b-col>

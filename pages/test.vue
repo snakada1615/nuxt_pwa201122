@@ -5,10 +5,9 @@
 
 <script>
  export default {
-   params:{
-     form_dirty: {
-       default: false,
-       required: true
+   computed:{
+     form_dirty: function () {
+      return $store.state.isEdited
      }
    },
     beforeRouteLeave (to, from, next) {

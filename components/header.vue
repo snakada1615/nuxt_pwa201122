@@ -10,18 +10,20 @@
             <b-nav-text right class="mr-2"><h6>{{$store.state.user.email}}</h6></b-nav-text>
             <b-nav-item-dropdown no-caret right>
               <template #button-content>
-                <Fa :icon="faUser"/>
+                <b-img src="/img/profile_gray.png" width="20px"/>
               </template>
-              <b-dropdown-item disabled>user name: <span class="text-danger">{{$store.state.user.name}}</span></b-dropdown-item>
-              <b-dropdown-item disabled>user email: <span class="text-danger">{{$store.state.user.email}}</span></b-dropdown-item>
-              <b-dropdown-item disabled>user country:<span class="text-danger">{{$store.state.user.country}}</span></b-dropdown-item>
-              <b-dropdown-item disabled>user profession:<span class="text-danger">{{$store.state.user.profession}}</span></b-dropdown-item>
+              <b-dropdown-item disabled>name: <span class="text-danger">{{$store.state.user.name}}</span></b-dropdown-item>
+              <b-dropdown-item disabled>email: <span class="text-danger">{{$store.state.user.email}}</span></b-dropdown-item>
+              <b-dropdown-item disabled>country:<span class="text-danger">{{$store.state.user.country}}</span></b-dropdown-item>
+              <b-dropdown-item disabled>profession:<span class="text-danger">{{$store.state.user.profession}}</span></b-dropdown-item>
               <b-dropdown-item @click="openLogin"><span class="text-primary font-weight-bold">login</span></b-dropdown-item>
               <b-dropdown-item @click="$store.dispatch('saveInfoPouch')"><span class="text-primary font-weight-bold">save workspace</span></b-dropdown-item>
             </b-nav-item-dropdown>
+            <b-nav-item v-if="$store.state.isEdited"><b-img width="20px" src="img/circle_red.png"/></b-nav-item>
+            <b-nav-item v-else><b-img width="20px" src="img/circle_green.png"/></b-nav-item>
             <b-nav-item-dropdown no-caret right>
               <template #button-content>
-                <Fa :icon="faCaretSquareDown"/>
+                <b-img src="/img/menu.png" width="20px"/>
               </template>
               <b-dropdown-item
                 v-for="(link, index) in links"
@@ -29,12 +31,6 @@
                 :key="link.val"
               >{{ link.val }}</b-dropdown-item>
             </b-nav-item-dropdown>
-            <b-nav-text
-              :class="{'text-primary':!$store.state.isEdited, 'text-danger':$store.state.isEdited}"
-              class="mr-1"
-            >
-              <Fa :icon="faCircle"/>
-            </b-nav-text>
             <b-nav-text :class="{'text-light':$nuxt.isOnline, 'text-info':$nuxt.isOffline}">
               <Fa :icon="faWifi"/>
             </b-nav-text>
@@ -52,7 +48,7 @@
 <script>
   import LayoutContent from '~/components/LayoutContent' // パスは適宜変更
   import Fa from 'vue-fa'
-  import { faHome, faUser, faCaretSquareDown, faWifi, faCircle } from '@fortawesome/free-solid-svg-icons'
+  import { faHome, faUser, faWifi, faBars } from '@fortawesome/free-solid-svg-icons'
   import user_login from "./molecules/user_login";
 
 
@@ -64,7 +60,7 @@
     },
     data(){
       return {
-        faHome, faUser, faCaretSquareDown, faWifi, faCircle,
+        faHome, faUser, faWifi, faBars,
         links:[
           {to: '/', val:'index'},
           {to: '/dietCalk', val:'dietCalk'},
