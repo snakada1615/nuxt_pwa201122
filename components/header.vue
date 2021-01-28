@@ -8,7 +8,7 @@
           <span>NFA tool</span>
           <b-navbar-nav class="ml-auto">
             <b-nav-text right class="mr-2"><h6>{{$store.state.user.email}}</h6></b-nav-text>
-            <b-nav-item-dropdown right>
+            <b-nav-item-dropdown no-caret right>
               <template #button-content>
                 <Fa :icon="faUser"/>
               </template>
@@ -19,7 +19,7 @@
               <b-dropdown-item @click="openLogin"><span class="text-primary font-weight-bold">login</span></b-dropdown-item>
               <b-dropdown-item @click="$store.dispatch('saveInfoPouch')"><span class="text-primary font-weight-bold">save workspace</span></b-dropdown-item>
             </b-nav-item-dropdown>
-            <b-nav-item-dropdown right>
+            <b-nav-item-dropdown no-caret right>
               <template #button-content>
                 <Fa :icon="faCaretSquareDown"/>
               </template>
@@ -29,7 +29,15 @@
                 :key="link.val"
               >{{ link.val }}</b-dropdown-item>
             </b-nav-item-dropdown>
-            <b-nav-text :class="{'text-light':$nuxt.isOnline, 'text-info':$nuxt.isOffline}"><Fa :icon="faWifi"/> </b-nav-text>
+            <b-nav-text
+              :class="{'text-primary':!$store.state.isEdited, 'text-danger':$store.state.isEdited}"
+              class="mr-1"
+            >
+              <Fa :icon="faCircle"/>
+            </b-nav-text>
+            <b-nav-text :class="{'text-light':$nuxt.isOnline, 'text-info':$nuxt.isOffline}">
+              <Fa :icon="faWifi"/>
+            </b-nav-text>
           </b-navbar-nav>
         </b-navbar>
         <user_login
@@ -44,7 +52,7 @@
 <script>
   import LayoutContent from '~/components/LayoutContent' // パスは適宜変更
   import Fa from 'vue-fa'
-  import { faHome, faUser, faCaretSquareDown, faWifi } from '@fortawesome/free-solid-svg-icons'
+  import { faHome, faUser, faCaretSquareDown, faWifi, faCircle } from '@fortawesome/free-solid-svg-icons'
   import user_login from "./molecules/user_login";
 
 
@@ -56,7 +64,7 @@
     },
     data(){
       return {
-        faHome, faUser, faCaretSquareDown, faWifi,
+        faHome, faUser, faCaretSquareDown, faWifi, faCircle,
         links:[
           {to: '/', val:'index'},
           {to: '/dietCalk', val:'dietCalk'},

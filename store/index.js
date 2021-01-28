@@ -15,6 +15,7 @@ export const state = () => ({
   tabNumber: 10,
   dbUser: 'userWorkSpace',
   caseId: 'case01',
+  isEdited: false,
 })
 
 export const getters = {
@@ -67,6 +68,9 @@ export const mutations = {
   setLoginUnChecked: function (state) {
     state.isLoginChecked = false
   },
+  setEdit: function (state, payload) {
+    state.isEdited = payload
+  }
 }
 
 export const actions = {
@@ -269,6 +273,9 @@ export const actions = {
   },
   setCaseId: function (context, payload) {
     context.commit('setCaseId', payload)
+  },
+  setEdit: function (context, payload) {
+    context.commit('setEdit', payload)
   },
   async getRecordsFromDb(context, payload) {
     return new Promise((resolve, reject) => {

@@ -1,7 +1,8 @@
 <template>
   <b-container style="max-width: 540px; min-width: 530px;">
     <b-row>
-      <div>isEdited:{{isEdited}}</div>
+      <navigation-guard :form_dirty="$store.state.isEdited"/>
+      <div>isEdited:{{$store.state.isEdited}}</div>
       <div>user:{{WS.user}}</div>
       <b-col>
         <b-button size="sm" variant="warning" @click="saveWS" class="mb-2 float-right">save workspace</b-button>
@@ -14,6 +15,8 @@
             :fct-org="items"
             :dri-org="itemsDRI"
             :diet-case="diet"
+            @changeTarget="modifiedSignal('target')"
+            @changeRecepi="modifiedSignal('recepi')"
           />
         </b-tab>
       </b-tabs>
@@ -27,11 +30,13 @@
   import PouchDB from 'pouchdb'
   import {getPouchData, syncCloudant, pouchPutNewOrUpdate} from '@/plugins/pouchHelper'
   import dietCalkComp from "../components/organisms/dietCalkComp";
+  import navigationGuard from "../components/atoms/navigationGuard";
 
   export default {
     components: {
       driTable,
       dietCalkComp,
+      navigationGuard,
     },
     data() {
       return {
@@ -45,7 +50,6 @@
           dietCases: [],
           user: '',
         },
-        isEdited: false,
       }
     },
     computed: {
@@ -55,22 +59,10 @@
       loginChecked: function () {
         return this.$store.state.isLoginChecked
       },
-      dietStatus: function (){
-        return this.WS.dietCases
-      },
-      userStatus: function (){
-        return this.WS.user
-      },
     },
     watch: {
       loginChecked: function () {
         this.refreshScreen()
-      },
-      dietStatus: function (){
-        this.isEdited = true
-      },
-      userStatus: function (){
-        this.isEdited = true
       },
     },
     beforeDestroy() {
@@ -78,11 +70,16 @@
       //this.saveWS()
     },
     methods: {
+      modifiedSignal(val){
+        //this.isEdited = true
+        this.$store.dispatch('setEdit', true)
+        console.log('modified:' + val)
+      },
       refreshScreen() {
         const vm = this
         // conduct deep copy for store value
         vm.WS.dietCases = JSON.parse(JSON.stringify(this.$store.state.dietCases))
-        vm.WS.user = JSON.parse(JSON.stringify(vm.currentUserComputed))
+        vm.WS.user = JSON.parse(JSON.stringify(this.$store.state.user))
       },
       setFTC(docs) {
         let res = []
@@ -121,7 +118,8 @@
         let promise = new Promise((resolve, reject) => {
           pouchPutNewOrUpdate(db, vm.WS).then(function (res) {
             if (res){
-              vm.isEdited = false
+              vm.$store.dispatch('setEdit', false)
+              //vm.isEdited = false
               resolve(true)
             } else {
               reject(false)
