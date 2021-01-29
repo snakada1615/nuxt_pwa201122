@@ -65,7 +65,7 @@ export default {
     "@nuxtjs/axios",
 
     // https://go.nuxtjs.dev/bootstrap
-    ['bootstrap-vue/nuxt',{ css: false }]
+    ['bootstrap-vue/nuxt',{ css: false, icons: true }]
   ],
 
   router: {

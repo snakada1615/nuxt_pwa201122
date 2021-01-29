@@ -1,8 +1,28 @@
 <template>
   <b-container>
-    halo music
-    <audio src="/F_MAI.mid" controls>play...</audio>
-    <img src="/icon.png" />
+    halo music:{{myId}}
+    <b-button @click="setCaseId" variant="primary">push me</b-button>
+    <b-img src="/icon.png" />
   </b-container>
 </template>
+
+<script>
+  export default {
+    computed:{
+      myId(){
+        return this.$store.state.caseId
+      }
+    },
+    watch:{
+      myId:function () {
+        console.log(this.myId)
+      }
+    },
+    methods:{
+      setCaseId(){
+        this.$store.dispatch('changeCaseId', 'newcase02')
+      }
+    }
+  }
+</script>
 

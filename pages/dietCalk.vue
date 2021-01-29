@@ -6,6 +6,23 @@
         <b-button size="sm" variant="warning" @click="saveWS" class="mb-2 float-right">save workspace</b-button>
       </b-col>
     </b-row>
+    <b-button size="sm" variant="success" v-b-toggle:showVariable class="mb-2">
+      <span class="when-open">Close</span><span class="when-closed">Open</span>
+    </b-button>
+    <b-collapse class="mb-2" id="showVariable">
+      <b-row >
+        <b-col>
+          <b-card>
+            <div>cases: {{currentCaseIds}}</div>
+            <div>user: {{WS.user.email}}</div>
+            <div>date: {{WS.saveDate}}</div>
+            <div>case: {{WS.caseId}}</div>
+            <div>case: {{currentCaseId}}</div>
+            <div>diets: {{WS.dietCases[0]}}</div>
+          </b-card>
+        </b-col>
+      </b-row>
+    </b-collapse>
     <b-row>
       <b-tabs lazy pills justified disabled="$store.state.isLoginChecked" content-class="mt-3">
         <b-tab v-for="(diet, index) in WS.dietCases" :key="index" :title="String(index + 1)">
@@ -47,20 +64,27 @@
           caseId: 'case01',
           dietCases: [],
           user: '',
+          saveDate: '',
         },
       }
     },
     computed: {
-      currentUserComputed: function () {
-        return this.$store.state.user
+      currentCaseId: function () {
+        return this.$store.state.caseId
       },
       loginChecked: function () {
         return this.$store.state.isLoginChecked
       },
+      currentCaseIds: function () {
+        return this.$store.state.caseIdList
+      }
     },
     watch: {
       loginChecked: function () {
         this.refreshScreen()
+      },
+      currentCaseId: function (value) {
+        this.WS.caseId = value
       },
     },
     beforeDestroy() {
@@ -68,7 +92,7 @@
       //this.saveWS()
     },
     methods: {
-      modifiedSignal(val){
+      modifiedSignal(val) {
         //this.isEdited = true
         this.$store.dispatch('setEdit', true)
         console.log('modified:' + val)
@@ -78,6 +102,10 @@
         // conduct deep copy for store value
         vm.WS.dietCases = JSON.parse(JSON.stringify(this.$store.state.dietCases))
         vm.WS.user = JSON.parse(JSON.stringify(this.$store.state.user))
+        vm.WS.caseId = this.$store.state.caseId
+        vm.WS.saveDate = this.$store.state.saveDate
+        console.log(vm.WS.caseId)
+        console.log(vm.WS.saveDate)
       },
       setFTC(docs) {
         let res = []
@@ -113,9 +141,11 @@
         const vm = this
         const db = new PouchDB(vm.userDatabaseName)
         vm.WS._id = this.$store.getters.currentPouchID
+        let today = new Date()
+        vm.WS.saveDate = today.getFullYear() + '/' + today.getMonth() + 1 + '/' + today.getDate()
         let promise = new Promise((resolve, reject) => {
           pouchPutNewOrUpdate(db, vm.WS).then(function (res) {
-            if (res){
+            if (res) {
               vm.$store.dispatch('setEdit', false)
               //vm.isEdited = false
               resolve(true)
