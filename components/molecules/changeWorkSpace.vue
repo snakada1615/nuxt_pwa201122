@@ -7,8 +7,8 @@
     header-text-variant="white"
     hide-footer
   >
-    <div>current user: <span class="text-danger">{{ $store.state.user.email }}</span></div>
-    <div class="mt-0 mb-2">current workspace: <span class="text-danger">{{ $store.state.caseId }}</span></div>
+    <div>current user: <span class="text-danger">{{ currentUser }}</span></div>
+    <div class="mt-0 mb-2">current workspace: <span class="text-danger">{{ currentWorkspace }}</span></div>
     <b-card>
       <b-card-body class="px-0 py-0">
         <b-table
@@ -71,6 +71,14 @@
       }
     },
     props: {
+      currentUser:{
+        type: String,
+        required: true
+      },
+      currentWorkspace:{
+        type: String,
+        required: true
+      },
       dialogId: {
         type: String,
         required: true
@@ -83,12 +91,6 @@
         type: Array,
         default: () => ([
           {User: 'user01', Workspace: 'case01', date: '2020/01/23'},
-          {User: 'user01', Workspace: 'case02', date: '2020/08/23'},
-          {User: 'user01', Workspace: 'case03', date: '2021/01/23'},
-          {User: 'user01', Workspace: 'case03', date: '2021/01/23'},
-          {User: 'user01', Workspace: 'case03', date: '2021/01/23'},
-          {User: 'user01', Workspace: 'case03', date: '2021/01/23'},
-          {User: 'user01', Workspace: 'case03', date: '2021/01/23'},
         ])
       },
     },
@@ -120,6 +122,7 @@
       changeCaseId(value){
         console.log('caseid: ' + value)
         this.$store.dispatch('changeCaseId', value)
+        this.workSpaceName = ''
         this.$bvModal.hide(this.dialogId)
       }
     }

@@ -1,52 +1,77 @@
 <template>
   <div>
+    <b-button class="my-2 mx-2" size="sm" variant="primary" @click="getDiet">push</b-button>
+    <b-card>
+      <b-card-body body-bg-variant="success" body-text-variant="light">
+        <div>user:{{$store.state.user}}</div>
+        <div>workspace:{{$store.state.caseId}}</div>
+      </b-card-body>
+    </b-card>
+    <b-card>
+      <b-card-body body-bg-variant="success" body-text-variant="light">
+        <div>wsList: {{$store.state.caseIdList}}</div>
+      </b-card-body>
+    </b-card>
+    <b-card>
+      <b-card-body body-bg-variant="success" body-text-variant="light">
+        <div>dietList: {{dietList[0]}}</div>
+      </b-card-body>
+    </b-card>
+    <b-card>
+      <b-card-body body-bg-variant="success" body-text-variant="light">
+        <b-input name="query" v-model="searchQuery" size="sm"/>
+        <v-json-tree :json-data="totalData" :filter-key="searchQuery"></v-json-tree>
+      </b-card-body>
+    </b-card>
   </div>
 </template>
 
 <script>
- export default {
-   computed:{
-     form_dirty: function () {
-      return $store.state.isEdited
-     }
-   },
-    beforeRouteLeave (to, from, next) {
-      // If the form is dirty and the user did not confirm leave,
-      // prevent losing unsaved changes by canceling navigation
-      if (this.confirmStayInDirtyForm()){
-        next(false)
-      } else {
-        // Navigate to next view
-        next()
+  import vJsonTree from 'v-json-tree'
+  import {pouchGetDb} from "../plugins/pouchHelper";
+
+  export default {
+    components: {
+      vJsonTree,
+    },
+    data() {
+      return {
+        dietList: [],
+        searchQuery: '',
+        jsonData: {},
+        totalData: [],
       }
     },
-
-    created() {
-      window.addEventListener('beforeunload', this.beforeWindowUnload)
+    computed: {
+      currentUser() {
+        return this.$store.state.user.email
+      },
     },
-
-    beforeDestroy() {
-      window.removeEventListener('beforeunload', this.beforeWindowUnload)
+    watch: {
+      currentUser: function () {
+        const vm = this
+        this.getDiet().then(function (docs) {
+          vm.totalData = docs
+        })
+      }
     },
-
     methods: {
-      confirmLeave() {
-        return window.confirm('Do you really want to leave? you have unsaved changes!')
+      async getDiet() {
+        const vm = this
+        vm.dietList = await vm.$store.dispatch('loadDietInfoFromPouch').catch((err) => err)
+        const db = pouchGetDb(vm.$store.state.dbUser)
+        db.allDocs({include_docs: true}).then(function (docs) {
+          console.log(docs)
+          vm.totalData = docs
+        })
       },
-
-      confirmStayInDirtyForm() {
-        return this.form_dirty && !this.confirmLeave()
-      },
-
-      beforeWindowUnload(e) {
-        if (this.confirmStayInDirtyForm()) {
-          // Cancel the event
-          e.preventDefault()
-          // Chrome requires returnValue to be set
-          e.returnValue = ''
-        }
+      setDiet(){
+        const vm = this
+        this.getDiet().then(function (docs) {
+          vm.totalData = docs
+        })
       },
     },
- }
+  }
 </script>
 

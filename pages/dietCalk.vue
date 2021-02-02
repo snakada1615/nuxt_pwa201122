@@ -10,15 +10,17 @@
       <span class="when-open">Close</span><span class="when-closed">Open</span>
     </b-button>
     <b-collapse class="mb-2" id="showVariable">
-      <b-row >
+      <b-row>
         <b-col>
           <b-card>
-            <div>cases: {{currentCaseIds}}</div>
-            <div>user: {{WS.user.email}}</div>
-            <div>date: {{WS.saveDate}}</div>
-            <div>case: {{WS.caseId}}</div>
-            <div>case: {{currentCaseId}}</div>
-            <div>diets: {{WS.dietCases[0]}}</div>
+            <b-card-body body-bg-variant="success" body-text-variant="light">
+              <div>cases: {{currentCaseIds}}</div>
+              <div>user: {{WS.user.email}}</div>
+              <div>date: {{WS.saveDate}}</div>
+              <div>case: {{WS.caseId}}</div>
+              <div>case: {{currentCaseId}}</div>
+              <div>diets: {{WS.dietCases[0]}}</div>
+            </b-card-body>
           </b-card>
         </b-col>
       </b-row>
@@ -60,6 +62,7 @@
         tabNumber: 10,
         userDatabaseName: 'userWorkSpace',
         userDb: null,
+        lastUser: 'lastUser',
         WS: {
           caseId: 'case01',
           dietCases: [],
@@ -81,7 +84,11 @@
     },
     watch: {
       loginChecked: function () {
-        this.refreshScreen()
+        let vm = this
+        vm.getDietfromPouch().then(function (res) {
+          vm.WS.dietCases = JSON.parse(JSON.stringify(res))
+          vm.refreshScreen()
+        })
       },
       currentCaseId: function (value) {
         this.WS.caseId = value
@@ -100,12 +107,16 @@
       refreshScreen() {
         const vm = this
         // conduct deep copy for store value
-        vm.WS.dietCases = JSON.parse(JSON.stringify(this.$store.state.dietCases))
+        //vm.WS.dietCases = this.getDietfromPouch()
         vm.WS.user = JSON.parse(JSON.stringify(this.$store.state.user))
         vm.WS.caseId = this.$store.state.caseId
         vm.WS.saveDate = this.$store.state.saveDate
         console.log(vm.WS.caseId)
         console.log(vm.WS.saveDate)
+      },
+      async getDietfromPouch() {
+        const res = await this.$store.dispatch('loadDietInfoFromPouch').catch((err) => err)
+        return res
       },
       setFTC(docs) {
         let res = []
@@ -137,26 +148,21 @@
         })
         return res
       },
-      saveWS() {
-        const vm = this
-        const db = new PouchDB(vm.userDatabaseName)
-        vm.WS._id = this.$store.getters.currentPouchID
-        let today = new Date()
-        vm.WS.saveDate = today.getFullYear() + '/' + today.getMonth() + 1 + '/' + today.getDate()
-        let promise = new Promise((resolve, reject) => {
-          pouchPutNewOrUpdate(db, vm.WS).then(function (res) {
-            if (res) {
-              vm.$store.dispatch('setEdit', false)
-              //vm.isEdited = false
-              resolve(true)
-            } else {
-              reject(false)
-            }
-          }).catch(function (err) {
-            reject(err)
-          })
-        })
-        return promise
+      async saveWS() {
+        console.log(this.$store.state)
+        const user = this.$store.state.user
+        const res1 = await this.$store.dispatch('saveDietToPouch', this.WS).catch((err)=>err)
+        const res2 = await this.$store.dispatch('saveUserToPouch',
+          {user: this.$store.state.user, caseId: this.$store.state.caseId}).catch((err)=>err)
+        console.log('user:'+ user)
+        console.log('caseid:'+ this.$store.state.caseId)
+        if (res1 && res2) {
+          this.$store.dispatch('setEdit', false)
+          return true
+        } else {
+          console.log('encountered error to save current WS to pouchDB')
+          return false
+        }
       },
     },
     destroyed() {

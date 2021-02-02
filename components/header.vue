@@ -33,14 +33,21 @@
                 v-for="(link, index) in links"
                 :to="link.to"
                 :key="link.val"
-              >{{ link.val }}</b-dropdown-item>
+              >
+                {{ link.val }}
+              </b-dropdown-item>
             </b-nav-item-dropdown>
             <b-nav-text v-if="$nuxt.isOnline" class="text-light"><b-icon icon="reception4"/></b-nav-text>
             <b-nav-text v-else class="text-light"><b-icon icon="reception0"/></b-nav-text>
           </b-navbar-nav>
         </b-navbar>
         <user_login dialog-id="loginModal"/>
-        <change-work-space dialog-id="changeWorkSpaceModal" :case-ids="$store.state.caseIdList"/>
+        <change-work-space
+          dialog-id="changeWorkSpaceModal"
+          :case-ids="$store.state.caseIdList"
+          :current-user="$store.state.user.email"
+          :current-workspace="$store.state.caseId"
+        />
       </div>
     </header>
     <layout-content></layout-content>
@@ -49,22 +56,18 @@
 
 <script>
   import LayoutContent from '~/components/LayoutContent' // パスは適宜変更
-  import Fa from 'vue-fa'
-  import { faHome, faUser, faWifi, faBars } from '@fortawesome/free-solid-svg-icons'
   import user_login from "./molecules/user_login";
   import changeWorkSpace from "./molecules/changeWorkSpace";
-  import ChangeWorkSpace from "./molecules/changeWorkSpace";
+  import ChangeWorkSpace from "./molecules/changeWorkSpace"
 
   export default {
     components: {
       ChangeWorkSpace,
       LayoutContent,
-      Fa,
       user_login,
     },
     data(){
       return {
-        faHome, faUser, faWifi, faBars,
         links:[
           {to: '/', val:'index'},
           {to: '/dietCalk', val:'dietCalk'},

@@ -2,7 +2,6 @@
   <b-container>
     halo music:{{myId}}
     <b-button @click="setCaseId" variant="primary">push me</b-button>
-    <b-img src="/icon.png" />
   </b-container>
 </template>
 

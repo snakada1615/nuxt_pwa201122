@@ -38,7 +38,7 @@ export default {
 
   // Modules for dev and build (recommended) (https://go.nuxtjs.dev/config-modules)
   buildModules: [
-    '@nuxtjs/fontawesome',
+    //'@nuxtjs/fontawesome',
     '@nuxtjs/pwa',
   ],
 
@@ -50,22 +50,57 @@ export default {
       "scope": "/",
       "start_url": "/",
       "app_name": "NFA-tool",
-      "short_name": "nfa",    }
-  },
-
-  fontawesome: {
-    icons: {
-      solid: true,
-      brands: true
+      "short_name": "nfa",
     }
   },
+
+  /*
+    fontawesome: {
+      icons: {
+        solid: true,
+        brands: true
+      }
+    },
+  */
 
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
     "@nuxtjs/axios",
 
     // https://go.nuxtjs.dev/bootstrap
-    ['bootstrap-vue/nuxt',{ css: false, icons: true }]
+    ['bootstrap-vue/nuxt', {
+      css: false,
+      // Add the desired icon components to the `components` array
+      components: [
+        'BIcon',
+        'BIconReception0',
+        'BIconReception4',
+        'BIconCaretDownSquare',
+        'BIconCheckCircleFill',
+        'BIconPersonCircle',
+        'BIconHouseFill'
+      ],
+      componentPlugins: [
+        'NavbarPlugin',
+        'LayoutPlugin',
+        'BadgePlugin',
+        'ButtonPlugin',
+        'ModalPlugin',
+        'PaginationPlugin',
+        'TabsPlugin',
+        'CarouselPlugin',
+        'CardPlugin',
+        'ToastPlugin',
+        'TablePlugin',
+        'TooltipPlugin',
+        'InputGroupPlugin',
+        'FormPlugin',
+        'FormGroupPlugin',
+        'FormInputPlugin',
+        'FormSelectPlugin',
+        'FormCheckboxPlugin',
+      ],
+    }]
   ],
 
   router: {
@@ -74,7 +109,8 @@ export default {
 
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
-    transpile: ["vee-validate/dist/rules"]
+    transpile: ["vee-validate/dist/rules"],
+    //analyze: true,
   },
 
   // Customize the progress-bar color

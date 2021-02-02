@@ -31,7 +31,6 @@
 
 
 <script>
-  var $ = require('jquery')
   import {FaRating} from 'vue-rate-it';
   import align_justify from 'vue-rate-it/glyphs/align-justify';
   import stop from 'vue-rate-it/glyphs/stop';

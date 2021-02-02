@@ -11,6 +11,10 @@ export function makeToast(mes) {
   return id
 }
 
+export function pouchGetDb(dbName) {
+  return new PouchDB(dbName)
+}
+
 export function pouchGetDoc(db, id){
   let promise = new Promise((resolve, reject) => {
     db.get(id).then(function (doc) {
