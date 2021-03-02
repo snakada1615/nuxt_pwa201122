@@ -51,6 +51,8 @@
 <script>
   import veeInput from "@/components/atoms/veeInput";
   import DietCalkComp from "../organisms/dietCalkComp";
+  import PouchDB from "pouchdb";
+  import {pouchGetDoc, pouchPutNewOrUpdate} from "../../plugins/pouchHelper";
 
   export default {
     components: {
@@ -106,7 +108,17 @@
           })
         })
         return res
-      }
+      },
+      workspaceList(){
+        let res = []
+        let vm = this
+        vm.caseIds.forEach(function (value, index) {
+          res.push({
+            Workspace: value.workspace,
+          })
+        })
+        return res
+      },
     },
     mounted() {
       this.totalRows = this.caseIds.length
@@ -119,9 +131,27 @@
         this.workSpaceName = value.Workspace
         console.log(value.Workspace)
       },
+      addNewCaseid(value){
+        const lastUser = 'lastUser'
+        let db = new PouchDB(state.dbUser)
+        let promise = new Promise((resolve, reject) => {
+          pouchPutNewOrUpdate(db, value).then(function () {
+            resolve(true)
+          }).catch(function () {
+            reject(false)
+          })
+        })
+        return promise
+      },
       changeCaseId(value){
         console.log('caseid: ' + value)
-        this.$store.dispatch('changeCaseId', value)
+        if (this.workspaceList.includes(value)) {
+          this.$store.dispatch('changeCaseId', value)
+        } else {
+          this.addNewCaseid({user: this.$store.state.user, caseId: value}).then(function () {
+            this.$store.dispatch('changeCaseId', value)
+          })
+        }
         this.workSpaceName = ''
         this.$bvModal.hide(this.dialogId)
       }

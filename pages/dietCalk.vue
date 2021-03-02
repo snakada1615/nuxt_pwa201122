@@ -152,7 +152,7 @@
         console.log(this.$store.state)
         const user = this.$store.state.user
         const res1 = await this.$store.dispatch('saveDietToPouch', this.WS).catch((err)=>err)
-        const res2 = await this.$store.dispatch('saveUserToPouch',
+        const res2 = await this.$store.dispatch('saveUserToLastuser',
           {user: this.$store.state.user, caseId: this.$store.state.caseId}).catch((err)=>err)
         console.log('user:'+ user)
         console.log('caseid:'+ this.$store.state.caseId)

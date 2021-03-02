@@ -17,7 +17,7 @@ export const state = () => ({
   isLoginChecked: false,
   tabNumber: 10,
   dbUser: 'userWorkSpace',
-  lastUser:'lastUser',
+  lastUser: 'lastUser',
   isEdited: false,
   saveDate: '',
 })
@@ -81,13 +81,13 @@ export const actions = {
             'uid': user.user.uid
           })
           console.log('firebase successfully login:' + user.user.email)
-          dispatch('saveUserToPouch',{user:state.user,caseId:state.caseId}).then(function () {
+          dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId}).then(function () {
             dispatch('autoLogin').then(function (res) {
               resolve(user)
             })
           }).catch((err) => {
             console.log(err)
-            console.log('there was a problem either saveUserToPouch or loadDietInfoFromPouch')
+            console.log('there was a problem either saveUserToLastuser or loadDietInfoFromPouch')
             resolve(null)
           })
         })
@@ -105,7 +105,7 @@ export const actions = {
       // Sign-out successful.
       dispatch('setOffUser')
       dispatch('setCaseId', 'case01')
-      dispatch('saveUserToPouch', {user:state.user,caseId:state.caseId}).then(function () {
+      dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId}).then(function () {
         dispatch('autoLogin').then(function (res) {
           console.log('firebase:successfully sign out')
           return true
@@ -118,7 +118,7 @@ export const actions = {
       return false
     });
   },
-  saveUserToPouch({state, dispatch, getters}, payload) {
+  saveUserToLastuser({state, dispatch, getters}, payload) {
     const lastUser = 'lastUser'
     let promise = new Promise(async (resolve, reject) => {
 
@@ -136,7 +136,7 @@ export const actions = {
     })
     return promise
   },
-  async saveDietToPouch({state, getters, dispatch}, payload){
+  async saveDietToPouch({state, getters, dispatch}, payload) {
     const db = new PouchDB(state.dbUser)
     let today = new Date()
     payload.saveDate = today.getFullYear() + '/' + today.getMonth() + 1 + '/' + today.getDate()
@@ -144,8 +144,8 @@ export const actions = {
     let promise = new Promise(async (resolve, reject) => {
       payload._id = getters.currentPouchID
       console.log(payload)
-      const res = await pouchPutNewOrUpdate(db, payload).catch((err)=>err)
-      if (res){
+      const res = await pouchPutNewOrUpdate(db, payload).catch((err) => err)
+      if (res) {
         resolve(res)
       } else {
         reject(false)
@@ -158,14 +158,24 @@ export const actions = {
     let db = new PouchDB(state.dbUser)
     let promise = new Promise((resolve) => {
       pouchGetDoc(db, lastUser).then(function (docTemp) {
-        docTemp.user ? dispatch('setUser', docTemp.user) : console.log('Error: doc.User = null')
-        docTemp.caseId ? dispatch('setCaseId', docTemp.caseId) : console.log('Error: doc.caseId = null')
+        const userTmp = docTemp.user ? docTemp.user : {
+          name: '',
+          email: state.user.email,
+          country: '',
+          profession: '',
+          uid: ''
+        }
+        const caseIdTmp = docTemp.caseId ? docTemp.caseId : 'case01'
+
+        dispatch('setUser', userTmp)
+        dispatch('setCaseId', caseIdTmp)
+        pouchPutNewOrUpdate(db, {user: userTmp, caseId: caseIdTmp})
         resolve(state.user)
       }).catch((err) => {
         // if no record
         dispatch('setOffUser')
         dispatch('setCaseId', 'case01')
-        dispatch('saveUserToPouch', {user:state.user, caseId:state.caseId})
+        dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId})
         resolve(state.user)
       })
     })
@@ -184,7 +194,7 @@ export const actions = {
     })
     return promise
   },
-  loadDietInfoFromPouch({ state, getters}) {
+  loadDietInfoFromPouch({state, getters}) {
     function initStatus() {
       const id = getters.currentPouchID
       const iCount = state.tabNumber
@@ -288,7 +298,7 @@ export const actions = {
   },
   changeCaseId: function ({dispatch}, payload) {
     dispatch('setCaseId', payload)
-    dispatch('saveUserToPouch',{user:state.user, caseId: payload})
+    dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId})
     dispatch('autoLogin')
   },
   setEdit: function (context, payload) {

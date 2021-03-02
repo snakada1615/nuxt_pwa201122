@@ -85,6 +85,17 @@
       },
       openWorkSpaceChange(){
         this.$bvModal.show('changeWorkSpaceModal')
+      },
+    },
+    computed:{
+      currentWorkspace: function () {
+        console.log('caseid is ?')
+        return this.$store.caseId
+      }
+    },
+    watch:{
+      currentWorkspace(val){
+        console.log(val)
       }
     }
   }
