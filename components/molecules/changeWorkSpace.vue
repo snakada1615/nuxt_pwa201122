@@ -104,17 +104,7 @@
           res.push({
             User: vm.$store.state.user.email,
             Workspace: value.workspace,
-            date: value.savedate,
-          })
-        })
-        return res
-      },
-      workspaceList(){
-        let res = []
-        let vm = this
-        vm.caseIds.forEach(function (value, index) {
-          res.push({
-            Workspace: value.workspace,
+            date: value.saveDate,
           })
         })
         return res
@@ -133,11 +123,12 @@
       },
       addNewCaseid(value){
         const lastUser = 'lastUser'
-        let db = new PouchDB(state.dbUser)
+        let db = new PouchDB(this.$store.state.userDB)
         let promise = new Promise((resolve, reject) => {
           pouchPutNewOrUpdate(db, value).then(function () {
             resolve(true)
-          }).catch(function () {
+          }).catch(function (err){
+            console.log(err)
             reject(false)
           })
         })
@@ -145,11 +136,15 @@
       },
       changeCaseId(value){
         console.log('caseid: ' + value)
-        if (this.workspaceList.includes(value)) {
-          this.$store.dispatch('changeCaseId', value)
+        if (this.$store.caseIdList.includes(value)) {
+          this.$store.dispatch('setCaseId', dat)
+          this.$store.dispatch('saveUserToLastuser', {user: this.$store.state.user, caseId: this.$store.state.caseId})
+          this.$store.dispatch('autoLogin')
         } else {
           this.addNewCaseid({user: this.$store.state.user, caseId: value}).then(function () {
-            this.$store.dispatch('changeCaseId', value)
+            this.$store.dispatch('setCaseId', dat)
+            this.$store.dispatch('saveUserToLastuser', {user: this.$store.state.user, caseId: this.$store.state.caseId})
+            this.$store.dispatch('autoLogin')
           })
         }
         this.workSpaceName = ''

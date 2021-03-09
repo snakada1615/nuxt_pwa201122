@@ -89,7 +89,7 @@
     },
     computed:{
       currentWorkspace: function () {
-        console.log('caseid is ?')
+        console.log('caseid is ?' + this.$store.caseId)
         return this.$store.caseId
       }
     },

@@ -16,7 +16,7 @@ export const state = () => ({
 
   isLoginChecked: false,
   tabNumber: 10,
-  dbUser: 'userWorkSpace',
+  userDB: 'userWorkSpace',
   lastUser: 'lastUser',
   isEdited: false,
   saveDate: '',
@@ -56,21 +56,23 @@ export const mutations = {
 }
 
 export const actions = {
-  autoLogin({dispatch, state}) {
-    let promise = new Promise(async (resolve, reject) => {
-      dispatch('setLoginUnChecked')
-      const userTemp = await dispatch('loadUserFromPouch').catch((err) => err)
-      const caseTemp = await dispatch('loadCaseListFromPouch').catch((err) => err)
-      if (userTemp && caseTemp) {
+  async autoLogin({dispatch, state}) {
+    dispatch('setLoginUnChecked')
+    const userTemp = dispatch('loadUserFromPouch')
+    const caseTemp = dispatch('loadCaseListFromPouch')
+    await Promise.all([userTemp, caseTemp])
+      .then(function () {
         dispatch('setLoginChecked')
-        resolve(userTemp)
-      } else {
+        return userTemp
+      })
+      .catch(function () {
         console.log('autoLogin failed')
         console.log(userTemp)
-        reject(false)
-      }
-    })
-    return promise
+        console.log(caseTemp)
+        dispatch('initPouch')
+        dispatch('setLoginChecked')
+        return 'initialized'
+      })
   },
   login({dispatch, state}, userInfo) {
     let promise = new Promise((resolve) => {
@@ -123,7 +125,7 @@ export const actions = {
     let promise = new Promise(async (resolve, reject) => {
 
       //save from store.user -> pouchDB(lastUser)
-      let db = new PouchDB(state.dbUser)
+      let db = new PouchDB(state.userDB)
       const userTemp = {}
       userTemp._id = lastUser
       userTemp.user = payload.user
@@ -136,68 +138,8 @@ export const actions = {
     })
     return promise
   },
-  async saveDietToPouch({state, getters, dispatch}, payload) {
-    const db = new PouchDB(state.dbUser)
-    let today = new Date()
-    payload.saveDate = today.getFullYear() + '/' + today.getMonth() + 1 + '/' + today.getDate()
-      + '-' + today.getHours() + ':' + today.getMinutes()
-    let promise = new Promise(async (resolve, reject) => {
-      payload._id = getters.currentPouchID
-      console.log(payload)
-      const res = await pouchPutNewOrUpdate(db, payload).catch((err) => err)
-      if (res) {
-        resolve(res)
-      } else {
-        reject(false)
-      }
-    })
-    return promise
-  },
-  loadUserFromPouch({state, dispatch}) {
-    const lastUser = 'lastUser'
-    let db = new PouchDB(state.dbUser)
-    let promise = new Promise((resolve) => {
-      pouchGetDoc(db, lastUser).then(function (docTemp) {
-        const userTmp = docTemp.user ? docTemp.user : {
-          name: '',
-          email: state.user.email,
-          country: '',
-          profession: '',
-          uid: ''
-        }
-        const caseIdTmp = docTemp.caseId ? docTemp.caseId : 'case01'
-
-        dispatch('setUser', userTmp)
-        dispatch('setCaseId', caseIdTmp)
-        pouchPutNewOrUpdate(db, {user: userTmp, caseId: caseIdTmp})
-        resolve(state.user)
-      }).catch((err) => {
-        // if no record
-        dispatch('setOffUser')
-        dispatch('setCaseId', 'case01')
-        dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId})
-        resolve(state.user)
-      })
-    })
-    return promise
-  },
-  loadCaseListFromPouch({state, dispatch}) {
-    let promise = new Promise(async (resolve, reject) => {
-      const caseTemp = await dispatch('getListWorkspace', state.user.email)
-      if (caseTemp) {
-        dispatch('setCaseIdList', caseTemp)
-        resolve(caseTemp)
-      } else {
-        console.log(caseTemp)
-        reject(caseTemp)
-      }
-    })
-    return promise
-  },
-  loadDietInfoFromPouch({state, getters}) {
-    function initStatus() {
-      const id = getters.currentPouchID
-      const iCount = state.tabNumber
+  async initPouch({state, dispatch, getters}) {
+    function initDiet(id, iCount) {
       let dat = []
       for (let index = 0; index < iCount; index++) {
         dat.push({
@@ -221,27 +163,86 @@ export const actions = {
           'pageId': index
         })
       }
+      console.log(dat)
       return dat
     }
 
-    let db = new PouchDB(state.dbUser)
-    const initDiet = initStatus()
-    let currentDiet = {}
-    let promise = new Promise((resolve) => {
-      pouchGetDoc(db, getters.currentPouchID).then(function (doc) {
-        currentDiet = doc.dietCases ? doc.dietCases : initDiet
-        resolve(currentDiet)
-      }).catch(function (err) {
-        console.log(err)
-        currentDiet = initDiet
-        resolve(currentDiet)
+    console.log('initialize workspace data')
+    // initialize user to store
+    dispatch('setOffUser')
+    dispatch('setCaseId', 'case01')
+
+    // initialize caseId to store
+    let today = new Date()
+    const caseInit = [{
+      'workspace': state.caseId,
+      'saveDate': today.getFullYear() + '/' + today.getMonth() + 1 + '/' + today.getDate()
+        + '-' + today.getHours() + ':' + today.getMinutes()
+    }]
+    dispatch('setCaseIdList', caseInit)
+
+    // set user and caseid to lastUser
+    await dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId})
+
+    // initialize and set caseId to PouchDB
+    let WS = {}
+    const id = getters.currentPouchID
+    const iCount = state.tabNumber
+
+    WS.dietCases = initDiet(id, iCount)
+    WS.saveDate = caseInit.saveDate
+    WS.user = state.user
+    WS.caseId = state.caseId
+    WS._id = getters.currentPouchID
+
+    let db = new PouchDB(state.userDB)
+    const res = await pouchPutNewOrUpdate(db, WS).catch((err) => console.log(err))
+    return res
+  },
+  loadUserFromPouch({state, dispatch}) {
+    const lastUser = 'lastUser'
+    let db = new PouchDB(state.userDB)
+    let promise = new Promise((resolve, reject) => {
+      pouchGetDoc(db, lastUser).then(function (docTemp) {
+        const userTmp = docTemp.user ? docTemp.user : {
+          name: '',
+          email: state.user.email,
+          country: '',
+          profession: '',
+          uid: ''
+        }
+        const caseIdTmp = docTemp.caseId ? docTemp.caseId : 'case01'
+
+        dispatch('setUser', userTmp)
+        dispatch('setCaseId', caseIdTmp)
+        pouchPutNewOrUpdate(db, {_id: lastUser, user: userTmp, caseId: caseIdTmp})
+        resolve(state.user)
+      }).catch((err) => {
+        // if no record
+        console.log('no data set on lastuser')
+        reject('no data set on lastuser:loadUserFromPouch')
       })
+    })
+    return promise
+  },
+  loadCaseListFromPouch({state, dispatch}) {
+    let promise = new Promise(async (resolve, reject) => {
+      const caseTemp = await dispatch('getListWorkspace', state.user.email)
+      if (caseTemp.length) {
+        // load list from pouchdb
+        dispatch('setCaseIdList', caseTemp)
+        resolve(caseTemp)
+      } else {
+        // if no caseId
+        console.log('no caseId set in pouchDB: loadCaseListFromPouch')
+        reject('no caseId set in pouchDB: loadCaseListFromPouch')
+      }
     })
     return promise
   },
   getListWorkspace({dispatch, state}, userEmail) {
     console.log('getListWorkspace')
-    const db = new PouchDB(state.dbUser)
+    const db = new PouchDB(state.userDB)
     let promise = new Promise((resolve, reject) => {
       db.allDocs({include_docs: true}).then(function (docs) {
         let res = []
@@ -296,46 +297,8 @@ export const actions = {
   setCaseIdList: function (context, payload) {
     context.commit('setCaseIdList', payload)
   },
-  changeCaseId: function ({dispatch}, payload) {
-    dispatch('setCaseId', payload)
-    dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId})
-    dispatch('autoLogin')
-  },
   setEdit: function (context, payload) {
     context.commit('setEdit', payload)
-  },
-  async getRecordsFromDb(context, payload) {
-    return new Promise((resolve, reject) => {
-      let records = []
-      let trans = payload.dbName.transaction(payload.tableName, 'readonly');
-      let store = trans.objectStore(payload.tableName);
-
-      store.openCursor().onsuccess = e => {
-        let cursor = e.target.result;
-        if (cursor) {
-          records.push(cursor.value)
-          cursor.continue();
-        }
-      };
-      trans.oncomplete = e => {
-        resolve(records);
-      };
-    });
-  },
-  async getDb(context, DBName) {
-    return new Promise((resolve, reject) => {
-      let request = window.indexedDB.open(DBName, 1);
-
-      request.onerror = e => {
-        console.log('Error opening db', e);
-        reject('Error');
-      };
-
-      request.onsuccess = e => {
-        //console.log(e.target.result)
-        resolve(e.target.result);
-      };
-    });
   },
   async DBexists(context, dbname) {
     var req = indexedDB.open(dbname);

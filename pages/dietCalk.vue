@@ -48,6 +48,8 @@
   import {getPouchData, syncCloudant, pouchPutNewOrUpdate} from '@/plugins/pouchHelper'
   import dietCalkComp from "../components/organisms/dietCalkComp";
   import navigationGuard from "../components/atoms/navigationGuard";
+  import {pouchGetDoc} from "../plugins/pouchHelper";
+  import {state} from "../store";
 
   export default {
     components: {
@@ -85,10 +87,12 @@
     watch: {
       loginChecked: function () {
         let vm = this
-        vm.getDietfromPouch().then(function (res) {
-          vm.WS.dietCases = JSON.parse(JSON.stringify(res))
-          vm.refreshScreen()
-        })
+        if (this.loginChecked) {
+          vm.getDietfromPouch().then(function (res) {
+            vm.WS.dietCases = JSON.parse(JSON.stringify(res))
+            vm.refreshScreen()
+          })
+        }
       },
       currentCaseId: function (value) {
         this.WS.caseId = value
@@ -114,9 +118,21 @@
         console.log(vm.WS.caseId)
         console.log(vm.WS.saveDate)
       },
-      async getDietfromPouch() {
-        const res = await this.$store.dispatch('loadDietInfoFromPouch').catch((err) => err)
-        return res
+      getDietfromPouch() {
+        let db = new PouchDB(this.$store.state.userDB)
+        const id = this.$store.getters.currentPouchID
+        const iCount = this.$store.state.tabNumber
+        let currentDiet = {}
+        let promise = new Promise((resolve) => {
+          pouchGetDoc(db, this.$store.getters.currentPouchID).then(function (doc) {
+            currentDiet = doc.dietCases
+            resolve(currentDiet)
+          }).catch(function (err) {
+            console.log('no data exists in PouchDB')
+            resolve(err)
+          })
+        })
+        return promise
       },
       setFTC(docs) {
         let res = []
@@ -148,10 +164,27 @@
         })
         return res
       },
+      saveDietToPouch(record) {
+        const db = new PouchDB(this.$store.state.userDB)
+        let today = new Date()
+        record.saveDate = today.getFullYear() + '/' + today.getMonth() + 1 + '/' + today.getDate()
+          + '-' + today.getHours() + ':' + today.getMinutes()
+        record._id = this.$store.getters.currentPouchID
+        let promise = new Promise(async (resolve, reject) => {
+          console.log(record)
+          const res = await pouchPutNewOrUpdate(db, record).catch((err) => err)
+          if (res) {
+            resolve(res)
+          } else {
+            reject(false)
+          }
+        })
+        return promise
+      },
       async saveWS() {
         console.log(this.$store.state)
         const user = this.$store.state.user
-        const res1 = await this.$store.dispatch('saveDietToPouch', this.WS).catch((err)=>err)
+        const res1 = await this.saveDietToPouch(this.WS).catch((err)=>err)
         const res2 = await this.$store.dispatch('saveUserToLastuser',
           {user: this.$store.state.user, caseId: this.$store.state.caseId}).catch((err)=>err)
         console.log('user:'+ user)
@@ -175,6 +208,7 @@
 //      window.addEventListener("beforeunload", this.sayHello)
     },
     mounted() {
+      console.log('dietCalk mounted')
       const vm = this;
       const fct = new PouchDB('fct');
       const dri = new PouchDB('dri');
