@@ -49,7 +49,7 @@
   import dietCalkComp from "../components/organisms/dietCalkComp";
   import navigationGuard from "../components/atoms/navigationGuard";
   import {pouchGetDoc} from "../plugins/pouchHelper";
-  import {state} from "../store";
+  //import {state} from "../store";
 
   export default {
     components: {
@@ -208,7 +208,6 @@
 //      window.addEventListener("beforeunload", this.sayHello)
     },
     mounted() {
-      console.log('dietCalk mounted')
       const vm = this;
       const fct = new PouchDB('fct');
       const dri = new PouchDB('dri');

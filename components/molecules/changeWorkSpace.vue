@@ -121,29 +121,17 @@
         this.workSpaceName = value.Workspace
         console.log(value.Workspace)
       },
-      addNewCaseid(value){
-        const lastUser = 'lastUser'
-        let db = new PouchDB(this.$store.state.userDB)
-        let promise = new Promise((resolve, reject) => {
-          pouchPutNewOrUpdate(db, value).then(function () {
-            resolve(true)
-          }).catch(function (err){
-            console.log(err)
-            reject(false)
-          })
-        })
-        return promise
-      },
       changeCaseId(value){
         console.log('caseid: ' + value)
-        if (this.$store.caseIdList.includes(value)) {
-          this.$store.dispatch('setCaseId', dat)
+        if (this.$store.state.caseIdList.includes(value)) {
+          this.$store.dispatch('setCaseId', value)
           this.$store.dispatch('saveUserToLastuser', {user: this.$store.state.user, caseId: this.$store.state.caseId})
           this.$store.dispatch('autoLogin')
         } else {
-          this.addNewCaseid({user: this.$store.state.user, caseId: value}).then(function () {
-            this.$store.dispatch('setCaseId', dat)
-            this.$store.dispatch('saveUserToLastuser', {user: this.$store.state.user, caseId: this.$store.state.caseId})
+          let payload = {}
+          payload.user = this.$store.state.user
+          payload.caseId = value
+          this.$store.dispatch('initPouch', payload).then(function (){
             this.$store.dispatch('autoLogin')
           })
         }

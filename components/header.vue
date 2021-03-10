@@ -57,7 +57,7 @@
 <script>
   import LayoutContent from '~/components/LayoutContent' // パスは適宜変更
   import user_login from "./molecules/user_login";
-  import changeWorkSpace from "./molecules/changeWorkSpace";
+  //import changeWorkSpace from "./molecules/changeWorkSpace";
   import ChangeWorkSpace from "./molecules/changeWorkSpace"
 
   export default {
@@ -89,7 +89,6 @@
     },
     computed:{
       currentWorkspace: function () {
-        console.log('caseid is ?' + this.$store.caseId)
         return this.$store.caseId
       }
     },

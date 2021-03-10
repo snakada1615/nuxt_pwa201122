@@ -58,21 +58,21 @@ export const mutations = {
 export const actions = {
   async autoLogin({dispatch, state}) {
     dispatch('setLoginUnChecked')
-    const userTemp = dispatch('loadUserFromPouch')
-    const caseTemp = dispatch('loadCaseListFromPouch')
-    await Promise.all([userTemp, caseTemp])
-      .then(function () {
+    const userTemp = await dispatch('loadUserFromPouch')
+    const caseTemp = await dispatch('loadCaseListFromPouch')
+    if (userTemp && caseTemp){
+      dispatch('setLoginChecked')
+      return 'login success'
+    } else {
+      console.log('autoLogin failed')
+      let payload = {}
+      payload.user = userTemp ? userTemp : {'email': 'anonymous', 'uid': ''}
+      payload.caseId = 'case01'
+      dispatch('initPouch', payload).then(function (){
         dispatch('setLoginChecked')
-        return userTemp
       })
-      .catch(function () {
-        console.log('autoLogin failed')
-        console.log(userTemp)
-        console.log(caseTemp)
-        dispatch('initPouch')
-        dispatch('setLoginChecked')
-        return 'initialized'
-      })
+      return 'initialized'
+    }
   },
   login({dispatch, state}, userInfo) {
     let promise = new Promise((resolve) => {
@@ -138,7 +138,7 @@ export const actions = {
     })
     return promise
   },
-  async initPouch({state, dispatch, getters}) {
+  async initPouch({state, dispatch, getters}, payload) {
     function initDiet(id, iCount) {
       let dat = []
       for (let index = 0; index < iCount; index++) {
@@ -168,9 +168,10 @@ export const actions = {
     }
 
     console.log('initialize workspace data')
+    console.log(payload)
     // initialize user to store
-    dispatch('setOffUser')
-    dispatch('setCaseId', 'case01')
+    dispatch('setUser', payload.user)
+    dispatch('setCaseId', payload.caseId)
 
     // initialize caseId to store
     let today = new Date()
@@ -189,6 +190,9 @@ export const actions = {
     const id = getters.currentPouchID
     const iCount = state.tabNumber
 
+    console.log('id: ' + id)
+    console.log('iCount: ' + iCount)
+
     WS.dietCases = initDiet(id, iCount)
     WS.saveDate = caseInit.saveDate
     WS.user = state.user
@@ -197,6 +201,8 @@ export const actions = {
 
     let db = new PouchDB(state.userDB)
     const res = await pouchPutNewOrUpdate(db, WS).catch((err) => console.log(err))
+    console.log('data saved to Pouch')
+    console.log(res)
     return res
   },
   loadUserFromPouch({state, dispatch}) {
@@ -219,8 +225,8 @@ export const actions = {
         resolve(state.user)
       }).catch((err) => {
         // if no record
-        console.log('no data set on lastuser')
-        reject('no data set on lastuser:loadUserFromPouch')
+        console.log('no user info set on lastuser')
+        resolve(false)
       })
     })
     return promise
@@ -235,13 +241,12 @@ export const actions = {
       } else {
         // if no caseId
         console.log('no caseId set in pouchDB: loadCaseListFromPouch')
-        reject('no caseId set in pouchDB: loadCaseListFromPouch')
+        resolve(false)
       }
     })
     return promise
   },
   getListWorkspace({dispatch, state}, userEmail) {
-    console.log('getListWorkspace')
     const db = new PouchDB(state.userDB)
     let promise = new Promise((resolve, reject) => {
       db.allDocs({include_docs: true}).then(function (docs) {
