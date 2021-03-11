@@ -132,7 +132,7 @@ export const actions = {
       userTemp.caseId = payload.caseId
       let today = new Date()
       userTemp.saveDate = today.getFullYear() + '/' + today.getMonth() + 1 + '/' + today.getDate()
-        + '-' + today.getHours() + ':' + today.getMinutes()
+        + '-' + ('00' + today.getHours()).slice(-2) + ':' + ('00' + today.getMinutes()).slice(-2)
       const res = await pouchPutNewOrUpdate(db, userTemp)
       res ? resolve(res) : reject(res)
     })
@@ -178,7 +178,7 @@ export const actions = {
     const caseInit = [{
       'workspace': state.caseId,
       'saveDate': today.getFullYear() + '/' + today.getMonth() + 1 + '/' + today.getDate()
-        + '-' + today.getHours() + ':' + today.getMinutes()
+        + '-' + ('00' + today.getHours()).slice(-2) + ':' + ('00' + today.getMinutes()).slice(-2)
     }]
     dispatch('setCaseIdList', caseInit)
 
@@ -252,7 +252,7 @@ export const actions = {
       db.allDocs({include_docs: true}).then(function (docs) {
         let res = []
         docs.rows.forEach(function (value, index) {
-          if (value.doc.user.email === userEmail) {
+          if (value.doc.user.email === userEmail && value.id !== 'lastUser') {
             if (value.doc.caseId) {
               res.push({
                 workspace: value.doc.caseId,

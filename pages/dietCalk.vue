@@ -168,7 +168,7 @@
         const db = new PouchDB(this.$store.state.userDB)
         let today = new Date()
         record.saveDate = today.getFullYear() + '/' + today.getMonth() + 1 + '/' + today.getDate()
-          + '-' + today.getHours() + ':' + today.getMinutes()
+          + '-' + ('00' + today.getHours()).slice(-2) + ':' + ('00' + today.getMinutes()).slice(-2)
         record._id = this.$store.getters.currentPouchID
         let promise = new Promise(async (resolve, reject) => {
           console.log(record)
@@ -187,10 +187,10 @@
         const res1 = await this.saveDietToPouch(this.WS).catch((err)=>err)
         const res2 = await this.$store.dispatch('saveUserToLastuser',
           {user: this.$store.state.user, caseId: this.$store.state.caseId}).catch((err)=>err)
-        console.log('user:'+ user)
-        console.log('caseid:'+ this.$store.state.caseId)
         if (res1 && res2) {
           this.$store.dispatch('setEdit', false)
+          await this.$store.dispatch('loadCaseListFromPouch')
+          console.log('WS saved')
           return true
         } else {
           console.log('encountered error to save current WS to pouchDB')

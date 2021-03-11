@@ -123,16 +123,17 @@
       },
       changeCaseId(value){
         console.log('caseid: ' + value)
-        if (this.$store.state.caseIdList.includes(value)) {
-          this.$store.dispatch('setCaseId', value)
-          this.$store.dispatch('saveUserToLastuser', {user: this.$store.state.user, caseId: this.$store.state.caseId})
-          this.$store.dispatch('autoLogin')
+        let vm = this
+        if (vm.$store.state.caseIdList.includes(value)) {
+          vm.$store.dispatch('setCaseId', value)
+          vm.$store.dispatch('saveUserToLastuser', {user: vm.$store.state.user, caseId: vm.$store.state.caseId})
+          vm.$store.dispatch('autoLogin')
         } else {
           let payload = {}
-          payload.user = this.$store.state.user
+          payload.user = vm.$store.state.user
           payload.caseId = value
-          this.$store.dispatch('initPouch', payload).then(function (){
-            this.$store.dispatch('autoLogin')
+          vm.$store.dispatch('initPouch', payload).then(function (){
+            vm.$store.dispatch('autoLogin')
           })
         }
         this.workSpaceName = ''
