@@ -124,10 +124,14 @@
       changeCaseId(value){
         console.log('caseid: ' + value)
         let vm = this
-        if (vm.$store.state.caseIdList.includes(value)) {
+        console.log(vm.$store.state.caseIdList)
+        let isExists = vm.$store.state.caseIdList.find(res => res.workspace === value)
+        if (isExists) {
           vm.$store.dispatch('setCaseId', value)
-          vm.$store.dispatch('saveUserToLastuser', {user: vm.$store.state.user, caseId: vm.$store.state.caseId})
-          vm.$store.dispatch('autoLogin')
+          vm.$store.dispatch('saveUserToLastuser',
+            {user: vm.$store.state.user, caseId: vm.$store.state.caseId}).then(function () {
+            vm.$store.dispatch('autoLogin')
+          })
         } else {
           let payload = {}
           payload.user = vm.$store.state.user

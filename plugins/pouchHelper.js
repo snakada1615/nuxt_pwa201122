@@ -40,23 +40,23 @@ export function pouchUpdateDoc(db, id, newDoc){
 }
 
 export function pouchPutNewDoc(db, newDoc){
-  let promise = new Promise((resolve, reject) => {
+  let promise = new Promise((resolve) => {
     db.put(newDoc).then(function () {
         resolve(true)
     }).catch(function (err) {
       console.log(err)
       console.log(newDoc)
-      reject(false)
+      resolve(false)
     })
   })
   return promise
 }
 
 export function pouchPutNewOrUpdate(db, doc){
-  let promise = new Promise( (resolve, reject) => {
+  let promise = new Promise( (resolve) => {
     if (!doc._id){
       console.log('_id is missing')
-      reject('no _id is set')
+      resolve(false)
     } else {
       db.get(doc._id).then(function (currentDoc) {
         doc._rev = currentDoc._rev
@@ -64,6 +64,7 @@ export function pouchPutNewOrUpdate(db, doc){
           resolve(res)
         })
       }).catch(function(err){
+        console.log(err)
         pouchPutNewDoc(db, doc).then(function (res) {
           resolve(res)
         })

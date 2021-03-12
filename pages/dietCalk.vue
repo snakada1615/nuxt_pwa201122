@@ -114,9 +114,8 @@
         //vm.WS.dietCases = this.getDietfromPouch()
         vm.WS.user = JSON.parse(JSON.stringify(this.$store.state.user))
         vm.WS.caseId = this.$store.state.caseId
+        this.$store.dispatch('setNow')
         vm.WS.saveDate = this.$store.state.saveDate
-        console.log(vm.WS.caseId)
-        console.log(vm.WS.saveDate)
       },
       getDietfromPouch() {
         let db = new PouchDB(this.$store.state.userDB)
@@ -165,18 +164,18 @@
         return res
       },
       saveDietToPouch(record) {
+        console.log('saveDietToPouch')
         const db = new PouchDB(this.$store.state.userDB)
-        let today = new Date()
-        record.saveDate = today.getFullYear() + '/' + today.getMonth() + 1 + '/' + today.getDate()
-          + '-' + ('00' + today.getHours()).slice(-2) + ':' + ('00' + today.getMinutes()).slice(-2)
+        this.$store.dispatch('setNow')
+        record.saveDate = this.$store.state.saveDate
         record._id = this.$store.getters.currentPouchID
-        let promise = new Promise(async (resolve, reject) => {
+        let promise = new Promise(async (resolve) => {
           console.log(record)
-          const res = await pouchPutNewOrUpdate(db, record).catch((err) => err)
+          const res = await pouchPutNewOrUpdate(db, record)
           if (res) {
             resolve(res)
           } else {
-            reject(false)
+            resolve(false)
           }
         })
         return promise
@@ -184,7 +183,7 @@
       async saveWS() {
         console.log(this.$store.state)
         const user = this.$store.state.user
-        const res1 = await this.saveDietToPouch(this.WS).catch((err)=>err)
+        const res1 = await this.saveDietToPouch(this.WS)
         const res2 = await this.$store.dispatch('saveUserToLastuser',
           {user: this.$store.state.user, caseId: this.$store.state.caseId}).catch((err)=>err)
         if (res1 && res2) {

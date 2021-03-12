@@ -52,6 +52,11 @@ export const mutations = {
   },
   setEdit: function (state, payload) {
     state.isEdited = payload
+  },
+  setNow: function (state){
+    const today = new Date()
+    state.saveDate = today.getFullYear() + '/' + today.getMonth() + 1 + '/' + today.getDate()
+      + '-' + ('00' + today.getHours()).slice(-2) + ':' + ('00' + today.getMinutes()).slice(-2)
   }
 }
 
@@ -130,9 +135,8 @@ export const actions = {
       userTemp._id = lastUser
       userTemp.user = payload.user
       userTemp.caseId = payload.caseId
-      let today = new Date()
-      userTemp.saveDate = today.getFullYear() + '/' + today.getMonth() + 1 + '/' + today.getDate()
-        + '-' + ('00' + today.getHours()).slice(-2) + ':' + ('00' + today.getMinutes()).slice(-2)
+      dispatch('setNow')
+      userTemp.saveDate = state.saveDate
       const res = await pouchPutNewOrUpdate(db, userTemp)
       res ? resolve(res) : reject(res)
     })
@@ -163,22 +167,21 @@ export const actions = {
           'pageId': index
         })
       }
-      console.log(dat)
       return dat
     }
 
     console.log('initialize workspace data')
-    console.log(payload)
     // initialize user to store
     dispatch('setUser', payload.user)
     dispatch('setCaseId', payload.caseId)
 
+    //set time stump
+    dispatch('setNow')
+
     // initialize caseId to store
-    let today = new Date()
     const caseInit = [{
       'workspace': state.caseId,
-      'saveDate': today.getFullYear() + '/' + today.getMonth() + 1 + '/' + today.getDate()
-        + '-' + ('00' + today.getHours()).slice(-2) + ':' + ('00' + today.getMinutes()).slice(-2)
+      'saveDate': state.saveDate
     }]
     dispatch('setCaseIdList', caseInit)
 
@@ -190,11 +193,8 @@ export const actions = {
     const id = getters.currentPouchID
     const iCount = state.tabNumber
 
-    console.log('id: ' + id)
-    console.log('iCount: ' + iCount)
-
     WS.dietCases = initDiet(id, iCount)
-    WS.saveDate = caseInit.saveDate
+    WS.saveDate = state.saveDate
     WS.user = state.user
     WS.caseId = state.caseId
     WS._id = getters.currentPouchID
@@ -283,6 +283,9 @@ export const actions = {
         console.log('registration failed')
         alert(error)
       })
+  },
+  setNow(context){
+    context.commit('setNow')
   },
   setUser(context, payload) {
     context.commit('setUser', payload)
