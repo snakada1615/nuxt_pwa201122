@@ -6,6 +6,11 @@
       </b-col>
     </b-row>
     <b-row>
+      <ul>
+        <li v-for="item in itemsDRI">{{item.id}}: {{item.Name}}</li>
+      </ul>
+    </b-row>
+    <b-row>
       <b-col class="px-0 mx-0">
         <b-card
           style="min-width: 530px;"
@@ -136,10 +141,14 @@
   import PouchDB from "pouchdb";
   import FctTableModal from "../components/organisms/FctTableModal";
   import {getPouchData, syncCloudant} from '@/plugins/pouchHelper'
+  import driTable from "../components/organisms/driTable";
+  import nutritionBar from "../components/organisms/nutritionBar";
 
   export default {
     components: {
       FctTableModal,
+      driTable,
+      nutritionBar,
     },
     mounted() {
       const fct = new PouchDB('fct');

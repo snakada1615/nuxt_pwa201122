@@ -18,25 +18,24 @@
       prop: 'selected',
       event: 'change'
     },
-    data(){
+    data() {
       return {
         fields1: [
           {key: 'Item', sortable: false},
           {key: 'Value', sortable: false},
         ],
-        selectedDRI:[],
+        selectedDRI: [],
       }
     },
-    computed:{
-      selectedItem:{
+    computed: {
+      selectedItem: {
         get: function () {
-          this.selectedDRI = this.setDRI(this.selected)
           return this.selected
         },
         set: function (selectedItem) {
-          console.log('selectedItem changed')
-          this.$emit('change', selectedItem)
+          this.selectedDRI = this.setDRI(selectedItem)
           this.$emit('changeTarget', this.selectedDRI)
+          this.$emit('change', selectedItem)
         }
       },
       options: function () {
@@ -55,14 +54,14 @@
         return result
       },
     },
-    props:{
-      selected:null,
-      items:{
+    props: {
+      selected: null,
+      items: {
         type: Array,
         required: true
       }
     },
-    methods:{
+    methods: {
       setDRI: function (selectedId) {
         const vm = this
         let tableItem = []
