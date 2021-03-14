@@ -6,11 +6,6 @@
       </b-col>
     </b-row>
     <b-row>
-      <ul>
-        <li v-for="item in itemsDRI">{{item.id}}: {{item.Name}}</li>
-      </ul>
-    </b-row>
-    <b-row>
       <b-col class="px-0 mx-0">
         <b-card
           style="min-width: 530px;"
