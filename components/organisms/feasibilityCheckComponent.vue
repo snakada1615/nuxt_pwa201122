@@ -114,8 +114,7 @@
             >
               {{qa.questionText}}
               <b-form-select
-                :value="ansList[qa.id-1]"
-                @input="onInput"
+                v-model="ansList[qa.id-1]"
                 :options="qa.answerList"
                 size="sm"
                 :state="ansList[qa.id-1]!=-99"
@@ -182,10 +181,11 @@
       })
     },
     methods: {
-      onInput(val){
+      onInput(val, id){
         console.log('onInput')
         console.log(val)
-        this.$emit('update:ansList[qa.id-1]', val)
+        console.log(id)
+        this.$emit('update:ansList[' + id + ']', val)
       },
       setFTC(docs) {
         let vm = this
@@ -216,7 +216,6 @@
         })
       },
       onChangeTarget(value) {
-        console.log(value)
         this.nutritionTarget.En = Number(value[1].Value) || 0
         this.nutritionTarget.Pr = Number(value[2].Value) || 0
         this.nutritionTarget.Va = Number(value[3].Value) || 0
@@ -497,7 +496,7 @@
       },
       ansList: {
         type: Array,
-        default: [-99, - 99, - 99, - 99,-99, -99, -99, -99, -99, -99, -99, -99]
+        default: () => ([-99, - 99, - 99, - 99,-99, -99, -99, -99, -99, -99, -99, -99])
       },
       pageId: {
         type: Number,

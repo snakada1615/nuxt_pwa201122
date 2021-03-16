@@ -1,13 +1,19 @@
 <template>
   <b-container>
     halo music:
-    <feasibility-check-component
-      :dri-org="itemsDRI"
-      :fct-org="items"
-      :dri-id.sync="driID"
-      :selected-item.sync="selectedItem"
-      :ans-list.sync="ansList"
-    />
+    <b-row>
+      <b-tabs lazy pills justified disabled="$store.state.isLoginChecked" content-class="mt-3">
+        <b-tab v-for="(feasibilityCase, index) in WS.feasibilityCases" :key="index" :title="String(index + 1)">
+          <feasibility-check-component
+            :dri-org="itemsDRI"
+            :fct-org="items"
+            :dri-id.sync="feasibilityCase.driID"
+            :selected-item.sync="feasibilityCase.selectedItem"
+            :ans-list="feasibilityCase.ansList"
+          />
+        </b-tab>
+      </b-tabs>
+    </b-row>
   </b-container>
 </template>
 
@@ -21,11 +27,18 @@
     },
     data(){
       return{
-        driID: "0",
         items:[],
         itemsDRI: [],
+        tabNumber: 10,
+        driID: "0",
         selectedItem:{},
         ansList:[],
+        WS: {
+          feasibilityCases: [],
+          caseId: 'case01',
+          user: '',
+          saveDate: '',
+        },
       }
     },
     mounted() {
