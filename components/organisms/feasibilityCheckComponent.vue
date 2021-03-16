@@ -84,7 +84,8 @@
           <div v-show="index===0" class="mb-2">
             <dri-table
               @changeTarget="onChangeTarget"
-              :mySelection="driID"
+              @change="$emit('update:driId', $event)"
+              :mySelection="driId"
               :items="itemsDRI"
               :showTable=false
               head-row-variant="success"
@@ -113,7 +114,8 @@
             >
               {{qa.questionText}}
               <b-form-select
-                v-model="ansList[qa.id-1]"
+                :value="ansList[qa.id-1]"
+                @input="onInput"
                 :options="qa.answerList"
                 size="sm"
                 :state="ansList[qa.id-1]!=-99"
@@ -134,10 +136,10 @@
 </template>
 <script>
   import PouchDB from "pouchdb";
-  import FctTableModal from "../components/organisms/FctTableModal";
+  import FctTableModal from "@/components/organisms/FctTableModal";
   import {getPouchData, syncCloudant} from '@/plugins/pouchHelper'
-  import driTable from "../components/organisms/driTable";
-  import nutritionBar from "../components/organisms/nutritionBar";
+  import driTable from "@/components/organisms/driTable";
+  import nutritionBar from "@/components/organisms/nutritionBar";
 
   export default {
     components: {
@@ -180,6 +182,11 @@
       })
     },
     methods: {
+      onInput(val){
+        console.log('onInput')
+        console.log(val)
+        this.$emit('update:ansList[qa.id-1]', val)
+      },
       setFTC(docs) {
         let vm = this
         docs.forEach(function (val, index) {
@@ -216,7 +223,8 @@
         this.nutritionTarget.Fe = Number(value[4].Value) || 0
       },
       onItemSelected(value) {
-        this.selectedItem = value
+        this.$emit('update:selectedItem', value)
+        //this.selectedItem = value
         this.nutritionSum.En = value.En || 0
         this.nutritionSum.Pr = value.Pr || 0
         this.nutritionSum.Va = value.Va || 0
@@ -287,13 +295,19 @@
           },
         ]
       },
+      items: {
+        get: function () {
+          return this.fctOrg
+        }
+      },
+      itemsDRI: {
+        get: function () {
+          return this.driOrg
+        }
+      },
     },
     data() {
       return {
-        items: [],
-        itemsDRI: [],
-        selectedItem: '',
-        driID: "",
         nutritionTarget: {
           En: 10,
           Pr: 10,
@@ -307,7 +321,6 @@
           Fe: 10,
           Wt: 10,
         },
-        ansList: [-99, 3, -99, -99, -99, -99, -99, -99, -99, -99, -99, -99],
         qaList: [
           {
             categoryID: 1, categoryText: 'Nutrient balance',
@@ -472,6 +485,32 @@
           },
         ]
       }
-    }
+    },
+    props: {
+      selectedItem: {
+        type: Object,
+        default: {}
+      },
+      driId: {
+        type: String,
+        default: ''
+      },
+      ansList: {
+        type: Array,
+        default: [-99, - 99, - 99, - 99,-99, -99, -99, -99, -99, -99, -99, -99]
+      },
+      pageId: {
+        type: Number,
+        default: 1
+      },
+      fctOrg: {
+        type: Array,
+        required: true
+      },
+      driOrg: {
+        type: Array,
+        required: true
+      },
+    },
   }
 </script>

@@ -111,3 +111,85 @@ export async function syncCloudant(value) {
   let output = await promise
   return output
 }
+
+export function getFCT() {
+  const fct = new PouchDB('fct');
+  let res = []
+  console.log('start fetching')
+  let promise = new Promise((resolve) => {
+    fct.info().then(function (info) {
+      if (!(info.doc_count)) {
+        console.log('your dataset is currently empty. the application will try to getch data from server!')
+        syncCloudant('fct').then(dataset => {
+          getPouchData(dataset).then(docs => {
+            res = setFTC(docs)
+            resolve(res)
+          })
+        })
+      } else {
+        getPouchData(fct).then(docs => {
+          res = setFTC(docs)
+          resolve(res)
+        })
+      }
+    })
+  })
+  return promise
+}
+
+export function getDRI() {
+  const dri = new PouchDB('dri');
+  let res = []
+  console.log('start fetching')
+  let promise = new Promise((resolve) => {
+    dri.info().then(function (info) {
+      if (!(info.doc_count)) {
+        console.log('your dataset is currently empty. the application will try to getch data from server!')
+        syncCloudant('dri').then(dataset => {
+          getPouchData(dataset).then(docs => {
+            res = setDRI(docs)
+            resolve(res)
+          })
+        })
+      } else {
+        getPouchData(dri).then(docs => {
+          res = setDRI(docs)
+          resolve(res)
+        })
+      }
+    })
+  })
+  return promise
+ }
+
+export function setFTC(docs) {
+  let items = []
+  docs.forEach(function (val, index) {
+    items.push({
+      'id': val.doc.food_item_id,
+      'Group': val.doc.food_group_unicef,
+      'Name': val.doc.Food_name,
+      'En': val.doc.Energy,
+      'Pr': val.doc.Protein,
+      'Va': val.doc.VITA_RAE,
+      'Fe': val.doc.FE
+    })
+  })
+  return items
+}
+
+export function setDRI(docs) {
+  let itemsDRI = []
+  docs.forEach(function (val, index) {
+    itemsDRI.push({
+      'id': val.key,
+      'Name': val.doc.nut_group,
+      'En': val.doc.energy,
+      'Pr': val.doc.protein,
+      'Va': val.doc.vita,
+      'Fe': val.doc.fe,
+      'number': 0
+    })
+  })
+  return itemsDRI
+}

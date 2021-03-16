@@ -202,7 +202,6 @@
         set(value){
           const res = this.dietCase
           res.nutritionTarget = value
-          this.$store.dispatch('setDiet', res)
         }
       },
       nutritionRating: function () {

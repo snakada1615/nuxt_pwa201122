@@ -6,25 +6,6 @@
         <b-button size="sm" variant="warning" @click="saveWS" class="mb-2 float-right">save workspace</b-button>
       </b-col>
     </b-row>
-    <b-button size="sm" variant="success" v-b-toggle:showVariable class="mb-2">
-      <span class="when-open">Close</span><span class="when-closed">Open</span>
-    </b-button>
-    <b-collapse class="mb-2" id="showVariable">
-      <b-row>
-        <b-col>
-          <b-card>
-            <b-card-body body-bg-variant="success" body-text-variant="light">
-              <div>cases: {{currentCaseIds}}</div>
-              <div>user: {{WS.user.email}}</div>
-              <div>date: {{WS.saveDate}}</div>
-              <div>case: {{WS.caseId}}</div>
-              <div>case: {{currentCaseId}}</div>
-              <div>diets: {{WS.dietCases[0]}}</div>
-            </b-card-body>
-          </b-card>
-        </b-col>
-      </b-row>
-    </b-collapse>
     <b-row>
       <b-tabs lazy pills justified disabled="$store.state.isLoginChecked" content-class="mt-3">
         <b-tab v-for="(diet, index) in WS.dietCases" :key="index" :title="String(index + 1)">
@@ -49,6 +30,7 @@
   import dietCalkComp from "../components/organisms/dietCalkComp";
   import navigationGuard from "../components/atoms/navigationGuard";
   import {pouchGetDoc} from "../plugins/pouchHelper";
+  import {getFCT, getDRI} from "../plugins/pouchHelper";
   //import {state} from "../store";
 
   export default {
@@ -133,36 +115,6 @@
         })
         return promise
       },
-      setFTC(docs) {
-        let res = []
-        docs.forEach(function (val, index) {
-          res.push({
-            'id': val.doc.food_item_id,
-            'Group': val.doc.food_group_unicef,
-            'Name': val.doc.Food_name,
-            'En': val.doc.Energy,
-            'Pr': val.doc.Protein,
-            'Va': val.doc.VITA_RAE,
-            'Fe': val.doc.FE
-          })
-        })
-        return res
-      },
-      setDRI(docs) {
-        let res = []
-        docs.forEach(function (val) {
-          res.push({
-            'id': val.key,
-            'Name': val.doc.nut_group,
-            'En': val.doc.energy,
-            'Pr': val.doc.protein,
-            'Va': val.doc.vita,
-            'Fe': val.doc.fe,
-            'number': 0
-          })
-        })
-        return res
-      },
       saveDietToPouch(record) {
         console.log('saveDietToPouch')
         const db = new PouchDB(this.$store.state.userDB)
@@ -207,45 +159,13 @@
 //      window.addEventListener("beforeunload", this.sayHello)
     },
     mounted() {
-      const vm = this;
-      const fct = new PouchDB('fct');
-      const dri = new PouchDB('dri');
-      vm.userDb = new PouchDB(vm.userDatabaseName)
-      const idToast1 = this.makeToast('start fetching')
-      fct.info().then(function (info) {
-        if (!(info.doc_count)) {
-          const idToast2 = vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
-          syncCloudant('fct').then(dataset => {
-            getPouchData(dataset).then(docs => {
-              vm.items = vm.setFTC(docs)
-              vm.hideToast(idToast2)
-            })
-          })
-        } else {
-          getPouchData(fct).then(docs => {
-            vm.items = vm.setFTC(docs)
-          })
-        }
-      }).then(
-        dri.info().then(function (info) {
-          if (!(info.doc_count)) {
-            const idToast2 = vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
-            syncCloudant('dri').then(dataset => {
-              getPouchData(dataset).then(docs => {
-                vm.itemsDRI = vm.setDRI(docs)
-                vm.hideToast(idToast2)
-                vm.hideToast(idToast1)
-              })
-            })
-          } else {
-            getPouchData(dri).then(docs => {
-              vm.itemsDRI = vm.setDRI(docs)
-              vm.hideToast(idToast1)
-            })
-          }
-        })
-      )
-      //window.addEventListener("beforeunload", this.saveWSAll(this.tabNumber - 1));
+      const vm = this
+      getFCT().then(function (dat) {
+        vm.items = dat
+      })
+      getDRI().then(function (dat) {
+        vm.itemsDRI = dat
+      })
     },
   }
 </script>
