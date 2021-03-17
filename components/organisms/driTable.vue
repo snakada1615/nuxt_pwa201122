@@ -33,6 +33,7 @@
           return this.selected
         },
         set: function (selectedItem) {
+          console.log(selectedItem)
           this.selectedDRI = this.setDRI(selectedItem)
           this.$emit('changeTarget', this.selectedDRI)
           this.$emit('change', selectedItem)
@@ -66,12 +67,18 @@
         const vm = this
         let tableItem = []
         //vm.selectedData.length = 0
+        console.log('1')
+        console.log(vm.items)
         const dat = vm.items.filter(function (item) {
+          console.log('2')
           return item.id === selectedId
         })
         if (dat.length !== 1) {
+          console.log('3')
+          console.log(dat.length)
           return []
         } else {
+          console.log('4')
           tableItem.push(
             {Item: 'target', Value: dat[0].Name},
             {Item: 'Energy', Value: dat[0].En},

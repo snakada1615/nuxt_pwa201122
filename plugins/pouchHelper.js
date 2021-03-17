@@ -193,3 +193,35 @@ export function setDRI(docs) {
   })
   return itemsDRI
 }
+
+export function pouchWSPutNewOrUpdate(db, doc, WStype){
+  let promise = new Promise( (resolve) => {
+    if (!doc._id){
+      console.log('_id is missing')
+      resolve(false)
+    } else {
+      db.get(doc._id).then(function (currentDoc) {
+        currentDoc.caseId = doc.caseId
+        if (WStype === 'diet') {
+          currentDoc.dietCases = doc.dietCases
+        } else if (WStype === 'feasibility') {
+          currentDoc.feasibilityCases = doc.feasibilityCases
+        } else {
+          console.log('error: WStype option is wrong in pouchWSPutNewOrUpdate')
+        }
+        currentDoc.user = doc.user
+        currentDoc.saveDate = doc.saveDate
+        pouchUpdateDoc(db, doc._id, currentDoc).then(function (res) {
+          resolve(res)
+        })
+      }).catch(function(err){
+        console.log(err)
+        pouchPutNewDoc(db, doc).then(function (res) {
+          resolve(res)
+        })
+      })
+    }
+  })
+  return promise
+}
+

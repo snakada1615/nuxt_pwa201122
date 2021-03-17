@@ -170,6 +170,18 @@ export const actions = {
       return dat
     }
 
+    function initFeasibilityCase(id, iCount) {
+      let dat = []
+      for (let index = 0; index < iCount; index++) {
+        dat.push({
+          'driID': "0",
+          'selectedItem':{},
+          'ansList':[-99, - 99, - 99, - 99,-99, -99, -99, -99, -99, -99, -99, -99],
+        })
+      }
+      return dat
+    }
+
     console.log('initialize workspace data')
     // initialize user to store
     dispatch('setUser', payload.user)
@@ -194,6 +206,7 @@ export const actions = {
     const iCount = state.tabNumber
 
     WS.dietCases = initDiet(id, iCount)
+    WS.feasibilityCases = initFeasibilityCase(id, iCount)
     WS.saveDate = state.saveDate
     WS.user = state.user
     WS.caseId = state.caseId

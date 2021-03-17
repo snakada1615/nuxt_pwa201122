@@ -26,7 +26,7 @@
 <script>
   import driTable from "../components/organisms/driTable";
   import PouchDB from 'pouchdb'
-  import {getPouchData, syncCloudant, pouchPutNewOrUpdate} from '@/plugins/pouchHelper'
+  import {pouchWSPutNewOrUpdate} from '@/plugins/pouchHelper'
   import dietCalkComp from "../components/organisms/dietCalkComp";
   import navigationGuard from "../components/atoms/navigationGuard";
   import {pouchGetDoc} from "../plugins/pouchHelper";
@@ -70,7 +70,7 @@
       loginChecked: function () {
         let vm = this
         if (this.loginChecked) {
-          vm.getDietfromPouch().then(function (res) {
+          vm.loadDietfromPouch().then(function (res) {
             vm.WS.dietCases = JSON.parse(JSON.stringify(res))
             vm.refreshScreen()
           })
@@ -93,13 +93,13 @@
       refreshScreen() {
         const vm = this
         // conduct deep copy for store value
-        //vm.WS.dietCases = this.getDietfromPouch()
+        //vm.WS.dietCases = this.loadDietfromPouch()
         vm.WS.user = JSON.parse(JSON.stringify(this.$store.state.user))
         vm.WS.caseId = this.$store.state.caseId
         this.$store.dispatch('setNow')
         vm.WS.saveDate = this.$store.state.saveDate
       },
-      getDietfromPouch() {
+      loadDietfromPouch() {
         let db = new PouchDB(this.$store.state.userDB)
         const id = this.$store.getters.currentPouchID
         const iCount = this.$store.state.tabNumber
@@ -123,7 +123,7 @@
         record._id = this.$store.getters.currentPouchID
         let promise = new Promise(async (resolve) => {
           console.log(record)
-          const res = await pouchPutNewOrUpdate(db, record)
+          const res = await pouchWSPutNewOrUpdate(db, record, 'diet')
           if (res) {
             resolve(res)
           } else {

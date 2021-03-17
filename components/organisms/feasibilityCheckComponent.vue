@@ -146,45 +146,8 @@
       driTable,
       nutritionBar,
     },
-    mounted() {
-      const fct = new PouchDB('fct');
-      const dri = new PouchDB('dri');
-      const vm = this;
-      this.makeToast('start fetching')
-      fct.info().then(function (info) {
-        if (!(info.doc_count)) {
-          vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
-          syncCloudant('fct').then(dataset => {
-            getPouchData(dataset).then(docs => {
-              vm.setFTC(docs)
-            })
-          })
-        } else {
-          getPouchData(fct).then(docs => {
-            vm.setFTC(docs)
-          })
-        }
-      })
-      dri.info().then(function (info) {
-        if (!(info.doc_count)) {
-          vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
-          syncCloudant('dri').then(dataset => {
-            getPouchData(dataset).then(docs => {
-              vm.setDRI(docs)
-            })
-          })
-        } else {
-          getPouchData(dri).then(docs => {
-            vm.setDRI(docs)
-          })
-        }
-      })
-    },
     methods: {
       onInput(val, id){
-        console.log('onInput')
-        console.log(val)
-        console.log(id)
         this.$emit('update:ansList[' + id + ']', val)
       },
       setFTC(docs) {

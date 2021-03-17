@@ -2,7 +2,7 @@
   <b-container>
     halo music:
     <b-row>
-      <b-tabs lazy pills justified disabled="$store.state.isLoginChecked" content-class="mt-3">
+      <b-tabs lazy pills justified disabled="beforeInitialize" content-class="mt-3">
         <b-tab v-for="(feasibilityCase, index) in WS.feasibilityCases" :key="index" :title="String(index + 1)">
           <feasibility-check-component
             :dri-org="itemsDRI"
@@ -19,7 +19,8 @@
 
 <script>
   import feasibilityCheckComponent from "@/components/organisms/feasibilityCheckComponent";
-  import {getDRI, getFCT} from "@/plugins/pouchHelper";
+  import {getDRI, getFCT, pouchGetDoc, pouchWSPutNewOrUpdate} from "@/plugins/pouchHelper";
+  import PouchDB from "pouchdb";
 
   export default {
     components:{
@@ -30,9 +31,7 @@
         items:[],
         itemsDRI: [],
         tabNumber: 10,
-        driID: "0",
-        selectedItem:{},
-        ansList:[],
+        beforeInitialize: true,
         WS: {
           feasibilityCases: [],
           caseId: 'case01',
@@ -41,17 +40,79 @@
         },
       }
     },
-    mounted() {
-      const vm = this
-      getFCT().then(function (dat) {
-        vm.items = dat
-      })
-      getDRI().then(function (dat) {
-        vm.itemsDRI = dat
-      })
+    computed: {
+      currentCaseId: function () {
+        return this.$store.state.caseId
+      },
+      loginChecked: function () {
+        return this.$store.state.isLoginChecked
+      },
+      currentCaseIds: function () {
+        return this.$store.state.caseIdList
+      }
+    },
+    watch: {
+      loginChecked: async function () {
+        let vm = this
+        if (this.loginChecked) {
+          vm.items = await getFCT()
+          vm.itemsDRI = await getDRI()
+          const res = await vm.loadFeasibilityCasefromPouch()
+          vm.WS.feasibilityCases = JSON.parse(JSON.stringify(res))
+          vm.beforeInitialize = false  // start rendering from here
+          //vm.refreshScreen()
+        }
+      },
+      currentCaseId: function (value) {
+        this.WS.caseId = value
+      },
     },
     methods: {
-
+      loadFeasibilityCasefromPouch() {
+        let db = new PouchDB(this.$store.state.userDB)
+        let currentFeasibilityCases = {}
+        let promise = new Promise((resolve) => {
+          pouchGetDoc(db, this.$store.getters.currentPouchID).then(function (doc) {
+            currentFeasibilityCases = doc.feasibilityCases
+            resolve(currentFeasibilityCases)
+          }).catch(function (err) {
+            console.log('no data exists in PouchDB')
+            resolve(err)
+          })
+        })
+        return promise
+      },
+      saveFeasibilityToPouch(record) {
+        console.log('saveFeasibilityToPouch')
+        const db = new PouchDB(this.$store.state.userDB)
+        this.$store.dispatch('setNow')
+        record.saveDate = this.$store.state.saveDate
+        record._id = this.$store.getters.currentPouchID
+        let promise = new Promise(async (resolve) => {
+          const res = await pouchWSPutNewOrUpdate(db, record, 'feasibility')
+          if (res) {
+            resolve(res)
+          } else {
+            resolve(false)
+          }
+        })
+        return promise
+      },
+      async saveWS() {
+        const user = this.$store.state.user
+        const res1 = await this.saveFeasibilityToPouch(this.WS)
+        const res2 = await this.$store.dispatch('saveUserToLastuser',
+          {user: this.$store.state.user, caseId: this.$store.state.caseId}).catch((err)=>err)
+        if (res1 && res2) {
+          this.$store.dispatch('setEdit', false)
+          await this.$store.dispatch('loadCaseListFromPouch')
+          console.log('WS saved')
+          return true
+        } else {
+          console.log('encountered error to save current WS to pouchDB')
+          return false
+        }
+      },
     },
   }
 </script>
