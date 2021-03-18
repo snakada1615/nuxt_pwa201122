@@ -54,7 +54,7 @@
     },
     computed: {
       colorFlag: function(){
-        return this.$store.state.isEdited? 'warning' : 'secondary'
+        return this.$store.state.isEdited? 'warning' : 'success'
       },
       currentCaseId: function () {
         return this.$store.state.caseId
@@ -72,8 +72,14 @@
         if (this.loginChecked) {
           vm.items = await getFCT()
           vm.itemsDRI = await getDRI()
+
           const res = await vm.loadFeasibilityCasefromPouch()
           vm.WS.feasibilityCases = JSON.parse(JSON.stringify(res))
+          vm.WS.user = JSON.parse(JSON.stringify(this.$store.state.user))
+          vm.WS.caseId = this.$store.state.caseId
+          this.$store.dispatch('setNow')
+          vm.WS.saveDate = this.$store.state.saveDate
+
           vm.beforeInitialize = false  // start rendering from here
           //vm.refreshScreen()
         }
@@ -120,10 +126,11 @@
         return promise
       },
       async saveWS() {
+        console.log(this.$store.state)
         const user = this.$store.state.user
         const res1 = await this.saveFeasibilityToPouch(this.WS)
         const res2 = await this.$store.dispatch('saveUserToLastuser',
-          {user: this.$store.state.user, caseId: this.$store.state.caseId}).catch((err)=>err)
+          {user: this.$store.state.user, caseId: this.$store.state.caseId})
         if (res1 && res2) {
           this.$store.dispatch('setEdit', false)
           await this.$store.dispatch('loadCaseListFromPouch')

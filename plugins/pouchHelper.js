@@ -115,7 +115,6 @@ export async function syncCloudant(value) {
 export function getFCT() {
   const fct = new PouchDB('fct');
   let res = []
-  console.log('start fetching')
   let promise = new Promise((resolve) => {
     fct.info().then(function (info) {
       if (!(info.doc_count)) {
@@ -140,7 +139,6 @@ export function getFCT() {
 export function getDRI() {
   const dri = new PouchDB('dri');
   let res = []
-  console.log('start fetching')
   let promise = new Promise((resolve) => {
     dri.info().then(function (info) {
       if (!(info.doc_count)) {

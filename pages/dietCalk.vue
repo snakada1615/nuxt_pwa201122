@@ -74,13 +74,18 @@
       }
     },
     watch: {
-      loginChecked: function () {
+      loginChecked: async function () {
         let vm = this
         if (this.loginChecked) {
-          vm.loadDietfromPouch().then(function (res) {
-            vm.WS.dietCases = JSON.parse(JSON.stringify(res))
-            vm.refreshScreen()
-          })
+          vm.items = await getFCT()
+          vm.itemsDRI = await getDRI()
+
+          const res = await vm.loadDietfromPouch()
+          vm.WS.dietCases = JSON.parse(JSON.stringify(res))
+          vm.WS.user = JSON.parse(JSON.stringify(this.$store.state.user))
+          vm.WS.caseId = this.$store.state.caseId
+          this.$store.dispatch('setNow')
+          vm.WS.saveDate = this.$store.state.saveDate
         }
       },
       currentCaseId: function (value) {
@@ -96,15 +101,6 @@
         //this.isEdited = true
         this.$store.dispatch('setEdit', true)
         console.log('modified:' + val)
-      },
-      refreshScreen() {
-        const vm = this
-        // conduct deep copy for store value
-        //vm.WS.dietCases = this.loadDietfromPouch()
-        vm.WS.user = JSON.parse(JSON.stringify(this.$store.state.user))
-        vm.WS.caseId = this.$store.state.caseId
-        this.$store.dispatch('setNow')
-        vm.WS.saveDate = this.$store.state.saveDate
       },
       loadDietfromPouch() {
         let db = new PouchDB(this.$store.state.userDB)
@@ -140,7 +136,6 @@
         return promise
       },
       async saveWS() {
-        console.log(this.$store.state)
         const user = this.$store.state.user
         const res1 = await this.saveDietToPouch(this.WS)
         const res2 = await this.$store.dispatch('saveUserToLastuser',
@@ -164,15 +159,6 @@
     created() {
 //      console.log('created')
 //      window.addEventListener("beforeunload", this.sayHello)
-    },
-    mounted() {
-      const vm = this
-      getFCT().then(function (dat) {
-        vm.items = dat
-      })
-      getDRI().then(function (dat) {
-        vm.itemsDRI = dat
-      })
     },
   }
 </script>
