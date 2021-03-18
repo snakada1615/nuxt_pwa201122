@@ -84,8 +84,7 @@
           <div v-show="index===0" class="mb-2">
             <dri-table
               @changeTarget="onChangeTarget"
-              @change="$emit('update:driId', $event)"
-              :mySelection="driId"
+              :mySelection="driID"
               :items="itemsDRI"
               :showTable=false
               head-row-variant="success"
@@ -118,7 +117,6 @@
                 :options="qa.answerList"
                 size="sm"
                 :state="ansList[qa.id-1]!=-99"
-                @change="$emit('ansListChange','ansList')"
               >
               </b-form-select>
             </li>
@@ -136,10 +134,10 @@
 </template>
 <script>
   import PouchDB from "pouchdb";
-  import FctTableModal from "@/components/organisms/FctTableModal";
+  import FctTableModal from "../components/organisms/FctTableModal";
   import {getPouchData, syncCloudant} from '@/plugins/pouchHelper'
-  import driTable from "@/components/organisms/driTable";
-  import nutritionBar from "@/components/organisms/nutritionBar";
+  import driTable from "../components/organisms/driTable";
+  import nutritionBar from "../components/organisms/nutritionBar";
 
   export default {
     components: {
@@ -147,10 +145,41 @@
       driTable,
       nutritionBar,
     },
+    mounted() {
+      const fct = new PouchDB('fct');
+      const dri = new PouchDB('dri');
+      const vm = this;
+      this.makeToast('start fetching')
+      fct.info().then(function (info) {
+        if (!(info.doc_count)) {
+          vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
+          syncCloudant('fct').then(dataset => {
+            getPouchData(dataset).then(docs => {
+              vm.setFTC(docs)
+            })
+          })
+        } else {
+          getPouchData(fct).then(docs => {
+            vm.setFTC(docs)
+          })
+        }
+      })
+      dri.info().then(function (info) {
+        if (!(info.doc_count)) {
+          vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
+          syncCloudant('dri').then(dataset => {
+            getPouchData(dataset).then(docs => {
+              vm.setDRI(docs)
+            })
+          })
+        } else {
+          getPouchData(dri).then(docs => {
+            vm.setDRI(docs)
+          })
+        }
+      })
+    },
     methods: {
-      onInput(val, id){
-        this.$emit('update:ansList[' + id + ']', val)
-      },
       setFTC(docs) {
         let vm = this
         docs.forEach(function (val, index) {
@@ -180,14 +209,14 @@
         })
       },
       onChangeTarget(value) {
+        console.log(value)
         this.nutritionTarget.En = Number(value[1].Value) || 0
         this.nutritionTarget.Pr = Number(value[2].Value) || 0
         this.nutritionTarget.Va = Number(value[3].Value) || 0
         this.nutritionTarget.Fe = Number(value[4].Value) || 0
       },
       onItemSelected(value) {
-        this.$emit('update:selectedItem', value)
-        //this.selectedItem = value
+        this.selectedItem = value
         this.nutritionSum.En = value.En || 0
         this.nutritionSum.Pr = value.Pr || 0
         this.nutritionSum.Va = value.Va || 0
@@ -258,19 +287,13 @@
           },
         ]
       },
-      items: {
-        get: function () {
-          return this.fctOrg
-        }
-      },
-      itemsDRI: {
-        get: function () {
-          return this.driOrg
-        }
-      },
     },
     data() {
       return {
+        items: [],
+        itemsDRI: [],
+        selectedItem: '',
+        driID: "",
         nutritionTarget: {
           En: 10,
           Pr: 10,
@@ -284,6 +307,7 @@
           Fe: 10,
           Wt: 10,
         },
+        ansList: [-99, 3, -99, -99, -99, -99, -99, -99, -99, -99, -99, -99],
         qaList: [
           {
             categoryID: 1, categoryText: 'Nutrient balance',
@@ -448,32 +472,6 @@
           },
         ]
       }
-    },
-    props: {
-      selectedItem: {
-        type: Object,
-        default: {}
-      },
-      driId: {
-        type: String,
-        default: ''
-      },
-      ansList: {
-        type: Array,
-        default: () => ([-99, - 99, - 99, - 99,-99, -99, -99, -99, -99, -99, -99, -99])
-      },
-      pageId: {
-        type: Number,
-        default: 1
-      },
-      fctOrg: {
-        type: Array,
-        required: true
-      },
-      driOrg: {
-        type: Array,
-        required: true
-      },
-    },
+    }
   }
 </script>

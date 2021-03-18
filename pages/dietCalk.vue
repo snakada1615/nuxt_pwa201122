@@ -3,7 +3,11 @@
     <b-row>
       <navigation-guard :form_dirty="$store.state.isEdited"/>
       <b-col>
-        <b-button size="sm" variant="warning" @click="saveWS" class="mb-2 float-right">save workspace</b-button>
+        <b-button
+          size="sm"
+          :variant="colorFlag"
+          @click="saveWS" class="my-2 float-right"
+        >save workspace</b-button>
       </b-col>
     </b-row>
     <b-row>
@@ -56,6 +60,9 @@
       }
     },
     computed: {
+      colorFlag: function(){
+        return this.$store.state.isEdited? 'warning' : 'success'
+      },
       currentCaseId: function () {
         return this.$store.state.caseId
       },

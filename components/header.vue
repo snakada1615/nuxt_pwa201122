@@ -21,10 +21,6 @@
               <b-dropdown-item @click="openWorkSpaceChange"><span class="text-info font-weight-bold">change workspace</span></b-dropdown-item>
               <b-dropdown-item @click="$store.dispatch('saveInfoPouch')"><span class="text-info font-weight-bold">save workspace</span></b-dropdown-item>
             </b-nav-item-dropdown>
-            <b-nav-text><b-icon
-              icon="check-circle-fill"
-              :class="{'text-warning':$store.state.isEdited, 'text-light':!$store.state.isEdited}"
-            /> </b-nav-text>
             <b-nav-item-dropdown no-caret right>
               <template #button-content>
                 <b-icon variant="light" icon="caret-down-square"/>
