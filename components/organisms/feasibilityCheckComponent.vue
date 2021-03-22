@@ -83,11 +83,11 @@
           </template>
           <div v-show="index===0" class="mb-2">
             <dri-table
-              @changeTarget="onChangeTarget"
-              @change="$emit('update:driId', $event)"
-              :mySelection="driId"
+              :value="driId"
               :items="itemsDRI"
               :showTable=false
+              @changeDri="onChangeTarget"
+              @change="$emit('update:driId', $event)"
               head-row-variant="success"
               table-variant="light"
             />

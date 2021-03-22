@@ -34,6 +34,27 @@
   import {getDRI, getFCT, pouchGetDoc, pouchWSPutNewOrUpdate} from "@/plugins/pouchHelper";
   import PouchDB from "pouchdb";
 
+  /**
+   * Component to calculate nutrition balance of combined food
+   * @module feasibilityCheck
+   * @author shunichi nakada
+   * @vue-data {array} items - FCT records
+   * @vue-data {array} itemsDRI - DRI records
+   * @vue-data {Number} tabNumber - number of Tabs
+   * @vue-data {Boolean} beforeInitialize - flag to check if initialization complete
+   * @vue-data {String} userDatabaseName - Table name of user info
+   * @vue-data {array} userDb - array of DRI records
+   * @vue-data {array} lastUser - array of DRI records
+   * @vue-data {Object[]} WS - list of datasets for each page (1..10)
+   * @vue-data {String} WS[].user - ID for current user
+   * @vue-data {String} WS[].caseId - ID for specific workspace
+   * @vue-data {String} WS[].dietCases - set of diet IDs selected
+   * @vue-data {String} WS[].saveDate - last date&time saved user data
+   * @vue-computed {String} colorFlag - color for saveButton
+   * @vue-computed {String} currentCaseId - current Wrokspace
+   * @vue-computed {Boolean} loginChecked - true if login completed
+   */
+
   export default {
     components:{
       feasibilityCheckComponent
@@ -90,6 +111,10 @@
 
     },
     methods: {
+      onUpdateDriId(){
+
+        this.modifiedSignal('driid')
+      },
       modifiedSignal(val) {
         //this.isEdited = true
         this.$store.dispatch('setEdit', true)

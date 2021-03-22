@@ -1,0 +1,10 @@
+{
+  "plugins": ["node_modules/jsdoc-vuejs"],
+  "source": {
+    "include": ["pages"],
+    "includePattern": "\\.(vue|js)$"
+  },
+  "opts": {
+    "template": "node_modules/tui-jsdoc-template"
+  }
+}

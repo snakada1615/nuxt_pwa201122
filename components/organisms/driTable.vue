@@ -1,6 +1,12 @@
 <template>
   <b-container>
-    <b-form-select v-model="selectedItem" :options="options" size="sm" class="mb-2"></b-form-select>
+    <b-form-select
+      :value="value"
+      @change="onChange"
+      :options="options"
+      size="sm"
+      class="mb-2">
+    </b-form-select>
     <b-table
       striped
       small
@@ -14,10 +20,6 @@
 
 <script>
   export default {
-    model: {
-      prop: 'selected',
-      event: 'change'
-    },
     data() {
       return {
         fields1: [
@@ -27,18 +29,14 @@
         selectedDRI: [],
       }
     },
+    mounted() {
+      this.onChange(this.value)
+    },
     computed: {
-      selectedItem: {
-        get: function () {
-          return this.selected
-        },
-        set: function (selectedItem) {
-          console.log(selectedItem)
-          this.selectedDRI = this.setDRI(selectedItem)
-          this.$emit('changeTarget', this.selectedDRI)
-          this.$emit('change', selectedItem)
-        }
-      },
+      /**
+       *
+       * @returns {{text, value: *}[]}
+       */
       options: function () {
         let result = this.items.map(function (value) {
           return {
@@ -56,35 +54,35 @@
       },
     },
     props: {
-      selected: null,
+      value: null,
       items: {
         type: Array,
         required: true
       }
     },
     methods: {
+      onChange:function(val){
+        this.selectedDRI = this.setDRI(val)
+        this.$emit('change', val)
+        this.$emit('changeDri', this.selectedDRI)
+      },
       setDRI: function (selectedId) {
         const vm = this
         let tableItem = []
         //vm.selectedData.length = 0
-        console.log('1')
-        console.log(vm.items)
         const dat = vm.items.filter(function (item) {
-          console.log('2')
           return item.id === selectedId
         })
         if (dat.length !== 1) {
-          console.log('3')
-          console.log(dat.length)
           return []
         } else {
-          console.log('4')
           tableItem.push(
             {Item: 'target', Value: dat[0].Name},
             {Item: 'Energy', Value: dat[0].En},
             {Item: 'Protein', Value: dat[0].Pr},
             {Item: 'Vita-A', Value: dat[0].Va},
-            {Item: 'Iron', Value: dat[0].Fe}
+            {Item: 'Iron', Value: dat[0].Fe},
+            {Item: 'driId', Value: selectedId}
           )
           return tableItem
         }

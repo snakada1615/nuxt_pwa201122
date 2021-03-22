@@ -162,7 +162,7 @@ export const actions = {
             'Fe': 0,
             'Wt': 0,
           },
-          'driID': '',
+          'driID': '0',
           '_id': id,
           'pageId': index
         })

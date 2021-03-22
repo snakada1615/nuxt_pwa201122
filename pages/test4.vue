@@ -1,163 +1,180 @@
 <template>
-  <b-container>
-    <b-tabs v-show="$store.state.isLoginChecked" content-class="mt-3">
-      <b-tab v-for="(diet, index) in dietCases" :key="index" :title="String(index + 1)">
-        <p>Tab-{{ index + 1 }}</p>
-        <diet-calk-comp
-          :fct-org="items"
-          :dri-org="itemsDRI"
-          :diet-case="diet"
-        />
-      </b-tab>
-    </b-tabs>
+  <b-container style="max-width: 540px; min-width: 530px;">
+    <b-row>
+      <navigation-guard :form_dirty="$store.state.isEdited"/>
+      <b-col>
+        <b-button
+          size="sm"
+          :variant="colorFlag"
+          @click="saveWS" class="my-2 float-right"
+        >save workspace
+        </b-button>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-tabs lazy pills justified disabled="$store.state.isLoginChecked" content-class="mt-3">
+        <b-tab v-for="(diet, index) in WS.dietCases" :key="index" :title="String(index + 1)">
+          <diet-calk-comp
+            :fct-org="items"
+            :dri-org="itemsDRI"
+            :diet-case="diet"
+            @changeTarget="modifiedSignal('target')"
+            @changeRecepi="modifiedSignal('recepi')"
+          />
+          {{diet}}
+        </b-tab>
+      </b-tabs>
+    </b-row>
   </b-container>
 </template>
 
 
 <script>
   import driTable from "../components/organisms/driTable";
-  import PouchDB from 'pouchdb'
-  import {getPouchData, syncCloudant} from '@/plugins/pouchHelper'
   import dietCalkComp from "../components/organisms/dietCalkComp";
+  import navigationGuard from "../components/atoms/navigationGuard";
+  import {getDRI, getFCT, pouchGetDoc} from "../plugins/pouchHelper";
+  import PouchDB from "pouchdb";
+
+  /**
+   * @param {string} somebody
+   * @vue-prop {Number} initialCounter - Initial counter's value
+   * @vue-prop {Number} [step=1] - Step
+   * @vue-data {Number} items - Current counter's value
+   * @vue-data {array} itemsDRI - array of DRI records
+   * @vue-computed {String} message
+   * @vue-computed {String} mymessage-2
+   * @vue-event {Number} increment - Emit counter's value after increment
+   * @vue-event {Number} decrement - Emit counter's value after decrement
+   */
 
   export default {
-    components:{
+    components: {
       driTable,
       dietCalkComp,
+      navigationGuard,
     },
-    data(){
-      return{
-        itemsDRI:[],
-        items:[],
-        tabNumber: 5,
-        dietCases:[]
+    data() {
+      return {
+        itemsDRI: [],
+        items: [],
+        tabNumber: 10,
+        userDatabaseName: 'userWorkSpace',
+        userDb: null,
+        lastUser: 'lastUser',
+        WS: {
+          caseId: 'case01',
+          dietCases: [],
+          user: '',
+          saveDate: '',
+        },
       }
     },
-    computed:{
+    computed: {
+      colorFlag: function(){
+        return this.$store.state.isEdited? 'warning' : 'success'
+      },
+      currentCaseId: function () {
+        return this.$store.state.caseId
+      },
       loginChecked: function () {
         return this.$store.state.isLoginChecked
       },
-    },
-    watch:{
-      loginChecked: function (value) {
-        const vm = this
-        if (value){
-          for (let index = 0; index < this.tabNumber; index++) {
-            vm.loadDiet(index).then(function (doc) {
-              vm.dietCases.push(doc)
-            })
-          }
-        }
+      currentCaseIds: function () {
+        return this.$store.state.caseIdList
       }
     },
-    methods:{
-      setFTC(docs) {
-        let res = []
-        docs.forEach(function (val, index) {
-          res.push({
-            'id': val.doc.food_item_id,
-            'Group': val.doc.food_group_unicef,
-            'Name': val.doc.Food_name,
-            'En': val.doc.Energy,
-            'Pr': val.doc.Protein,
-            'Va': val.doc.VITA_RAE,
-            'Fe': val.doc.FE
-          })
-        })
-        return res
+    watch: {
+      loginChecked: async function () {
+        let vm = this
+        if (this.loginChecked) {
+          vm.items = await getFCT()
+          vm.itemsDRI = await getDRI()
+
+          const res = await vm.loadDietfromPouch()
+          vm.WS.dietCases = JSON.parse(JSON.stringify(res))
+          console.log('vm.WS.dietCases')
+          console.log(vm.WS.dietCases)
+          vm.WS.user = JSON.parse(JSON.stringify(this.$store.state.user))
+          vm.WS.caseId = this.$store.state.caseId
+          this.$store.dispatch('setNow')
+          vm.WS.saveDate = this.$store.state.saveDate
+        }
       },
-      setDRI(docs) {
-        let res = []
-        docs.forEach(function (val) {
-          res.push({
-            'id': val.key,
-            'Name': val.doc.nut_group,
-            'En': val.doc.energy,
-            'Pr': val.doc.protein,
-            'Va': val.doc.vita,
-            'Fe': val.doc.fe,
-            'number': 0
-          })
-        })
-        return res
+      currentCaseId: function (value) {
+        this.WS.caseId = value
       },
-      loadDiet(index) {
-        const vm = this
-        const db = new PouchDB('test')
-        const _id = this.$store.state.user.email + index
-        let promise = new Promise((resolve, reject) => {
-          db.get(_id).then(function (doc) {
-            doc._id = _id
-            console.log('added pre-input to index:' + index)
-            console.log(doc)
-            resolve(doc)
-          }).catch(function (e) {
-              const dat = {
-                itemsRecepi: [],
-                targetName: '',
-                nutritionTarget: {
-                  En: 0,
-                  Pr: 0,
-                  Va: 0,
-                  Fe: 0,
-                },
-                nutritionSum: {
-                  En: 0,
-                  Pr: 0,
-                  Va: 0,
-                  Fe: 0,
-                  Wt: 0,
-                },
-                driID: '',
-                _id: _id,
-                pageId: index
-              }
-              resolve(dat)
-            }
-          )
+    },
+    beforeDestroy() {
+      console.log('beforeDestroy')
+      //this.saveWS()
+    },
+    methods: {
+      modifiedSignal(val) {
+        //this.isEdited = true
+        this.$store.dispatch('setEdit', true)
+        console.log('modified:' + val)
+      },
+      loadDietfromPouch() {
+        let db = new PouchDB(this.$store.state.userDB)
+        const id = this.$store.getters.currentPouchID
+        const iCount = this.$store.state.tabNumber
+        let currentDiet = {}
+        let promise = new Promise((resolve) => {
+          pouchGetDoc(db, this.$store.getters.currentPouchID).then(function (doc) {
+            currentDiet = doc.dietCases
+            resolve(currentDiet)
+          }).catch(function (err) {
+            console.log('no data exists in PouchDB')
+            resolve(err)
+          })
         })
         return promise
       },
-    },
-    mounted() {
-      console.log('mounted: new!!!')
-      const fct = new PouchDB('fct');
-      const dri = new PouchDB('dri');
-      const vm = this;
-      const idToast1 = this.makeToast('start fetching')
-      fct.info().then(function (info) {
-        if (!(info.doc_count)) {
-          const idToast2 = vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
-          syncCloudant('fct').then(dataset => {
-            getPouchData(dataset).then(docs => {
-              vm.items = vm.setFTC(docs)
-              vm.hideToast(idToast2)
-            })
-          })
-        } else {
-          getPouchData(fct).then(docs => {
-            vm.items = vm.setFTC(docs)
-          })
-        }
-      }).then(
-        dri.info().then(function (info) {
-          if (!(info.doc_count)) {
-            const idToast2 = vm.makeToast('your dataset is currently empty. the application will try to getch data from server!')
-            syncCloudant('dri').then(dataset => {
-              getPouchData(dataset).then(docs => {
-                vm.itemsDRI = vm.setDRI(docs)
-                vm.hideToast(idToast2)
-                vm.hideToast(idToast1)
-              })
-            })
+      saveDietToPouch(record) {
+        console.log('saveDietToPouch')
+        const db = new PouchDB(this.$store.state.userDB)
+        this.$store.dispatch('setNow')
+        record.saveDate = this.$store.state.saveDate
+        record._id = this.$store.getters.currentPouchID
+        let promise = new Promise(async (resolve) => {
+          console.log(record)
+          const res = await pouchWSPutNewOrUpdate(db, record, 'diet')
+          if (res) {
+            resolve(res)
           } else {
-            getPouchData(dri).then(docs => {
-              vm.itemsDRI = vm.setDRI(docs)
-              vm.hideToast(idToast1)
-            })
+            resolve(false)
           }
         })
-      )
+        return promise
+      },
+      async saveWS() {
+        const user = this.$store.state.user
+        const res1 = await this.saveDietToPouch(this.WS)
+        const res2 = await this.$store.dispatch('saveUserToLastuser',
+          {user: this.$store.state.user, caseId: this.$store.state.caseId})
+        console.log(res1)
+        console.log(res2)
+        if (res1 && res2) {
+          this.$store.dispatch('setEdit', false)
+          await this.$store.dispatch('loadCaseListFromPouch')
+          console.log('WS saved')
+          return true
+        } else {
+          console.log('encountered error to save current WS to pouchDB')
+          return false
+        }
+      },
+    },
+    destroyed() {
+//      console.log('destroyed')
+//      alert('destroy')
+//      window.removeEventListener("beforeunload", this.sayHello);
+    },
+    created() {
+//      console.log('created')
+//      window.addEventListener("beforeunload", this.sayHello)
     },
   }
+
 </script>

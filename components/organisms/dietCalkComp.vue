@@ -51,11 +51,12 @@
           </template>
           <dri-table
             v-show="!targetSwitch"
-            v-model="dietCase.driID"
+            :value="dietCase.driID"
             :items="itemsDRI"
+            @change="$emit('update:driID', $event)"
+            @changeDri="onChangeTarget($event, dietCase.pageId)"
             head-row-variant="success"
             table-variant="light"
-            @changeTarget="onChangeTarget($event, dietCase.pageId)"
           />
           <dri-table-group
             ref="table"
@@ -318,28 +319,6 @@
       }
     },
     methods: {
-      saveDiet(index) {
-        const vm = this
-        const db = new PouchDB('test')
-        const id = this.$store.state.user.email + index
-        db.get(id).then(function (doc) {
-          vm.dietCase._rev = doc._rev
-          doc = vm.dietCase
-          return db.put(doc);
-        })
-      },
-      loadDiet(index) {
-        const vm = this
-        const db = new PouchDB('test')
-        const _id = this.$store.state.user.email + index
-        db.get(_id).then(function (doc) {
-          vm.dietCase = doc
-          vm.dietCase._id = _id
-        })
-      },
-      setIcon() {
-        this.iconNum += 1
-      },
       onChangeRecepi(value, pageId) {
         if (pageId !== this.dietCase.pageId) {
           return
@@ -353,6 +332,8 @@
         }
       },
       onChangeTarget(value, pageId) {
+        console.log('onChangeTarget')
+        console.log(value)
         if (pageId !== this.dietCase.pageId || !value.length) {
           return
         }
@@ -361,6 +342,7 @@
           this.dietCase.nutritionTarget.Pr = Number(value[2].Value) || 0
           this.dietCase.nutritionTarget.Va = Number(value[3].Value) || 0
           this.dietCase.nutritionTarget.Fe = Number(value[4].Value) || 0
+          //this.dietCase.driID  = Number(value[5].Value) || 0
           this.$emit('changeTarget', this.dietCase)
         }
       },
