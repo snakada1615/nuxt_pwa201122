@@ -27,10 +27,25 @@
     },
 
     props: {
-      value: {},
-      checked: {},
+      /**
+       * selected value
+       */
+      value: { type:Boolean },
+      /**
+       * true if selected right
+       */
+      checked: { type:Boolean },
+      /**
+       * label for left switch
+       */
       labelLeft: { type: String },
+      /**
+       * label for right switch
+       */
       labelRight: { type: String },
+      /**
+       * name of the component
+       */
       name: { type: String, require: true }
     },
 
@@ -44,10 +59,22 @@
     },
 
     methods: {
+      /**
+       * triggered when switch changed
+       * @param { Boolean } e - selected value
+       */
       updateValue (e) {
         let value = e ? true : false
         if (this.group) {
+          /**
+           * input event
+           * @event
+           * @property { Boolean } value
+           */
           this.group.$emit('input', value)
+          /**
+           * change event
+           */
           this.group.$emit('checked', value)
         } else {
           this.$emit('input', value)
