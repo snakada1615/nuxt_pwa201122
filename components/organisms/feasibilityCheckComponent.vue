@@ -452,7 +452,7 @@
     props: {
       selectedItem: {
         type: Object,
-        default: {}
+        default: ()=> ({})
       },
       driId: {
         type: String,
