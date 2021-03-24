@@ -6,7 +6,9 @@
     "dev": "nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
-    "generate": "nuxt generate"
+    "generate": "nuxt generate",
+    "styleguide": "vue-styleguidist server",
+    "styleguide:build": "vue-styleguidist build"
   },
   "dependencies": {
     "@fortawesome/free-brands-svg-icons": "^5.15.1",
@@ -26,10 +28,8 @@
   },
   "devDependencies": {
     "jsdoc": "^3.6.6",
-    "jsdoc-vuejs": "^3.0.9",
     "node-sass": "^5.0.0",
     "sass-loader": "^10.1.0",
-    "tui-jsdoc-template": "^1.2.2",
-    "vue-template-compiler": "^2.6.12"
+    "vue-styleguidist": "4.33.0"
   }
 }
