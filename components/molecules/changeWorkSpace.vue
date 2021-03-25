@@ -49,6 +49,11 @@
 </template>
 
 <script>
+/**
+ * @requires veeInput
+ * @requires DietCalkComp
+*/
+
   import veeInput from "@/components/atoms/veeInput";
   import DietCalkComp from "../organisms/dietCalkComp";
   import PouchDB from "pouchdb";

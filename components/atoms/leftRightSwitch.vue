@@ -1,7 +1,6 @@
 <template>
   <b-form inline>
     <span v-if="labelLeft"><slot name="labelLeft">{{ labelLeft }}</slot></span>
-
     <b-form-checkbox
       switch
       class="mr-0 ml-1"
@@ -20,67 +19,72 @@
 </template>
 
 <script>
-  export default {
-    model: {
-      prop: 'checked',
-      event: 'input'
-    },
+/**
+ * this component adds label on both side of bootstrap-switch component
+ */
 
-    props: {
-      /**
-       * selected value
-       */
-      value: { type:Boolean },
-      /**
-       * true if selected right
-       */
-      checked: { type:Boolean },
-      /**
-       * label for left switch
-       */
-      labelLeft: { type: String },
-      /**
-       * label for right switch
-       */
-      labelRight: { type: String },
-      /**
-       * name of the component
-       */
-      name: { type: String, require: true }
-    },
+export default {
+  model: {
+    prop: 'checked',
+    event: 'input'
+  },
 
-    computed: {
-      group () {
-        return ('$parent' in this && this.$parent.$options.name === 'vue-group') ? this.$parent : null
-      },
-      input () {
-        return this.group ? this.group.value : this.checked
-      }
-    },
+  props: {
+    /**
+     * selected value
+     */
+    value: {type: Boolean},
+    /**
+     * true if selected right
+     */
+    checked: {type: Boolean},
+    /**
+     * label for left switch
+     */
+    labelLeft: {type: String},
+    /**
+     * label for right switch
+     */
+    labelRight: {type: String},
+    /**
+     * name of the component
+     */
+    name: {type: String, require: true}
+  },
 
-    methods: {
-      /**
-       * triggered when switch changed
-       * @param { Boolean } e - selected value
-       */
-      updateValue (e) {
-        let value = e ? true : false
-        if (this.group) {
-          /**
-           * input event
-           * @event
-           * @property { Boolean } value
-           */
-          this.group.$emit('input', value)
-          /**
-           * change event
-           */
-          this.group.$emit('checked', value)
-        } else {
-          this.$emit('input', value)
-          this.$emit('checked', value)
-        }
+  computed: {
+    group() {
+      return ('$parent' in this && this.$parent.$options.name === 'vue-group') ? this.$parent : null
+    },
+    input() {
+      return this.group ? this.group.value : this.checked
+    }
+  },
+
+  methods: {
+    /**
+     * triggered when switch changed
+     * @function updataValue
+     * @param { Boolean } e - selected value
+     */
+    updateValue(e) {
+      let value = e ? true : false
+      if (this.group) {
+        this.group.$emit('input', value)
+        this.group.$emit('checked', value)
+      } else {
+        /**
+         * when switch changed
+         * @property {number} value selected value
+         */
+        this.$emit('input', value)
+        /**
+         * when switch checked
+         * @property {boolean} value true if sliding switch is on right
+         */
+        this.$emit('checked', value)
       }
     }
   }
+}
 </script>
