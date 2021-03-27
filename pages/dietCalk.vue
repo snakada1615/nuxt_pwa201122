@@ -106,8 +106,6 @@
 
           const res = await vm.loadDietfromPouch()
           vm.WS.dietCases = JSON.parse(JSON.stringify(res))
-          console.log('vm.WS.dietCases')
-          console.log(vm.WS.dietCases)
           vm.WS.user = JSON.parse(JSON.stringify(this.$store.state.user))
           vm.WS.caseId = this.$store.state.caseId
           this.$store.dispatch('setNow')

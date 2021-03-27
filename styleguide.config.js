@@ -1,3 +1,4 @@
+const path = require('path')
 const { getWebpackConfig } = require('nuxt')
 
 const FILTERED_PLUGINS = [
@@ -38,6 +39,9 @@ module.exports = async () => {
   return {
     components: './components/**/[A-Za-z]*.vue',
     webpackConfig,
-    styleguideDir: 'dist/docs'
+    styleguideDir: 'dist/docs',
+    require: [
+      path.join(__dirname, 'styleguide/global.requires.js')
+    ]
   }
 }

@@ -175,6 +175,11 @@
 </template>
 
 <script>
+  /**
+   * combination of fctTable, DRItble,
+   *
+   */
+
   import fctTable from '~/components/organisms/FctTable'
   import nutritionBar from "~/components/organisms/nutritionBar";
   import recepiTable from "~/components/organisms/recepiTable";
@@ -182,8 +187,6 @@
   import driTableGroup from "@/components/organisms/driTableGroup";
   import foodModal from '@/components/organisms/foodModal'
   import leftRightSwitch from "@/components/atoms/leftRightSwitch";
-  import {getPouchData, syncCloudant} from '@/plugins/pouchHelper'
-  import PouchDB from 'pouchdb'
 
   export default {
     components: {
@@ -275,6 +278,12 @@
       },
     },
     props: {
+      /**
+       * information for combination of diet (itemsRecepi) plus
+       *
+       * aaaaaaaaaa
+       *
+       */
       dietCase: {
         type: Object,
         default: () => ({

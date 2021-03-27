@@ -1,20 +1,18 @@
+leftRightSwitch example:
+
+```vue live
 <template>
   <b-container>
     <left-right-switch
-      labelLeft="single"
-      labelRight="multiple"
+      labelLeft="left message"
+      labelRight="right message"
       name="check"
       v-model="test"
     />
-    {{test}}
   </b-container>
 </template>
 <script>
-  import leftRightSwitch from "../components/atoms/leftRightSwitch";
   export default {
-    components:{
-      leftRightSwitch
-    },
     data(){
       return {
         test:false
@@ -23,3 +21,4 @@
   }
 
 </script>
+```

@@ -19,6 +19,13 @@
 </template>
 
 <script>
+  /**
+   * this component is a combination of dropdown menu and table linked together.
+   *
+   * table shows DRI information to match with items selected from dropdown menu
+   *
+   */
+
   export default {
     data() {
       return {
@@ -33,10 +40,6 @@
       this.onChange(this.value)
     },
     computed: {
-      /**
-       *
-       * @returns {{text, value: *}[]}
-       */
       options: function () {
         let result = this.items.map(function (value) {
           return {
@@ -54,7 +57,13 @@
       },
     },
     props: {
+      /**
+       * value of selecetd item
+       */
       value: null,
+      /**
+       * list of DRI information
+       */
       items: {
         type: Array,
         required: true
@@ -63,7 +72,15 @@
     methods: {
       onChange:function(val){
         this.selectedDRI = this.setDRI(val)
-        this.$emit('change', val)
+        /**
+         * triggers when dri selection changed
+         * @property {Number} value selected DRI id
+         */
+        this.$emit('input', val)
+        /**
+         * triggers when dri selection changed
+         * @property {Object} value set of DRI information
+         */
         this.$emit('changeDri', this.selectedDRI)
       },
       setDRI: function (selectedId) {
@@ -82,7 +99,7 @@
             {Item: 'Protein', Value: dat[0].Pr},
             {Item: 'Vita-A', Value: dat[0].Va},
             {Item: 'Iron', Value: dat[0].Fe},
-            {Item: 'driId', Value: selectedId}
+            {Item: 'id', Value: selectedId}
           )
           return tableItem
         }

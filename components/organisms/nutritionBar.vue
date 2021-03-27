@@ -41,34 +41,58 @@
       FaRating
     },
     props: {
+      /**
+       * show reset button
+       */
       showReset: {
         type: Boolean,
         default: false,
       },
+      /**
+       * show number next to barchart
+       */
       showDri: {
         type: Boolean,
         default: false,
       },
+      /**
+       * actual score shown on barchart (relative value between [0, max])
+       */
       rating: {
         type: Number,
         default: 5
       },
+      /**
+       * max value of barchart (relative value)
+       */
       max: {
         type: Number,
         default: 10
       },
+      /**
+       * increment shown on the barchart
+       */
       increment: {
         type: Number,
         default: 0.1
       },
+      /**
+       * icon ID used for barchart renderig
+       */
       iconNum: {
         type: Number,
         default: 1
       },
+      /**
+       * label shown at left side of barchart
+       */
       cropName: {
         type: String,
         required: true
       },
+      /**
+       * absolute value equivalent to max
+       */
       nutritionTarget: {
         type: Number,
         default: 0
