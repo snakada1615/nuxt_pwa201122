@@ -38,7 +38,6 @@ export default {
 
   // Modules for dev and build (recommended) (https://go.nuxtjs.dev/config-modules)
   buildModules: [
-    //'@nuxtjs/fontawesome',
     '@nuxtjs/pwa',
   ],
 
@@ -53,15 +52,6 @@ export default {
       "short_name": "nfa",
     }
   },
-
-  /*
-    fontawesome: {
-      icons: {
-        solid: true,
-        brands: true
-      }
-    },
-  */
 
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
@@ -78,7 +68,10 @@ export default {
         'BIconCaretDownSquare',
         'BIconCheckCircleFill',
         'BIconPersonCircle',
-        'BIconHouseFill'
+        'BIconHouseFill',
+        'BIconExclamationCircleFill',
+        'BIconCheck',
+        'BIconPeopleFill'
       ],
       componentPlugins: [
         'NavbarPlugin',

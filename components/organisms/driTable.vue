@@ -71,17 +71,22 @@
     },
     methods: {
       onChange:function(val){
-        this.selectedDRI = this.setDRI(val)
-        /**
-         * triggers when dri selection changed
-         * @property {Number} value selected DRI id
-         */
-        this.$emit('input', val)
-        /**
-         * triggers when dri selection changed
-         * @property {Object} value set of DRI information
-         */
-        this.$emit('changeDri', this.selectedDRI)
+        if (val > 0) {
+          this.selectedDRI = this.setDRI(val)
+          console.log('onChangeDRI')
+          console.log(val)
+          console.log(this.selectedDRI)
+          /**
+           * triggers when dri selection changed
+           * @property {Number} value selected DRI id
+           */
+          this.$emit('input', val)
+          /**
+           * triggers when dri selection changed
+           * @property {Object} value set of DRI information
+           */
+          this.$emit('changeDri', this.selectedDRI)
+        }
       },
       setDRI: function (selectedId) {
         const vm = this

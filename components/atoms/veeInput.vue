@@ -7,10 +7,10 @@
           class="bg-light"
           :class="{ 'border-danger': !valid, 'border-info':valid }">
           <div v-show="valid" class="text-info bg-light">
-            <Fa :icon="faCheck"/>
+            <b-icon icon="check"/>
           </div>
           <b-badge v-show="!valid" v-b-tooltip.hover :title="errors[0]" class="text-danger bg-light">
-            <Fa :icon="faExclamationCircle"/>
+            <b-icon icon="exclamation-circle-fill"/>
           </b-badge>
         </b-input-group-text>
       </template>
@@ -30,19 +30,8 @@
 </template>
 
 <script>
-  import Fa from 'vue-fa'
-  import { faExclamationCircle, faCheck } from '@fortawesome/free-solid-svg-icons'
 
   export default {
-    components:{
-      Fa, faCheck
-    },
-    data(){
-      return {
-        faExclamationCircle,
-        faCheck,
-      }
-    },
     props: {
       name: { type: String, required: true },
       rules:{

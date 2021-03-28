@@ -180,6 +180,7 @@
         })
       },
       onChangeTarget(value) {
+        console.log(value)
         this.nutritionTarget.En = Number(value[1].Value) || 0
         this.nutritionTarget.Pr = Number(value[2].Value) || 0
         this.nutritionTarget.Va = Number(value[3].Value) || 0

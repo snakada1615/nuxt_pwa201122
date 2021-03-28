@@ -10,7 +10,7 @@
             <b-nav-text right class="mr-2"><h6>{{$store.state.user.email}}</h6></b-nav-text>
             <b-nav-item-dropdown no-caret right>
               <template #button-content>
-                <b-icon variant="light" icon="person-circle"/>
+                <b-icon variant="light" icon="people-fill"/>
               </template>
               <b-dropdown-item disabled>name: <span class="text-danger">{{$store.state.user.name}}</span></b-dropdown-item>
               <b-dropdown-item disabled>email: <span class="text-danger">{{$store.state.user.email}}</span></b-dropdown-item>

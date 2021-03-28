@@ -20,7 +20,6 @@
             @changeTarget="modifiedSignal('target')"
             @changeRecepi="modifiedSignal('recepi')"
           />
-          {{diet}}
         </b-tab>
       </b-tabs>
     </b-row>
@@ -37,26 +36,6 @@
   import {pouchGetDoc} from "../plugins/pouchHelper";
   import {getFCT, getDRI} from "../plugins/pouchHelper";
   //import {state} from "../store";
-
-  /**
-   * Component to calculate nutrition balance of combined food
-   * @module dietCalk
-   * @author shunichi nakada
-   * @vue-data {array} items - FCT records
-   * @vue-data {array} itemsDRI - DRI records
-   * @vue-data {Number} tabNumber - number of Tabs
-   * @vue-data {String} userDatabaseName - Table name of user info
-   * @vue-data {array} userDb - array of DRI records
-   * @vue-data {array} lastUser - array of DRI records
-   * @vue-data {Object[]} WS - list of datasets for each page (1..10)
-   * @vue-data {String} WS[].user - ID for current user
-   * @vue-data {String} WS[].caseId - ID for specific workspace
-   * @vue-data {String} WS[].dietCases - set of diet IDs selected
-   * @vue-data {String} WS[].saveDate - last date&time saved user data
-   * @vue-computed {String} colorFlag - color for saveButton
-   * @vue-computed {String} currentCaseId - current Wrokspace
-   * @vue-computed {Boolean} loginChecked - true if login completed
-   */
 
   export default {
     components: {

@@ -2,7 +2,7 @@ nutritionBar example
 
 ```vue
 <template>
-  <b-container>
+  <b-jumbotron bg-variant="light" border-variant="primary">
      <nutrition-bar
        cropName="Iron"
        :iconNum=3
@@ -11,7 +11,7 @@ nutritionBar example
        :rating="rate"
        :showDri="true"
      ></nutrition-bar> 
-  </b-container>
+  </b-jumbotron>
 </template>
 <script> 
   export default {

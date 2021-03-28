@@ -1,24 +1,22 @@
-driTable example:
+driTableGroup example:
 
 ```vue
 <template>
     <b-jumbotron border-variant="primary" bg-variant="light"> 
-      <dri-table
-        v-model="driID"
-        :items="DRI"
-        @changeDri="(val)=>selectedDRI=val"
-        head-row-variant="success"
-        table-variant="light"
-      />
+        <dri-table-group
+          v-model="itemsDRI"
+          input-name='inputForm'
+          rules="min_value:0|max_value:500"
+          head-row-variant="success"
+          table-variant="light"
+        />
     </b-jumbotron>
 </template>
 <script>
 export default{
     data(){
       return {
-        driID: 2,
-        selectedDRI: {},
-        DRI: [
+        itemsDRI: [
           {
             En: "1088.0",
             Fe: "5.8",
@@ -26,6 +24,7 @@ export default{
             Name: "child 6-23 month",
             Pr: "11.65",
             Va: "400.0",
+            number: 0,
             id: 0
           },
           {
@@ -35,6 +34,7 @@ export default{
             Name: "lactating",
             Pr: "61.0",
             Va: "850.0",          
+            number: 0,
             id: 1
           },
           {
@@ -44,15 +44,13 @@ export default{
             Name: "adolescent all",
             Pr: "52.65",
             Va: "600.0" ,         
+            number: 0,
             id: 2
           } 
         ]            
       } 
     },  
     methods:{
-      onInput(val){
-        alert(val)
-      },
     }
 }
 </script>

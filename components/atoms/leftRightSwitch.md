@@ -1,15 +1,15 @@
 leftRightSwitch example:
 
-```vue live
+```vue
 <template>
-  <b-container>
+  <b-jumbotron border-variant="primary" bg-variant="light">
     <left-right-switch
       labelLeft="left message"
       labelRight="right message"
       name="check"
       v-model="test"
     />
-  </b-container>
+  </b-jumbotron>
 </template>
 <script>
   export default {
