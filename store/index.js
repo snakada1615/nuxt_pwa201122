@@ -5,16 +5,17 @@ import {pouchPutNewDoc, pouchGetDoc, pouchUpdateDoc, pouchPutNewOrUpdate} from "
 export const state = () => ({
   user: {
     name: '',
-    email: 'anonymous',
+    email: '',
     country: '',
     profession: '',
     uid: ''
   },
   //dietCases: [],
-  caseId: 'case01',
+  caseId: '',
   caseIdList: [],
 
   isLoginChecked: false,
+  loginStatus: 0,
   tabNumber: 10,
   userDB: 'userWorkSpace',
   lastUser: 'lastUser',
@@ -29,6 +30,9 @@ export const getters = {
 }
 
 export const mutations = {
+  setLoginStatus: function (state, payload) {
+    state.loginStatus = payload
+  },
   setCaseId: function (state, payload) {
     state.caseId = payload
   },
@@ -53,7 +57,7 @@ export const mutations = {
   setEdit: function (state, payload) {
     state.isEdited = payload
   },
-  setNow: function (state){
+  setNow: function (state) {
     const today = new Date()
     state.saveDate = today.getFullYear() + '/' + today.getMonth() + 1 + '/' + today.getDate()
       + '-' + ('00' + today.getHours()).slice(-2) + ':' + ('00' + today.getMinutes()).slice(-2)
@@ -61,11 +65,18 @@ export const mutations = {
 }
 
 export const actions = {
-  async autoLogin({dispatch, state}) {
+  async autoLogin({dispatch}) {
+    const res = await dispatch('loadUserFromPouch')
+    dispatch('setLoginStatus', res)
+    if (res === 1) {
+      await dispatch('loadCaseListFromPouch')
+    }
+  },
+  async autoLogin2({dispatch, state}) {
     dispatch('setLoginUnChecked')
     const userTemp = await dispatch('loadUserFromPouch')
     const caseTemp = await dispatch('loadCaseListFromPouch')
-    if (userTemp && caseTemp){
+    if (userTemp && caseTemp) {
       dispatch('setLoginChecked')
       return 'login success'
     } else {
@@ -73,7 +84,7 @@ export const actions = {
       let payload = {}
       payload.user = userTemp ? userTemp : {'email': 'anonymous', 'uid': ''}
       payload.caseId = 'case01'
-      dispatch('initPouch', payload).then(function (){
+      dispatch('initPouch', payload).then(function () {
         dispatch('setLoginChecked')
       })
       return 'initialized'
@@ -175,8 +186,8 @@ export const actions = {
       for (let index = 0; index < iCount; index++) {
         dat.push({
           'driID': "0",
-          'selectedItem':{},
-          'ansList':[-99, - 99, - 99, - 99,-99, -99, -99, -99, -99, -99, -99, -99],
+          'selectedItem': {},
+          'ansList': [-99, -99, -99, -99, -99, -99, -99, -99, -99, -99, -99, -99],
         })
       }
       return dat
@@ -220,26 +231,34 @@ export const actions = {
   },
   loadUserFromPouch({state, dispatch}) {
     const lastUser = 'lastUser'
+    let result = 0
+    let res1 = 1
+    let res2 = 1
     let db = new PouchDB(state.userDB)
-    let promise = new Promise((resolve, reject) => {
+    let promise = new Promise((resolve) => {
       pouchGetDoc(db, lastUser).then(function (docTemp) {
-        const userTmp = docTemp.user ? docTemp.user : {
-          name: '',
-          email: state.user.email,
-          country: '',
-          profession: '',
-          uid: ''
-        }
-        const caseIdTmp = docTemp.caseId ? docTemp.caseId : 'case01'
+        const userTmp = docTemp.user
+        const caseIdTmp = docTemp.caseId
 
-        dispatch('setUser', userTmp)
-        dispatch('setCaseId', caseIdTmp)
-        pouchPutNewOrUpdate(db, {_id: lastUser, user: userTmp, caseId: caseIdTmp})
-        resolve(state.user)
+        userTmp ? dispatch('setUser', userTmp) : res1 = 0
+        caseIdTmp ? dispatch('setCaseId', caseIdTmp) : res2 = 0
+        result = res1 * res2
+        if (res1 && res2) {
+          result = 1
+        } else if (!res1) {
+          result = 2
+        } else if (!res2) {
+          result = 3
+        } else {
+          result = 4
+        }
+        resolve(result)
       }).catch((err) => {
         // if no record
+        console.log(err)
         console.log('no user info set on lastuser')
-        resolve(false)
+        result = 0
+        resolve(result)
       })
     })
     return promise
@@ -297,8 +316,11 @@ export const actions = {
         alert(error)
       })
   },
-  setNow(context){
+  setNow(context) {
     context.commit('setNow')
+  },
+  setLoginStatus(context, payload) {
+    context.commit('setLoginStatus', payload)
   },
   setUser(context, payload) {
     context.commit('setUser', payload)

@@ -27,6 +27,7 @@
       <b-row class="my-2">
         <b-col>
           <b-button @click="login()" variant="primary" size="sm">login</b-button>
+          <b-button @click="registUser" variant="primary" size="sm">new user</b-button>
           <b-button @click="logout()" size="sm">logout</b-button>
         </b-col>
       </b-row>
@@ -59,6 +60,12 @@
         this.email = ''
         this.password = ''
         //this.$router.push('/')
+      },
+      registUser() {
+        this.$store.dispatch('registUser', {email: this.email, password: this.password})
+        this.email = ''
+        this.password = ''
+        this.$router.push('/')
       },
       DBexists(targetDB) {
         window.indexedDB.databases().then((namelist) => {
