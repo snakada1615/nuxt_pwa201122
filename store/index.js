@@ -39,6 +39,9 @@ export const mutations = {
   setCaseIdList: function (state, payload) {
     state.caseIdList = payload
   },
+  addCaseIdList: function (state, payload) {
+    state.caseIdList.push(payload)
+  },
   setUser: function (state, payload) {
     state.user = payload
   },
@@ -66,11 +69,9 @@ export const mutations = {
 
 export const actions = {
   async autoLogin({dispatch}) {
+    await dispatch('loadCaseListFromPouch')
     const res = await dispatch('loadUserFromPouch')
     dispatch('setLoginStatus', res)
-    if (res === 1) {
-      await dispatch('loadCaseListFromPouch')
-    }
   },
   async autoLogin2({dispatch, state}) {
     dispatch('setLoginUnChecked')
@@ -91,29 +92,15 @@ export const actions = {
     }
   },
   login({dispatch, state}, userInfo) {
-    let promise = new Promise((resolve) => {
+    let promise = new Promise((resolve, reject) => {
       firebase.auth().signInWithEmailAndPassword(userInfo.email, userInfo.password)
-        .then(user => {
-          dispatch('setUser', {
-            'email': user.user.email,
-            'uid': user.user.uid
-          })
-          console.log('firebase successfully login:' + user.user.email)
-          dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId}).then(function () {
-            dispatch('autoLogin').then(function (res) {
-              resolve(user)
-            })
-          }).catch((err) => {
-            console.log(err)
-            console.log('there was a problem either saveUserToLastuser or loadDietInfoFromPouch')
-            resolve(null)
-          })
+        .then(res => {
+          resolve(res.user)
         })
         .catch((error) => {
           alert('login failed')
-          console.log('firebase: login failed')
           console.log(error)
-          resolve(null)
+          reject(error)
         })
     })
     return promise
@@ -122,12 +109,9 @@ export const actions = {
     firebase.auth().signOut().then(function () {
       // Sign-out successful.
       dispatch('setOffUser')
-      dispatch('setCaseId', 'case01')
+      dispatch('setCaseId', '')
       dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId}).then(function () {
-        dispatch('autoLogin').then(function (res) {
-          console.log('firebase:successfully sign out')
-          return true
-        })
+        console.log('firebase:successfully sign out')
       })
     }).catch(function (error) {
       // An error happened.
@@ -202,11 +186,12 @@ export const actions = {
     dispatch('setNow')
 
     // initialize caseId to store
-    const caseInit = [{
-      'workspace': state.caseId,
-      'saveDate': state.saveDate
-    }]
-    dispatch('setCaseIdList', caseInit)
+    const caseInit = {
+        'email': state.user.email,
+        'workspace': state.caseId,
+        'saveDate': state.saveDate
+      }
+    dispatch('addCaseIdList', caseInit)
 
     // set user and caseid to lastUser
     await dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId})
@@ -224,10 +209,10 @@ export const actions = {
     WS._id = getters.currentPouchID
 
     let db = new PouchDB(state.userDB)
-    const res = await pouchPutNewOrUpdate(db, WS).catch((err) => console.log(err))
+    const res = await pouchPutNewOrUpdate(db, WS).catch((err) => reject(err))
     console.log('data saved to Pouch')
     console.log(res)
-    return res
+    resolve(res)
   },
   loadUserFromPouch({state, dispatch}) {
     const lastUser = 'lastUser'
@@ -266,7 +251,7 @@ export const actions = {
   loadCaseListFromPouch({state, dispatch}) {
     let promise = new Promise(async (resolve, reject) => {
       const caseTemp = await dispatch('getListWorkspace', state.user.email)
-      if (caseTemp.length) {
+      if (caseTemp) {
         // load list from pouchdb
         dispatch('setCaseIdList', caseTemp)
         resolve(caseTemp)
@@ -284,9 +269,10 @@ export const actions = {
       db.allDocs({include_docs: true}).then(function (docs) {
         let res = []
         docs.rows.forEach(function (value, index) {
-          if (value.doc.user.email === userEmail && value.id !== 'lastUser') {
+          if (value.id !== 'lastUser') {
             if (value.doc.caseId) {
               res.push({
+                email: value.doc.user.email,
                 workspace: value.doc.caseId,
                 saveDate: value.doc.saveDate
               })
@@ -296,25 +282,32 @@ export const actions = {
         resolve(res)
       }).catch(function (err) {
         console.log(err)
-        reject('')
+        reject(err)
       })
     })
     return promise
   },
-  registUser(context, userInfo) {
-    firebase.auth().createUserWithEmailAndPassword(userInfo.email, userInfo.password)
-      .then((user) => {
-        console.log('regist ok！')
-        context.commit('setUser', {
-          'email': user.user.email,
-          'uid': user.user.uid
+  async registUser({context, dispatch}, userInfo) {
+    const res = await firebase.auth().createUserWithEmailAndPassword(userInfo.email, userInfo.password).catch((error) => {
+      context.commit('setOffUser')
+      console.log('registration failed')
+      alert(error)
+      reject(error)
+    })
+    console.log(res)
+    if (res){
+      console.log('regist ok！')
+      context.commit('setUser', {
+        'email': res.user.email,
+        'uid': res.user.uid
+      })
+      dispatch('initPouch', userInfo).then(function () {
+        dispatch('autoLogin').then(function (res) {
+          console.log('login -> autologin: loginStatus=' + res)
+          resolve(true)
         })
       })
-      .catch((error) => {
-        context.commit('setOffUser')
-        console.log('registration failed')
-        alert(error)
-      })
+    }
   },
   setNow(context) {
     context.commit('setNow')
@@ -339,6 +332,9 @@ export const actions = {
   },
   setCaseIdList: function (context, payload) {
     context.commit('setCaseIdList', payload)
+  },
+  addCaseIdList: function (context, payload) {
+    context.commit('addCaseIdList', payload)
   },
   setEdit: function (context, payload) {
     context.commit('setEdit', payload)

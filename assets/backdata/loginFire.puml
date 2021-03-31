@@ -1,0 +1,43 @@
+@startuml
+title original login using firebase
+
+start
+
+:(params)
+ user.email
+ user.uid
+ caseId;
+
+if (parallel process) then (email, uid)
+  :login using firebase;
+  if (firelogin success) then (true)
+      :set user
+       to $store;
+  else (false)
+      :failure message;
+      :stay @loginPage;
+      stop
+  endif
+else (caseId)
+  :set caseId
+   to $store;
+endif
+
+:set user & caseId to
+ PouchDB-lastUser;
+
+if (user & caseId exists
+ in caseList) then (true)
+
+else (false)
+  :initialize userData
+    for caseId;
+  :set userData
+   to PouchDB-userDB;
+endif
+
+:move to '/index';
+
+stop
+
+@enduml

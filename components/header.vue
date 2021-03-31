@@ -17,33 +17,11 @@
               <b-dropdown-item disabled>country:<span class="text-danger">{{$store.state.user.country}}</span></b-dropdown-item>
               <b-dropdown-item disabled>profession:<span class="text-danger">{{$store.state.user.profession}}</span></b-dropdown-item>
               <b-dropdown-item disabled>workspace: <span class="text-danger">{{$store.state.caseId}}</span></b-dropdown-item>
-              <b-dropdown-item @click="openLogin"><span class="text-info font-weight-bold">change user</span></b-dropdown-item>
-              <b-dropdown-item @click="openWorkSpaceChange"><span class="text-info font-weight-bold">change workspace</span></b-dropdown-item>
-              <b-dropdown-item @click="$store.dispatch('saveInfoPouch')"><span class="text-info font-weight-bold">save workspace</span></b-dropdown-item>
-            </b-nav-item-dropdown>
-            <b-nav-item-dropdown no-caret right>
-              <template #button-content>
-                <b-icon variant="light" icon="caret-down-square"/>
-              </template>
-              <b-dropdown-item
-                v-for="(link, index) in links"
-                :to="link.to"
-                :key="link.val"
-              >
-                {{ link.val }}
-              </b-dropdown-item>
             </b-nav-item-dropdown>
             <b-nav-text v-if="$nuxt.isOnline" class="text-light"><b-icon icon="reception4"/></b-nav-text>
             <b-nav-text v-else class="text-light"><b-icon icon="reception0"/></b-nav-text>
           </b-navbar-nav>
         </b-navbar>
-        <user_login dialog-id="loginModal"/>
-        <change-work-space
-          dialog-id="changeWorkSpaceModal"
-          :case-ids="$store.state.caseIdList"
-          :current-user="$store.state.user.email"
-          :current-workspace="$store.state.caseId"
-        />
       </div>
     </header>
     <layout-content></layout-content>
@@ -52,15 +30,10 @@
 
 <script>
   import LayoutContent from '~/components/LayoutContent' // パスは適宜変更
-  import user_login from "./molecules/user_login";
-  //import changeWorkSpace from "./molecules/changeWorkSpace";
-  import ChangeWorkSpace from "./molecules/changeWorkSpace"
 
   export default {
     components: {
-      ChangeWorkSpace,
       LayoutContent,
-      user_login,
     },
     data(){
       return {
@@ -68,30 +41,10 @@
           {to: '/', val:'index'},
           {to: '/dietCalk', val:'dietCalk'},
           {to: '/test', val:'test'},
-          {to: '/user_login', val:'user_login'},
-          {to: '/user_reg', val:'user_register'},
           {to: '/updateSW', val:'updateSW'},
           {to: '/feasibilityCheck', val:'Feasiblity Check'},
         ]
       }
     },
-    methods:{
-      openLogin() {
-        this.$bvModal.show('loginModal')
-      },
-      openWorkSpaceChange(){
-        this.$bvModal.show('changeWorkSpaceModal')
-      },
-    },
-    computed:{
-      currentWorkspace: function () {
-        return this.$store.caseId
-      }
-    },
-    watch:{
-      currentWorkspace(val){
-        console.log(val)
-      }
-    }
   }
 </script>

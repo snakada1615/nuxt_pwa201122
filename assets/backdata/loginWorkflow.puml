@@ -1,16 +1,43 @@
 @startuml
-title autologin flow
+title autologin using cashed login info (PouchDB)
 
 start
 
-:autologin-Local;
+:autologin;
 
-if (lastuser not exists) then (true)
+
+:(preload caseId list)
+  load caseList
+  from PouchDB;
+
+ if (load success) then (false)
+  :failure message;
+  stop
+  else (true)
+  :load lastUser info
+    from PouchDB
+    -user
+    -caseId;
+ endif
+
+
+if (lastUser not exists) then (true)
     :loginStatus = 0;
 else if (user != null &&
-caseId != null) then (true)
+  caseId != null) then (true)
     :loginStatus = 1;
-else if (user != null) then (true)
+    if (user & caseId exists
+     in caseList) then (true)
+
+    else (false)
+      :initialize userData
+        for caseId;
+      :set userData
+       to PouchDB-userDB;
+      :reload ceseId list
+        from PouchDB;
+    endif
+else if (user != null) then (yes)
     :loginStatus = 2;
 else if (caseId != null) then (true)
     :loginStatus = 3;
@@ -18,8 +45,15 @@ else (false)
     :loginStatus = 4;
 endif
 
-:return main;
-
+if (loginStatus == 1) then (no)
+  :move to '/index';
+  :wait for manual login
+   (using firebase);
+  stop
+else (yes)
+  :move to desired
+   direction;
+endif
 stop
 
 @enduml

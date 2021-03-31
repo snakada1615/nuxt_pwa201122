@@ -1,6 +1,7 @@
 <template>
   <div class="container" style="max-width: 540px">
     <p>current user: <span v-if="$store.state.user">{{ $store.state.user.email }}</span></p>
+    {{ email }}
     <b-form @submit.prevent>
       <b-row class="my-2">
         <b-col>
@@ -24,7 +25,35 @@
           />
         </b-col>
       </b-row>
-      <b-row class="my-2">
+      <b-row class="mt-3">
+        <b-col>
+          <p>current FileName: <span v-if="$store.state.caseId">{{ $store.state.caseId }}</span></p>
+          <b-input-group size="sm">
+            <b-form-input
+              v-model="fileName"
+              type="text"
+              id="input_filename"
+              placeholder="file name"
+              :state="fileNameValidator"
+            ></b-form-input>
+
+            <template #append>
+              <b-dropdown text="Dropdown" variant="info" size="sm">
+                <b-dropdown-item
+                  v-for="caseId in caseIdList"
+                  :key="caseId"
+                  :value="caseId"
+                  @click="fileName = caseId"
+                >{{ caseId }}
+                </b-dropdown-item>
+              </b-dropdown>
+              <b-button variant="warning" :disabled="!fileName" @click="fileName = ''">clear</b-button>
+            </template>
+
+          </b-input-group>
+        </b-col>
+      </b-row>
+      <b-row class="my-2 mt-4">
         <b-col>
           <b-button @click="login()" variant="primary" size="sm">login</b-button>
           <b-button @click="registUser" variant="primary" size="sm">new user</b-button>
@@ -36,48 +65,99 @@
 </template>
 
 <script>
-  import veeInput from "@/components/atoms/veeInput";
+import veeInput from "@/components/atoms/veeInput";
 
-  export default {
-    components: {
-      veeInput,
+export default {
+  components: {
+    veeInput,
+  },
+  data() {
+    return {
+      email: '',
+      password: '',
+      fileName: '',
+    }
+  },
+  computed: {
+    caseIdList: function () {
+      return this.$store.state.caseIdList
     },
-    data() {
-      return {
-        email: '',
-        password: ''
-      }
+    fileNameValidator: function () {
+      return this.fileName.length > 3 ? true : false
     },
-    methods: {
-      login() {
-        this.$store.dispatch('login', {email: this.email, password: this.password})
-        this.email = ''
-        this.password = ''
-        //this.$router.push('/')
-      },
-      logout() {
-        this.$store.dispatch('logout')
-        this.email = ''
-        this.password = ''
-        //this.$router.push('/')
-      },
-      registUser() {
-        this.$store.dispatch('registUser', {email: this.email, password: this.password})
-        this.email = ''
-        this.password = ''
-        this.$router.push('/')
-      },
-      DBexists(targetDB) {
-        window.indexedDB.databases().then((namelist) => {
-          let res = false
-          for (let i=0; i < namelist.length; i++) {
-            if (namelist[i].name === targetDB) {
-              res = true
-            }
-          }
-          console.log(res)
+    isNewFileName: function () {
+      return this.fileName
+    }
+  },
+  methods: {
+    async login() {
+      const res = await this.$store.dispatch('login', {
+        email: this.email,
+        password: this.password,
+      })
+      if (res) { // successfully logged in using firebase
+        //update $store
+        this.$store.dispatch('setUser', {
+          'email': res.email,
+          'uid': res.uid
         })
+
+        //update $store
+        this.$store.dispatch('setCaseId', {
+          'caseId': this.fileName
+        })
+
+        //update PouchDB-lastUser
+        await this.$store.dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId})
+
+        //check if caseId is already registered to PouchDB
+        const res2 = this.caseIdList.find((val) => val.caseId === state.caseId && val.user === state.user)
+        if (res2.length === 0) {
+          await this.$store.dispatch('initPouch', {user: state.user, caseId: state.caseId})
+
+          //move to top page
+          this.email = ''
+          this.password = ''
+          this.$router.push('/')
+        } else {
+
+          //move to top page
+          this.email = ''
+          this.password = ''
+          this.$router.push('/')
+        }
       }
+    },
+    logout() {
+      this.$store.dispatch('logout')
+      this.email = ''
+      this.password = ''
+      this.$router.push('/')
+    },
+    async registUser() {
+      const res = await this.$store.dispatch('registUser', {
+        email: this.email,
+        password: this.password,
+        caseId: this.fileName
+      })
+      this.email = ''
+      this.password = ''
+      this.fileName = ''
+      if (res) {
+        this.$router.push('/')
+      }
+    },
+    DBexists(targetDB) {
+      window.indexedDB.databases().then((namelist) => {
+        let res = false
+        for (let i = 0; i < namelist.length; i++) {
+          if (namelist[i].name === targetDB) {
+            res = true
+          }
+        }
+        console.log(res)
+      })
     }
   }
+}
 </script>
