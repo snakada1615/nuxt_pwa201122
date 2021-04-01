@@ -14,7 +14,6 @@ export const state = () => ({
   caseId: '',
   caseIdList: [],
 
-  isLoginChecked: false,
   loginStatus: 0,
   tabNumber: 10,
   userDB: 'userWorkSpace',
@@ -51,9 +50,6 @@ export const mutations = {
       uid: ''
     }
   },
-  setLoginChecked: function (state) {
-    state.isLoginChecked = true
-  },
   setLoginUnChecked: function (state) {
     state.isLoginChecked = false
   },
@@ -72,24 +68,6 @@ export const actions = {
     await dispatch('loadCaseListFromPouch')
     const res = await dispatch('loadUserFromPouch')
     dispatch('setLoginStatus', res)
-  },
-  async autoLogin2({dispatch, state}) {
-    dispatch('setLoginUnChecked')
-    const userTemp = await dispatch('loadUserFromPouch')
-    const caseTemp = await dispatch('loadCaseListFromPouch')
-    if (userTemp && caseTemp) {
-      dispatch('setLoginChecked')
-      return 'login success'
-    } else {
-      console.log('autoLogin failed')
-      let payload = {}
-      payload.user = userTemp ? userTemp : {'email': 'anonymous', 'uid': ''}
-      payload.caseId = 'case01'
-      dispatch('initPouch', payload).then(function () {
-        dispatch('setLoginChecked')
-      })
-      return 'initialized'
-    }
   },
   login({dispatch, state}, userInfo) {
     let promise = new Promise((resolve, reject) => {
@@ -188,10 +166,10 @@ export const actions = {
     // initialize caseId to store
     const caseInit = {
         'email': state.user.email,
-        'workspace': state.caseId,
+        'caseId': state.caseId,
         'saveDate': state.saveDate
       }
-    dispatch('addCaseIdList', caseInit)
+    dispatch('addCaseIdList', state.caseId)
 
     // set user and caseid to lastUser
     await dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId})
@@ -211,8 +189,7 @@ export const actions = {
     let db = new PouchDB(state.userDB)
     const res = await pouchPutNewOrUpdate(db, WS).catch((err) => reject(err))
     console.log('data saved to Pouch')
-    console.log(res)
-    resolve(res)
+    return res
   },
   loadUserFromPouch({state, dispatch}) {
     const lastUser = 'lastUser'
@@ -227,9 +204,19 @@ export const actions = {
 
         userTmp ? dispatch('setUser', userTmp) : res1 = 0
         caseIdTmp ? dispatch('setCaseId', caseIdTmp) : res2 = 0
-        result = res1 * res2
         if (res1 && res2) {
           result = 1
+
+          //check if caseId is already registered to PouchDB
+          //initialize data if caseId does not exists
+          //check if caseId is already registered to PouchDB
+          const res3 = state.caseIdList.filter(function(val){
+            return val.caseId === caseIdTmp && val.user === userTmp
+          })
+          if (!res3) {
+            dispatch('initPouch', {user: state.user, caseId: state.caseId})
+          }
+
         } else if (!res1) {
           result = 2
         } else if (!res2) {
@@ -245,6 +232,46 @@ export const actions = {
         result = 0
         resolve(result)
       })
+    })
+    return promise
+  },
+  /**
+   * load list of Diet from PouchDB
+   * @returns {Promise<unknown>}
+   */
+  loadDietfromPouch({state, getters}) {
+    let db = new PouchDB(state.userDB)
+    let currentDiet = {}
+    let promise = new Promise((resolve) => {
+      pouchGetDoc(db, getters.currentPouchID).then(function (doc) {
+        currentDiet = doc.dietCases
+        resolve(currentDiet)
+      }).catch(function (err) {
+        console.log('no data exists in PouchDB')
+        resolve(err)
+      })
+    })
+    return promise
+  },
+  /**
+   * save list of diet to PouchDB
+   * @param {Objects[]} record - array of diet dataset (WS[1..10])
+   * @returns {Promise<unknown>}
+   */
+  saveDietToPouch({store}, record) {
+    console.log('saveDietToPouch')
+    console.log(record)
+    const db = new PouchDB(store.state.userDB)
+    store.dispatch('setNow')
+    record.saveDate = store.state.saveDate
+    record._id = store.getters.currentPouchID
+    let promise = new Promise(async (resolve) => {
+      const res = await pouchWSPutNewOrUpdate(db, record, 'diet')
+      if (res) {
+        resolve(res)
+      } else {
+        resolve(false)
+      }
     })
     return promise
   },
@@ -273,7 +300,7 @@ export const actions = {
             if (value.doc.caseId) {
               res.push({
                 email: value.doc.user.email,
-                workspace: value.doc.caseId,
+                caseId: value.doc.caseId,
                 saveDate: value.doc.saveDate
               })
             }
@@ -294,7 +321,6 @@ export const actions = {
       alert(error)
       reject(error)
     })
-    console.log(res)
     if (res){
       console.log('regist ok！')
       context.commit('setUser', {
@@ -320,12 +346,6 @@ export const actions = {
   },
   setOffUser(context) {
     context.commit('setOffUser')
-  },
-  setLoginChecked(context) {
-    context.commit('setLoginChecked')
-  },
-  setLoginUnChecked(context) {
-    context.commit('setLoginUnChecked')
   },
   setCaseId: function (context, payload) {
     context.commit('setCaseId', payload)

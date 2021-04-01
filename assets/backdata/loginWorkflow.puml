@@ -25,6 +25,8 @@ if (lastUser not exists) then (true)
     :loginStatus = 0;
 else if (user != null &&
   caseId != null) then (true)
+    :set user & caseId
+      to $store;
     :loginStatus = 1;
     if (user & caseId exists
      in caseList) then (true)
@@ -38,8 +40,10 @@ else if (user != null &&
         from PouchDB;
     endif
 else if (user != null) then (yes)
+    :set user to $store;
     :loginStatus = 2;
 else if (caseId != null) then (true)
+    :set caseId to $store;
     :loginStatus = 3;
 else (false)
     :loginStatus = 4;

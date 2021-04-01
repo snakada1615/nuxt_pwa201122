@@ -36,7 +36,6 @@
               placeholder="file name"
               :state="fileNameValidator"
             ></b-form-input>
-
             <template #append>
               <b-dropdown text="Dropdown" variant="info" size="sm">
                 <b-dropdown-item
@@ -51,6 +50,7 @@
             </template>
 
           </b-input-group>
+          caseIDList:{{caseIdList}}
         </b-col>
       </b-row>
       <b-row class="my-2 mt-4">
@@ -103,17 +103,19 @@ export default {
         })
 
         //update $store
-        this.$store.dispatch('setCaseId', {
-          'caseId': this.fileName
-        })
+        this.$store.dispatch('setCaseId',
+          this.fileName
+        )
 
         //update PouchDB-lastUser
-        await this.$store.dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId})
+        await this.$store.dispatch('saveUserToLastuser', {user: this.$store.state.user, caseId: this.$store.state.caseId})
 
         //check if caseId is already registered to PouchDB
-        const res2 = this.caseIdList.find((val) => val.caseId === state.caseId && val.user === state.user)
+        const res2 = this.caseIdList.filter(function(val){
+          return val.caseId === this.$store.state.caseId && val.user === this.$store.state.user
+        })
         if (res2.length === 0) {
-          await this.$store.dispatch('initPouch', {user: state.user, caseId: state.caseId})
+          await this.$store.dispatch('initPouch', {user: this.$store.state.user, caseId: this.$store.state.caseId})
 
           //move to top page
           this.email = ''

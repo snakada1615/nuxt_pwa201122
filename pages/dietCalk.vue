@@ -70,25 +70,22 @@
         return this.$store.state.caseId
       },
       loginChecked: function () {
-        return this.$store.state.isLoginChecked
+        return this.$store.state.loginStatus === 1
       },
-      currentCaseIds: function () {
-        return this.$store.state.caseIdList
-      }
     },
     watch: {
       loginChecked: async function () {
         let vm = this
-        if (this.loginChecked) {
+        if (vm.loginChecked) {
           vm.items = await getFCT()
           vm.itemsDRI = await getDRI()
 
-          const res = await vm.loadDietfromPouch()
+          const res = await vm.$store.dispatch('loadDietfromPouch')
           vm.WS.dietCases = JSON.parse(JSON.stringify(res))
-          vm.WS.user = JSON.parse(JSON.stringify(this.$store.state.user))
-          vm.WS.caseId = this.$store.state.caseId
-          this.$store.dispatch('setNow')
-          vm.WS.saveDate = this.$store.state.saveDate
+          vm.WS.user = JSON.parse(JSON.stringify(vm.$store.state.user))
+          vm.WS.caseId = vm.$store.state.caseId
+          vm.$store.dispatch('setNow')
+          vm.WS.saveDate = vm.$store.state.saveDate
         }
       },
       currentCaseId: function (value) {
@@ -97,7 +94,33 @@
     },
     beforeDestroy() {
       console.log('beforeDestroy')
-      //this.saveWS()
+    },
+    async asyncData({store}){
+      // fetch data if loginstatus == 1 (autologin complete in middleware pages.js)
+      // this is true when moving from index.vue (no reload)
+      let myItem = []
+      let myitemsDRI = []
+      let myWS = {}
+
+      if (store.state.loginStatus !== 1) {
+        return
+      } else {
+        myItem =  getFCT()
+        myitemsDRI =  getDRI()
+
+        store.dispatch('setNow')
+        const res = await store.dispatch('loadDietfromPouch')
+
+        myWS.dietCases = JSON.parse(JSON.stringify(res))
+        myWS.user = JSON.parse(JSON.stringify(store.state.user))
+        myWS.caseId = store.state.caseId
+        myWS.saveDate = store.state.saveDate
+      }
+      return {
+        items: await myItem,
+        itemsDRI: await myitemsDRI,
+        WS: myWS
+      }
     },
     methods: {
       /**
@@ -110,58 +133,13 @@
         console.log('modified:' + val)
       },
       /**
-       * load list of Diet from PouchDB
-       * @returns {Promise<unknown>}
-       */
-      loadDietfromPouch() {
-        let db = new PouchDB(this.$store.state.userDB)
-        const id = this.$store.getters.currentPouchID
-        const iCount = this.$store.state.tabNumber
-        let currentDiet = {}
-        let promise = new Promise((resolve) => {
-          pouchGetDoc(db, this.$store.getters.currentPouchID).then(function (doc) {
-            currentDiet = doc.dietCases
-            resolve(currentDiet)
-          }).catch(function (err) {
-            console.log('no data exists in PouchDB')
-            resolve(err)
-          })
-        })
-        return promise
-      },
-      /**
-       * save list of diet to PouchDB
-       * @param {Objects[]} record - array of diet dataset (WS[1..10])
-       * @returns {Promise<unknown>}
-       */
-      saveDietToPouch(record) {
-        console.log('saveDietToPouch')
-        const db = new PouchDB(this.$store.state.userDB)
-        this.$store.dispatch('setNow')
-        record.saveDate = this.$store.state.saveDate
-        record._id = this.$store.getters.currentPouchID
-        let promise = new Promise(async (resolve) => {
-          console.log(record)
-          const res = await pouchWSPutNewOrUpdate(db, record, 'diet')
-          if (res) {
-            resolve(res)
-          } else {
-            resolve(false)
-          }
-        })
-        return promise
-      },
-      /**
        * save overall working data to Pouch with userId, workSpace and timestamp
        * @returns {Promise<boolean>}
        */
       async saveWS() {
-        const user = this.$store.state.user
         const res1 = await this.saveDietToPouch(this.WS)
         const res2 = await this.$store.dispatch('saveUserToLastuser',
           {user: this.$store.state.user, caseId: this.$store.state.caseId})
-        console.log(res1)
-        console.log(res2)
         if (res1 && res2) {
           this.$store.dispatch('setEdit', false)
           await this.$store.dispatch('loadCaseListFromPouch')
