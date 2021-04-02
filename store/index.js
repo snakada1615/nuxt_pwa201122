@@ -1,6 +1,6 @@
 import firebase from '~/plugins/firebase'
 import PouchDB from 'pouchdb'
-import {pouchPutNewDoc, pouchGetDoc, pouchUpdateDoc, pouchPutNewOrUpdate} from "../plugins/pouchHelper";
+import {pouchPutNewDoc, pouchGetDoc, pouchUpdateDoc, pouchPutNewOrUpdate, pouchWSPutNewOrUpdate} from "../plugins/pouchHelper";
 
 export const state = () => ({
   user: {
@@ -258,13 +258,13 @@ export const actions = {
    * @param {Objects[]} record - array of diet dataset (WS[1..10])
    * @returns {Promise<unknown>}
    */
-  saveDietToPouch({store}, record) {
+  saveDietToPouch({state, getters, dispatch}, record) {
     console.log('saveDietToPouch')
     console.log(record)
-    const db = new PouchDB(store.state.userDB)
-    store.dispatch('setNow')
-    record.saveDate = store.state.saveDate
-    record._id = store.getters.currentPouchID
+    const db = new PouchDB(state.userDB)
+    dispatch('setNow')
+    record.saveDate = state.saveDate
+    record._id = getters.currentPouchID
     let promise = new Promise(async (resolve) => {
       const res = await pouchWSPutNewOrUpdate(db, record, 'diet')
       if (res) {

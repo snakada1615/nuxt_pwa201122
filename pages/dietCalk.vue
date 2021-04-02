@@ -29,11 +29,8 @@
 
 <script>
   import driTable from "../components/organisms/driTable";
-  import PouchDB from 'pouchdb'
-  import {pouchWSPutNewOrUpdate} from '@/plugins/pouchHelper'
   import dietCalkComp from "../components/organisms/dietCalkComp";
   import navigationGuard from "../components/atoms/navigationGuard";
-  import {pouchGetDoc} from "../plugins/pouchHelper";
   import {getFCT, getDRI} from "../plugins/pouchHelper";
   //import {state} from "../store";
 
@@ -137,7 +134,7 @@
        * @returns {Promise<boolean>}
        */
       async saveWS() {
-        const res1 = await this.saveDietToPouch(this.WS)
+        const res1 = await this.$store.dispatch('saveDietToPouch', this.WS)
         const res2 = await this.$store.dispatch('saveUserToLastuser',
           {user: this.$store.state.user, caseId: this.$store.state.caseId})
         if (res1 && res2) {
