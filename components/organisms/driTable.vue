@@ -37,6 +37,7 @@
       }
     },
     mounted() {
+      // to reflect property on initial loading
       this.onChange(this.value)
     },
     computed: {
@@ -73,9 +74,7 @@
       onChange:function(val){
         if (val > 0) {
           this.selectedDRI = this.setDRI(val)
-          console.log('onChangeDRI')
-          console.log(val)
-          console.log(this.selectedDRI)
+
           /**
            * triggers when dri selection changed
            * @property {Number} value selected DRI id
@@ -93,7 +92,7 @@
         let tableItem = []
         //vm.selectedData.length = 0
         const dat = vm.items.filter(function (item) {
-          return item.id === selectedId
+          return item.id === String(selectedId)
         })
         if (dat.length !== 1) {
           return []

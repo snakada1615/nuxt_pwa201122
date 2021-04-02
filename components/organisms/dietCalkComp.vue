@@ -342,7 +342,6 @@
       },
       onChangeTarget(value, pageId) {
         console.log('onChangeTarget')
-        console.log(value)
         if (pageId !== this.dietCase.pageId || !value.length) {
           return
         }
