@@ -40,17 +40,16 @@
               <b-dropdown text="Dropdown" variant="info" size="sm">
                 <b-dropdown-item
                   v-for="caseId in caseIdList"
-                  :key="caseId"
-                  :value="caseId"
-                  @click="fileName = caseId"
-                >{{ caseId }}
+                  :key="caseId.caseId"
+                  :value="caseId.caseId"
+                  @click="fileName = caseId.caseId"
+                >{{ caseId.caseId }}
                 </b-dropdown-item>
               </b-dropdown>
               <b-button variant="warning" :disabled="!fileName" @click="fileName = ''">clear</b-button>
             </template>
-
           </b-input-group>
-          caseIDList:{{caseIdList}}
+          <p>please specify file name to store your work record</p>
         </b-col>
       </b-row>
       <b-row class="my-2 mt-4">

@@ -275,6 +275,36 @@ export const actions = {
     })
     return promise
   },
+  loadFeasibilityCasefromPouch({state, getters}) {
+    let db = new PouchDB(state.userDB)
+    let currentFeasibilityCases = {}
+    let promise = new Promise((resolve) => {
+      pouchGetDoc(db, getters.currentPouchID).then(function (doc) {
+        currentFeasibilityCases = doc.feasibilityCases
+        resolve(currentFeasibilityCases)
+      }).catch(function (err) {
+        console.log('no data exists in PouchDB')
+        resolve(err)
+      })
+    })
+    return promise
+  },
+  saveFeasibilityToPouch({state, getters, dispatch}, record) {
+    console.log('saveFeasibilityToPouch')
+    const db = new PouchDB(state.userDB)
+    dispatch('setNow')
+    record.saveDate = state.saveDate
+    record._id = getters.currentPouchID
+    let promise = new Promise(async (resolve) => {
+      const res = await pouchWSPutNewOrUpdate(db, record, 'feasibility')
+      if (res) {
+        resolve(res)
+      } else {
+        resolve(false)
+      }
+    })
+    return promise
+  },
   loadCaseListFromPouch({state, dispatch}) {
     let promise = new Promise(async (resolve, reject) => {
       const caseTemp = await dispatch('getListWorkspace', state.user.email)

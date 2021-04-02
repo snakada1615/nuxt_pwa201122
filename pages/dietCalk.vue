@@ -32,7 +32,6 @@
   import dietCalkComp from "../components/organisms/dietCalkComp";
   import navigationGuard from "../components/atoms/navigationGuard";
   import {getFCT, getDRI} from "../plugins/pouchHelper";
-  //import {state} from "../store";
 
   export default {
     components: {

@@ -87,7 +87,7 @@
               :items="itemsDRI"
               :showTable=false
               @changeDri="onChangeTarget"
-              @change="$emit('update:driId', $event)"
+              @input="$emit('update:driId', $event)"
               head-row-variant="success"
               table-variant="light"
             />
@@ -135,9 +135,7 @@
   </b-container>
 </template>
 <script>
-  import PouchDB from "pouchdb";
   import FctTableModal from "@/components/organisms/FctTableModal";
-  import {getPouchData, syncCloudant} from '@/plugins/pouchHelper'
   import driTable from "@/components/organisms/driTable";
   import nutritionBar from "@/components/organisms/nutritionBar";
 
@@ -180,6 +178,7 @@
         })
       },
       onChangeTarget(value) {
+        console.log('onChangeTarget')
         console.log(value)
         this.nutritionTarget.En = Number(value[1].Value) || 0
         this.nutritionTarget.Pr = Number(value[2].Value) || 0

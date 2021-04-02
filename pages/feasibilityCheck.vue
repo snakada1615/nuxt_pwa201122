@@ -81,7 +81,7 @@
         return this.$store.state.caseId
       },
       loginChecked: function () {
-        return this.$store.state.isLoginChecked
+        return this.$store.state.loginStatus === 1
       },
       currentCaseIds: function () {
         return this.$store.state.caseIdList
@@ -94,7 +94,7 @@
           vm.items = await getFCT()
           vm.itemsDRI = await getDRI()
 
-          const res = await vm.loadFeasibilityCasefromPouch()
+          const res = await this.$store.dispatch('loadFeasibilityCasefromPouch')
           vm.WS.feasibilityCases = JSON.parse(JSON.stringify(res))
           vm.WS.user = JSON.parse(JSON.stringify(this.$store.state.user))
           vm.WS.caseId = this.$store.state.caseId
@@ -110,9 +110,34 @@
       },
 
     },
+    async asyncData({store}){
+      // fetch data if loginstatus == 1 (autologin complete in middleware pages.js)
+      // this is true when moving from index.vue (no reload)
+      let myItem = []
+      let myitemsDRI = []
+      let myWS = {}
+
+      if (store.state.loginStatus !== 1) {
+        return
+      } else {
+        myItem =  getFCT()
+        myitemsDRI =  getDRI()
+
+        const res = await store.dispatch('loadFeasibilityCasefromPouch')
+        myWS.feasibilityCases = JSON.parse(JSON.stringify(res))
+        myWS.user = JSON.parse(JSON.stringify(store.state.user))
+        myWS.caseId = store.state.caseId
+        store.dispatch('setNow')
+        myWS.saveDate = store.state.saveDate
+      }
+      return {
+        items: await myItem,
+        itemsDRI: await myitemsDRI,
+        WS: myWS
+      }
+    },
     methods: {
       onUpdateDriId(){
-
         this.modifiedSignal('driid')
       },
       modifiedSignal(val) {
@@ -120,40 +145,9 @@
         this.$store.dispatch('setEdit', true)
         console.log('modified:' + val)
       },
-      loadFeasibilityCasefromPouch() {
-        let db = new PouchDB(this.$store.state.userDB)
-        let currentFeasibilityCases = {}
-        let promise = new Promise((resolve) => {
-          pouchGetDoc(db, this.$store.getters.currentPouchID).then(function (doc) {
-            currentFeasibilityCases = doc.feasibilityCases
-            resolve(currentFeasibilityCases)
-          }).catch(function (err) {
-            console.log('no data exists in PouchDB')
-            resolve(err)
-          })
-        })
-        return promise
-      },
-      saveFeasibilityToPouch(record) {
-        console.log('saveFeasibilityToPouch')
-        const db = new PouchDB(this.$store.state.userDB)
-        this.$store.dispatch('setNow')
-        record.saveDate = this.$store.state.saveDate
-        record._id = this.$store.getters.currentPouchID
-        let promise = new Promise(async (resolve) => {
-          const res = await pouchWSPutNewOrUpdate(db, record, 'feasibility')
-          if (res) {
-            resolve(res)
-          } else {
-            resolve(false)
-          }
-        })
-        return promise
-      },
       async saveWS() {
-        console.log(this.$store.state)
-        const user = this.$store.state.user
-        const res1 = await this.saveFeasibilityToPouch(this.WS)
+        console.log(this.WS)
+        const res1 = await this.$store.dispatch('saveFeasibilityToPouch', this.WS)
         const res2 = await this.$store.dispatch('saveUserToLastuser',
           {user: this.$store.state.user, caseId: this.$store.state.caseId})
         if (res1 && res2) {
