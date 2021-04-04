@@ -3,6 +3,7 @@ import PouchDB from 'pouchdb'
 import {pouchPutNewDoc, pouchGetDoc, pouchUpdateDoc, pouchPutNewOrUpdate, pouchWSPutNewOrUpdate} from "../plugins/pouchHelper";
 
 export const state = () => ({
+  packageVersion: process.env.PACKAGE_VERSION || '0',
   user: {
     name: '',
     email: '',
@@ -23,8 +24,11 @@ export const state = () => ({
 })
 
 export const getters = {
-  currentPouchID: state => {
+  currentPouchID: (state) => {
     return state.user.email + '_' + state.caseId
+  },
+  appVersion: (state) => {
+    return state.packageVersion
   },
 }
 

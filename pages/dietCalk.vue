@@ -119,6 +119,17 @@
       }
     },
     methods: {
+      delRecepiItem(id){
+        console.log(id)
+        let res = []
+        this.dietCase.itemsRecepi.forEach(function (val, index) {
+          if (index !== id) {
+            res.push(val)
+          }
+        })
+        console.log(res)
+        this.dietCase.itemsRecepi = res
+      },
       /**
        * emit modified signal
        * @param {String} val - indicate which DOM have changed

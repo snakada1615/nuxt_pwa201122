@@ -25,7 +25,7 @@
             :items="items"
             head-row-variant="success"
             table-variant="light"
-            @fctClick="onFCTclick($event, dietCase.pageId)"
+            @fctClick="onFCTclick($event, pageId)"
           ></fct-table>
         </b-card>
       </b-col>
@@ -51,10 +51,10 @@
           </template>
           <dri-table
             v-show="!targetSwitch"
-            :value="dietCase.driID"
+            :value="driID"
             :items="itemsDRI"
             @change="$emit('update:driID', $event)"
-            @changeDri="onChangeTarget($event, dietCase.pageId)"
+            @changeDri="onChangeTarget($event, pageId)"
             head-row-variant="success"
             table-variant="light"
           />
@@ -78,12 +78,13 @@
             <b class="py-0 my-0">Crop combination</b>
           </template>
           <recepi-table
-            @inputData="onChangeRecepi($event, dietCase.pageId)"
-            :items.sync="dietCase.itemsRecepi"
+            @inputData="onChangeRecepi($event, pageId)"
+            :items="itemsRecepi"
             head-row-variant="success"
             table-variant="light"
             foot-row-variant="light"
-            @rowClick="onRecepiclick($event, dietCase.pageId)"
+            @rowClick="onRecepiclick($event, pageId)"
+            @delClick="delRecepiItem"
           >
           </recepi-table>
         </b-card>
@@ -166,7 +167,7 @@
     <food-modal
       v-model="initWeight"
       :items="itemSingleCrop"
-      :my-name="'modalTest' + dietCase.pageId"
+      :my-name="'modalTest' + pageId"
       my-type="Number"
       rules="min_value:0|max_value:500"
       @modalOk="onCropWeightSet"
@@ -201,7 +202,7 @@
     computed: {
       nutritionTargetComputed: {
         get(){
-          return this.dietCase.nutritionTarget ? this.dietCase.nutritionTarget : []
+          return this.nutritionTarget ? this.nutritionTarget : []
         },
         set(value){
           const res = this.dietCase
@@ -209,17 +210,17 @@
         }
       },
       nutritionRating: function () {
-        if (!this.dietCase.nutritionTarget) {
+        if (!this.nutritionTarget) {
           return []
         }
-        let En = this.dietCase.nutritionTarget.En ?
-          Math.round(100 * this.dietCase.nutritionSum.En * this.driRange / this.dietCase.nutritionTarget.En) / 10 : 0
-        let Pr = this.dietCase.nutritionTarget.En ?
-          Math.round(100 * this.dietCase.nutritionSum.Pr * this.driRange / this.dietCase.nutritionTarget.Pr) / 10 : 0
-        let Va = this.dietCase.nutritionTarget.En ?
-          Math.round(100 * this.dietCase.nutritionSum.Va * this.driRange / this.dietCase.nutritionTarget.Va) / 10 : 0
-        let Fe = this.dietCase.nutritionTarget.En ?
-          Math.round(100 * this.dietCase.nutritionSum.Fe * this.driRange / this.dietCase.nutritionTarget.Fe) / 10 : 0
+        let En = this.nutritionTarget.En ?
+          Math.round(100 * this.nutritionSum.En * this.driRange / this.nutritionTarget.En) / 10 : 0
+        let Pr = this.nutritionTarget.En ?
+          Math.round(100 * this.nutritionSum.Pr * this.driRange / this.nutritionTarget.Pr) / 10 : 0
+        let Va = this.nutritionTarget.En ?
+          Math.round(100 * this.nutritionSum.Va * this.driRange / this.nutritionTarget.Va) / 10 : 0
+        let Fe = this.nutritionTarget.En ?
+          Math.round(100 * this.nutritionSum.Fe * this.driRange / this.nutritionTarget.Fe) / 10 : 0
         return {
           En: En,
           Pr: Pr,
@@ -251,11 +252,11 @@
       },
       selectedCrops: {
         get: function () {
-          if (!this.dietCase.itemsRecepi) {
+          if (!this.itemsRecepi) {
             return []
           }
           let uniqueGroup = []
-          this.dietCase.itemsRecepi.forEach(function (elem) {
+          this.itemsRecepi.forEach(function (elem) {
             if (uniqueGroup.indexOf(elem.Group) === -1) {
               uniqueGroup.push(elem.Group)
             }
@@ -284,29 +285,16 @@
        * aaaaaaaaaa
        *
        */
-      dietCase: {
-        type: Object,
-        default: () => ({
-          _id: '',
-          driID: 2,
-          pageId: 1,
-          itemsRecepi: [],
-          targetName: '',
-          nutritionTarget: {
-            En: 10,
-            Pr: 10,
-            Va: 10,
-            Fe: 10,
-          },
-          nutritionSum: {
-            En: 10,
-            Pr: 10,
-            Va: 10,
-            Fe: 10,
-            Wt: 10,
-          },
-        })
+      _id: {
+        type:String,
+        default: ''
       },
+      driID:{
+        type: Number,
+        default: 2,
+      },
+      pageId: 1,
+      itemsRecepi: [],
       fctOrg: {
         type: Array
       },
@@ -330,43 +318,43 @@
     methods: {
       delRecepiItem(id){
         let res = []
-        this.dietCase.itemsRecepi.forEach(function (val, index) {
+        this.itemsRecepi.forEach(function (val, index) {
           if (index !== id) {
             res.push(val)
           }
         })
-        this.dietCase.itemsRecepi = res
+        this.itemsRecepi = res
         this.$emit('changeRecepi')
       },
       onChangeRecepi(value, pageId) {
-        if (pageId !== this.dietCase.pageId) {
+        if (pageId !== this.pageId) {
           return
         }
-        if (this.dietCase.nutritionSum) {
-          this.dietCase.nutritionSum.En = value.En || 0
-          this.dietCase.nutritionSum.Pr = value.Pr || 0
-          this.dietCase.nutritionSum.Va = value.Va || 0
-          this.dietCase.nutritionSum.Fe = value.Fe || 0
-          this.dietCase.nutritionSum.Wt = value.Wt || 0
+        if (this.nutritionSum) {
+          this.nutritionSum.En = value.En || 0
+          this.nutritionSum.Pr = value.Pr || 0
+          this.nutritionSum.Va = value.Va || 0
+          this.nutritionSum.Fe = value.Fe || 0
+          this.nutritionSum.Wt = value.Wt || 0
         }
       },
       onChangeTarget(value, pageId) {
         console.log('onChangeTarget')
-        if (pageId !== this.dietCase.pageId || !value.length) {
+        if (pageId !== this.pageId || !value.length) {
           return
         }
-        if (this.dietCase.nutritionTarget) {
-          this.dietCase.nutritionTarget.En = Number(value[1].Value) || 0
-          this.dietCase.nutritionTarget.Pr = Number(value[2].Value) || 0
-          this.dietCase.nutritionTarget.Va = Number(value[3].Value) || 0
-          this.dietCase.nutritionTarget.Fe = Number(value[4].Value) || 0
-          this.dietCase.driID  = Number(value[5].Value) || 0
+        if (this.nutritionTarget) {
+          this.nutritionTarget.En = Number(value[1].Value) || 0
+          this.nutritionTarget.Pr = Number(value[2].Value) || 0
+          this.nutritionTarget.Va = Number(value[3].Value) || 0
+          this.nutritionTarget.Fe = Number(value[4].Value) || 0
+          this.driID  = Number(value[5].Value) || 0
           this.$emit('changeTarget', this.dietCase)
         }
       },
       onFCTclick(rec, pageId) {
         const vm = this
-        if (pageId !== vm.dietCase.pageId) {
+        if (pageId !== vm.pageId) {
           return
         }
         vm.itemSingleCrop.length = 0
@@ -380,7 +368,7 @@
           'Fe': rec.Fe,
         })
         vm.initWeight = 0
-        vm.dietCase.itemsRecepi.forEach(function (item) {
+        vm.itemsRecepi.forEach(function (item) {
           if (item.id === rec.id) {
             vm.initWeight = Number(item.Wt)
           }
@@ -388,7 +376,7 @@
         vm.$bvModal.show('modalTest' + String(pageId))
       },
       onRecepiclick(rec, pageId) {
-        if (pageId !== this.dietCase.pageId) {
+        if (pageId !== this.pageId) {
           return
         }
         this.itemSingleCrop.length = 0
@@ -406,14 +394,14 @@
       },
       onCropWeightSet(dat) {
         let res = false
-        this.dietCase.itemsRecepi.forEach(function (val) {
+        this.itemsRecepi.forEach(function (val) {
           if (val.id === dat.item[0].id) {
             val.Wt = dat.Wt
             res = true
           }
         })
         if (!res) {
-          this.dietCase.itemsRecepi.push({
+          this.itemsRecepi.push({
             'id': dat.item[0].id || 0,
             'Name': dat.item[0].Name || 0,
             'Group': dat.item[0].Group || 0,
@@ -424,7 +412,7 @@
             "Wt": dat.Wt || 0
           })
         }
-        this.$emit('changeRecepi', {pageId: this.dietCase.pageId ,itemsRecepi: dat})
+        this.$emit('changeRecepi', {pageId: this.pageId ,itemsRecepi: dat})
       },
     },
   }

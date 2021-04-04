@@ -1,7 +1,7 @@
 //import path from 'path'
 //import fs from 'fs'
-
 export default {
+  // add version number from WebPack to the program environmental variable
   // Disable server-side rendering (https://go.nuxtjs.dev/ssr-mode)
   ssr: false,
 
@@ -47,7 +47,7 @@ export default {
       "background_color": "#066308",
       "display": "standalone",
       "scope": "/",
-      "start_url": "/",
+      "start_url": "",
       "app_name": "NFA-tool",
       "short_name": "nfa",
     }
@@ -71,7 +71,8 @@ export default {
         'BIconHouseFill',
         'BIconExclamationCircleFill',
         'BIconCheck',
-        'BIconPeopleFill'
+        'BIconPeopleFill',
+        'BIconX'
       ],
       componentPlugins: [
         'NavbarPlugin',

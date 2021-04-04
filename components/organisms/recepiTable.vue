@@ -6,7 +6,7 @@
         bordered
         small
         ref="table"
-        :items="items"
+        :items="items_c"
         :fields="fields"
         @input="inputData"
         @row-clicked="rowClick"
@@ -14,6 +14,12 @@
         v-bind="$attrs">
 
         <!-- A custom formatted footer cell for field 'name' -->
+        <template #cell(Name)="data">
+          <span class="text-info">{{ data.value }}</span>
+          <b-button class="px-0 py-0 mx-0 my-0" variant="light" @click="delClick(data.index)">
+            <b-badge variant="gray-400" class="px-0 py-0"><b-icon icon="X"></b-icon></b-badge>
+          </b-button>
+        </template>
         <template #foot(Name)="data">
           <span>total</span>
         </template>
@@ -83,6 +89,14 @@
         sum_Fe = Math.round(sum_Fe)
         sum_Wt = Math.round(sum_Wt)
         return {En: sum_En, Pr: sum_Pr, Va: sum_Va, Fe: sum_Fe, Wt: sum_Wt}
+      },
+      items_c: {
+        get(){
+          return [...this.items]
+        },
+        set(value){
+          this.$emit('update:items', value)
+        }
       }
     },
     data() {
@@ -105,7 +119,16 @@
       },
       rowClick(record){
         this.$emit('rowClick', record)
-      }
+      },
+      delClick(id){
+        let res = []
+        this.items.forEach(function (val, index) {
+          if (index !== id) {
+            res.push(val)
+          }
+        })
+        this.items_c = res
+      },
     }
   }
 </script>

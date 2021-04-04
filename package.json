@@ -1,6 +1,6 @@
 {
-  "name": "nuxt-pwa-201122",
-  "version": "1.0.0",
+  "name": "nfa-app",
+  "version": "0.6.0",
   "private": true,
   "scripts": {
     "dev": "nuxt",

@@ -61,6 +61,14 @@
             </b-card-body>
         </b-card>
       </b-col>
+      <b-col cols="6" md="4" class="px-1">
+        <b-card class="bg-info my-2">
+            <b-card-body class="px-0 py-0">
+              <b-card-text class="text-center font-weight-bold text-secondary bg-white">option</b-card-text>
+              <b-button class="btn btn-warning m-auto btn-block" to="/updateSW" Nuxt>option</b-button>
+            </b-card-body>
+        </b-card>
+      </b-col>
     </b-row>
   </section>
 </template>

@@ -90,42 +90,46 @@ export default {
   },
   methods: {
     async login() {
-      const res = await this.$store.dispatch('login', {
-        email: this.email,
-        password: this.password,
+      const vm = this
+      console.log('vm.caseIdList')
+      const res = await vm.$store.dispatch('login', {
+        email: vm.email,
+        password: vm.password,
       })
       if (res) { // successfully logged in using firebase
         //update $store
-        this.$store.dispatch('setUser', {
+        vm.$store.dispatch('setUser', {
           'email': res.email,
           'uid': res.uid
         })
 
         //update $store
-        this.$store.dispatch('setCaseId',
-          this.fileName
+        vm.$store.dispatch('setCaseId',
+          vm.fileName
         )
 
         //update PouchDB-lastUser
-        await this.$store.dispatch('saveUserToLastuser', {user: this.$store.state.user, caseId: this.$store.state.caseId})
+        await vm.$store.dispatch('saveUserToLastuser', {user: vm.$store.state.user, caseId: vm.$store.state.caseId})
 
         //check if caseId is already registered to PouchDB
-        const res2 = this.caseIdList.filter(function(val){
-          return val.caseId === this.$store.state.caseId && val.user === this.$store.state.user
+        const res2 = vm.caseIdList.filter(function(val){
+          return val.caseId === vm.$store.state.caseId && val.user === vm.$store.state.user
         })
         if (res2.length === 0) {
-          await this.$store.dispatch('initPouch', {user: this.$store.state.user, caseId: this.$store.state.caseId})
+          await vm.$store.dispatch('initPouch', {user: vm.$store.state.user, caseId: vm.$store.state.caseId})
 
           //move to top page
-          this.email = ''
-          this.password = ''
-          this.$router.push('/')
+          console.log('gotoindex')
+          vm.email = ''
+          vm.password = ''
+          vm.$router.push('/')
         } else {
 
           //move to top page
-          this.email = ''
-          this.password = ''
-          this.$router.push('/')
+          console.log('gotoindex2')
+          vm.email = ''
+          vm.password = ''
+          vm.$router.push('/')
         }
       }
     },
