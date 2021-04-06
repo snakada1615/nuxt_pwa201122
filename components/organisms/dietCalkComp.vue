@@ -405,7 +405,11 @@
         this.$bvModal.show('modalTest' + String(pageId))
       },
       onCropWeightSet(dat) {
+        //TODO:  currently violating Vue rule of property handling
+        //　need to be fixed to emit modification signal to parent
+
         let res = false
+        let modifiedData =
         this.dietCase.itemsRecepi.forEach(function (val) {
           if (val.id === dat.item[0].id) {
             val.Wt = dat.Wt
@@ -425,6 +429,7 @@
           })
         }
         this.$emit('changeRecepi', {pageId: this.dietCase.pageId ,itemsRecepi: dat})
+        this.$emit('update:dietCase')
       },
     },
   }

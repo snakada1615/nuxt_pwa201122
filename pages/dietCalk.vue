@@ -16,7 +16,7 @@
           <diet-calk-comp
             :fct-org="items"
             :dri-org="itemsDRI"
-            :diet-case="diet"
+            :diet-case.sync="diet"
             @changeTarget="modifiedSignal('target')"
             @changeRecepi="modifiedSignal('recepi')"
           />
