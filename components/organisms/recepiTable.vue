@@ -93,9 +93,6 @@
       items_c: {
         get(){
           return [...this.items]
-        },
-        set(value){
-          this.$emit('update:items', value)
         }
       }
     },
@@ -127,7 +124,8 @@
             res.push(val)
           }
         })
-        this.items_c = res
+        //this.items_c = res
+        this.$emit('update:items', res)
       },
     }
   }

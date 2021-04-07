@@ -79,7 +79,7 @@
           </template>
           <recepi-table
             @inputData="onChangeRecepi($event, dietCase.pageId)"
-            :items.sync="dietCase.itemsRecepi"
+            :items.sync="dietCase.foodItems"
             head-row-variant="success"
             table-variant="light"
             foot-row-variant="light"
@@ -251,11 +251,11 @@
       },
       selectedCrops: {
         get: function () {
-          if (!this.dietCase.itemsRecepi) {
+          if (!this.dietCase.foodItems) {
             return []
           }
           let uniqueGroup = []
-          this.dietCase.itemsRecepi.forEach(function (elem) {
+          this.dietCase.foodItems.forEach(function (elem) {
             if (uniqueGroup.indexOf(elem.Group) === -1) {
               uniqueGroup.push(elem.Group)
             }
@@ -279,7 +279,7 @@
     },
     props: {
       /**
-       * information for combination of diet (itemsRecepi) plus
+       * information for combination of diet (foodItems) plus
        *
        * aaaaaaaaaa
        *
@@ -290,7 +290,7 @@
           _id: '',
           driID: 2,
           pageId: 1,
-          itemsRecepi: [],
+          foodItems: [],
           targetName: '',
           nutritionTarget: {
             En: 10,
@@ -330,12 +330,12 @@
     methods: {
       delRecepiItem(id){
         let res = []
-        this.dietCase.itemsRecepi.forEach(function (val, index) {
+        this.dietCase.foodItems.forEach(function (val, index) {
           if (index !== id) {
             res.push(val)
           }
         })
-        this.dietCase.itemsRecepi = res
+        this.dietCase.foodItems = res
         this.$emit('changeRecepi')
       },
       onChangeRecepi(value, pageId) {
@@ -380,7 +380,7 @@
           'Fe': rec.Fe,
         })
         vm.initWeight = 0
-        vm.dietCase.itemsRecepi.forEach(function (item) {
+        vm.dietCase.foodItems.forEach(function (item) {
           if (item.id === rec.id) {
             vm.initWeight = Number(item.Wt)
           }
@@ -405,19 +405,18 @@
         this.$bvModal.show('modalTest' + String(pageId))
       },
       onCropWeightSet(dat) {
-        //TODO:  currently violating Vue rule of property handling
-        //　need to be fixed to emit modification signal to parent
+        //TODO:  object copy is done using assign -> need to improve
 
         let res = false
         let modifiedData = JSON.parse(JSON.stringify(this.dietCase))
-        modifiedData.itemsRecepi.forEach(function (val) {
+        modifiedData.foodItems.forEach(function (val) {
           if (val.id === dat.item[0].id) {
             val.Wt = dat.Wt
             res = true
           }
         })
         if (!res) {
-          modifiedData.itemsRecepi.push({
+          modifiedData.foodItems.push({
             'id': dat.item[0].id || 0,
             'Name': dat.item[0].Name || 0,
             'Group': dat.item[0].Group || 0,
@@ -428,11 +427,8 @@
             "Wt": dat.Wt || 0
           })
         }
-        this.$emit('changeRecepi', {pageId: this.dietCase.pageId ,itemsRecepi: dat})
-        console.log('i send it now')
+        this.$emit('changeRecepi', {pageId: this.dietCase.pageId ,foodItems: dat})
         this.$emit('update:dietCase', modifiedData)
-        console.log('sending complete')
-        console.log(modifiedData)
       },
     },
   }

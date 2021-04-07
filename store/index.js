@@ -124,7 +124,7 @@ export const actions = {
       let dat = []
       for (let index = 0; index < iCount; index++) {
         dat.push({
-          'itemsRecepi': [],
+          'foodItems': [],
           'targetName': '',
           'nutritionTarget': {
             'En': 0,

@@ -16,7 +16,7 @@
           <diet-calk-comp
             :fct-org="items"
             :dri-org="itemsDRI"
-            :diet-case.sync="diet"
+            :diet-case="diet"
             @update:dietCase="test($event, index)"
             @changeTarget="modifiedSignal('target')"
             @changeRecepi="modifiedSignal('recepi')"
@@ -127,18 +127,18 @@
         console.log(val)
         console.log(index)
         console.log(this.WS.dietCases[index])
-        this.WS.dietCases[index] = val
+        Object.assign(this.WS.dietCases[index], JSON.parse(JSON.stringify(val)))
       },
       delRecepiItem(id){
         console.log(id)
         let res = []
-        this.dietCase.itemsRecepi.forEach(function (val, index) {
+        this.dietCase.foodItems.forEach(function (val, index) {
           if (index !== id) {
             res.push(val)
           }
         })
         console.log(res)
-        this.dietCase.itemsRecepi = res
+        this.dietCase.foodItems = res
       },
       /**
        * emit modified signal

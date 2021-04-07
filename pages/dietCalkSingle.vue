@@ -78,7 +78,7 @@
           </template>
           <recepi-table
             @inputData="onChangeRecepi"
-            :items="dietCase.itemsRecepi"
+            :items="dietCase.foodItems"
             head-row-variant="success"
             table-variant="light"
             foot-row-variant="light"
@@ -235,7 +235,7 @@
       selectedCrops: {
         get: function () {
           let uniqueGroup = []
-          this.dietCase.itemsRecepi.forEach(function (elem) {
+          this.dietCase.foodItems.forEach(function (elem) {
             if (uniqueGroup.indexOf(elem.Group) === -1) {
               uniqueGroup.push(elem.Group)
             }
@@ -251,7 +251,7 @@
       return {
         dietCase:{
           user: this.$store.state.user.email,
-          itemsRecepi: [],
+          foodItems: [],
           targetName:'',
           nutritionTarget: {
             En: 10,
@@ -398,7 +398,7 @@
           'Fe': rec.Fe,
         })
         vm.initWeight = 0
-        vm.dietCase.itemsRecepi.forEach(function (item) {
+        vm.dietCase.foodItems.forEach(function (item) {
           console.log(item.id)
           if (item.id === rec.id) {
             vm.initWeight = Number(item.Wt)
@@ -423,14 +423,14 @@
       onCropWeightSet(dat) {
         console.log(dat)
         let res = false
-        this.dietCase.itemsRecepi.forEach(function (val) {
+        this.dietCase.foodItems.forEach(function (val) {
           if (val.id === dat.item[0].id) {
             val.Wt = dat.Wt
             res = true
           }
         })
         if (!res) {
-          this.dietCase.itemsRecepi.push({
+          this.dietCase.foodItems.push({
             'id': dat.item[0].id || 0,
             'Name': dat.item[0].Name || 0,
             'Group': dat.item[0].Group || 0,
