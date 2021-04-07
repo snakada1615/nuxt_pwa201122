@@ -409,15 +409,15 @@
         //　need to be fixed to emit modification signal to parent
 
         let res = false
-        let modifiedData =
-        this.dietCase.itemsRecepi.forEach(function (val) {
+        let modifiedData = JSON.parse(JSON.stringify(this.dietCase))
+        modifiedData.itemsRecepi.forEach(function (val) {
           if (val.id === dat.item[0].id) {
             val.Wt = dat.Wt
             res = true
           }
         })
         if (!res) {
-          this.dietCase.itemsRecepi.push({
+          modifiedData.itemsRecepi.push({
             'id': dat.item[0].id || 0,
             'Name': dat.item[0].Name || 0,
             'Group': dat.item[0].Group || 0,
@@ -429,7 +429,10 @@
           })
         }
         this.$emit('changeRecepi', {pageId: this.dietCase.pageId ,itemsRecepi: dat})
-        this.$emit('update:dietCase')
+        console.log('i send it now')
+        this.$emit('update:dietCase', modifiedData)
+        console.log('sending complete')
+        console.log(modifiedData)
       },
     },
   }

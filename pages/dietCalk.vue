@@ -17,9 +17,13 @@
             :fct-org="items"
             :dri-org="itemsDRI"
             :diet-case.sync="diet"
+            @update:dietCase="test($event, index)"
             @changeTarget="modifiedSignal('target')"
             @changeRecepi="modifiedSignal('recepi')"
           />
+          <b-card>
+            {{diet}}
+          </b-card>
         </b-tab>
       </b-tabs>
     </b-row>
@@ -119,6 +123,12 @@
       }
     },
     methods: {
+      test(val, index){
+        console.log(val)
+        console.log(index)
+        console.log(this.WS.dietCases[index])
+        this.WS.dietCases[index] = val
+      },
       delRecepiItem(id){
         console.log(id)
         let res = []
