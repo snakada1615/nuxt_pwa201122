@@ -6,9 +6,9 @@
         bordered
         small
         ref="table"
-        :items="items_c"
+        :items="items"
         :fields="fields"
-        @input="inputData"
+        @input="onInput"
         @row-clicked="rowClick"
         foot-clone
         v-bind="$attrs">
@@ -17,7 +17,9 @@
         <template #cell(Name)="data">
           <span class="text-info">{{ data.value }}</span>
           <b-button class="px-0 py-0 mx-0 my-0" variant="light" @click="delClick(data.index)">
-            <b-badge variant="gray-400" class="px-0 py-0"><b-icon icon="X"></b-icon></b-badge>
+            <b-badge variant="gray-400" class="px-0 py-0">
+              <b-icon icon="X"></b-icon>
+            </b-badge>
           </b-button>
         </template>
         <template #foot(Name)="data">
@@ -51,8 +53,8 @@
       items: {
         type: Array,
         default: () => [
-          {id:"1", Group: "grain", Name: "taro", En: "25", Pr: "5", Va: "109", Fe: "13", Wt: "196"},
-          {id:"2", Group: "meat", Name: "pork", En: "15", Pr: "9", Va: "58", Fe: "31", Wt: "208"}
+          {id: "1", Group: "grain", Name: "taro", En: "25", Pr: "5", Va: "109", Fe: "13", Wt: "196"},
+          {id: "2", Group: "meat", Name: "pork", En: "15", Pr: "9", Va: "58", Fe: "31", Wt: "208"}
         ],
       },
       FoodGrp: {
@@ -69,35 +71,18 @@
         ],
       }
     },
-    computed:{
-      nutritionSum: function () {
-        let sum_En = 0
-        let sum_Pr = 0
-        let sum_Va = 0
-        let sum_Fe = 0
-        let sum_Wt = 0
-        this.items.forEach((value) =>{
-          sum_En += Number(value.En)
-          sum_Pr += Number(value.Pr)
-          sum_Va += Number(value.Va)
-          sum_Fe += Number(value.Fe)
-          sum_Wt += Number(value.Wt)
-        })
-        sum_En = Math.round(sum_En)
-        sum_Pr = Math.round(sum_Pr)
-        sum_Va = Math.round(sum_Va)
-        sum_Fe = Math.round(sum_Fe)
-        sum_Wt = Math.round(sum_Wt)
-        return {En: sum_En, Pr: sum_Pr, Va: sum_Va, Fe: sum_Fe, Wt: sum_Wt}
-      },
-      items_c: {
-        get(){
-          return [...this.items]
+    watch:{
+      items:{
+        handler(value){
+          console.log(value)
+          this.nutritionSum = {...this.updateSum(value)}
+          console.log(this.nutritionSum)
         }
       }
     },
     data() {
       return {
+        nutritionSum:{},
         fields: [
           {key: 'id', sortable: false, tdClass: 'd-none', thClass: 'd-none'},
           {key: 'Group', sortable: true, tdClass: 'd-none', thClass: 'd-none'},
@@ -111,21 +96,29 @@
       }
     },
     methods: {
-      inputData() {
-        this.$emit('inputData', this.nutritionSum)
+      updateSum(array){
+          return array.reduce((accumulator, item) => {
+            accumulator.En = (accumulator.En || 0) + item.En
+            accumulator.Pr = (accumulator.Pr || 0) + item.Pr
+            accumulator.Va = (accumulator.Va || 0) + item.Va
+            accumulator.Fe = (accumulator.Fe || 0) + item.Fe
+            return accumulator
+          }, {})
       },
-      rowClick(record){
+      onInput() {
+        this.$emit('totalChanged', this.nutritionSum)
+      },
+      rowClick(record) {
         this.$emit('rowClick', record)
       },
-      delClick(id){
+      delClick(id) {
         let res = []
         this.items.forEach(function (val, index) {
           if (index !== id) {
             res.push(val)
           }
         })
-        //this.items_c = res
-        this.$emit('update:items', res)
+        this.$emit('delItem', res)
       },
     }
   }

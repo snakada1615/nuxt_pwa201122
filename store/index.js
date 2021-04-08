@@ -126,19 +126,6 @@ export const actions = {
         dat.push({
           'foodItems': [],
           'targetName': '',
-          'nutritionTarget': {
-            'En': 0,
-            'Pr': 0,
-            'Va': 0,
-            'Fe': 0,
-          },
-          'nutritionSum': {
-            'En': 0,
-            'Pr': 0,
-            'Va': 0,
-            'Fe': 0,
-            'Wt': 0,
-          },
           'driID': '0',
           '_id': id,
           'pageId': index

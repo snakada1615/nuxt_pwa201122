@@ -73,13 +73,13 @@
     methods: {
       onChange:function(val){
         if (val > 0) {
-          this.selectedDRI = this.setDRI(val)
+          this.selectedDRI = [...this.setDRI(val)]
 
           /**
            * triggers when dri selection changed
            * @property {Number} value selected DRI id
            */
-          this.$emit('input', val)
+          this.$emit('change', val)
           /**
            * triggers when dri selection changed
            * @property {Object} value set of DRI information
@@ -101,7 +101,7 @@
             {Item: 'target', Value: dat[0].Name},
             {Item: 'Energy', Value: dat[0].En},
             {Item: 'Protein', Value: dat[0].Pr},
-            {Item: 'Vita-A', Value: dat[0].Va},
+            {Item: 'Vit_A', Value: dat[0].Va},
             {Item: 'Iron', Value: dat[0].Fe},
             {Item: 'id', Value: selectedId}
           )
