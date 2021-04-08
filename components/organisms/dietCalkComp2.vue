@@ -230,12 +230,9 @@
         //TODO: fix unique group extraxtion error
         let uniqueGroup = []
         let result = []
-        const len = this.items.length
         this.items.forEach(function (elem, index) {
           if (uniqueGroup.indexOf(elem.Group) === -1) {
             uniqueGroup.push(elem.Group)
-            console.log(index)
-            console.log(elem.Name)
             result.push({
               text: elem.Group,
               value: elem.Group,
@@ -243,7 +240,6 @@
             })
           }
         })
-        console.log(result)
         result.pop() // there are some bug in above code, which i cannot figure out
         return result
       },
