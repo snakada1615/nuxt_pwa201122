@@ -13,17 +13,16 @@
     <b-row>
       <b-tabs lazy pills justified disabled="$store.state.isLoginChecked" content-class="mt-3">
         <b-tab v-for="(diet, index) in WS.dietCases" :key="index" :title="String(index + 1)">
-          <diet-calk-comp
+          <diet-calk-comp2
             :fct-org="items"
             :dri-org="itemsDRI"
-            :diet-case="diet"
-            @update:dietCase="test($event, index)"
+            :dri-id.sync="diet.driID"
+            :food-items.sync="diet.foodItems"
+            :page-id="index"
+            :_id="diet._id"
             @changeTarget="modifiedSignal('target')"
             @changeRecepi="modifiedSignal('recepi')"
           />
-          <b-card>
-            {{diet}}
-          </b-card>
         </b-tab>
       </b-tabs>
     </b-row>
@@ -33,14 +32,14 @@
 
 <script>
   import driTable from "../components/organisms/driTable";
-  import dietCalkComp from "../components/organisms/dietCalkComp";
+  import dietCalkComp2 from "../components/organisms/dietCalkComp2";
   import navigationGuard from "../components/atoms/navigationGuard";
   import {getFCT, getDRI} from "../plugins/pouchHelper";
 
   export default {
     components: {
       driTable,
-      dietCalkComp,
+      dietCalkComp2,
       navigationGuard,
     },
     data() {
@@ -123,12 +122,6 @@
       }
     },
     methods: {
-      test(val, index){
-        console.log(val)
-        console.log(index)
-        console.log(this.WS.dietCases[index])
-        Object.assign(this.WS.dietCases[index], JSON.parse(JSON.stringify(val)))
-      },
       delRecepiItem(id){
         console.log(id)
         let res = []

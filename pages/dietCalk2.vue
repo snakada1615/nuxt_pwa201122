@@ -16,7 +16,7 @@
           <diet-calk-comp2
             :fct-org="items"
             :dri-org="itemsDRI"
-            :dri-id="diet.driID"
+            :dri-id.sync="diet.driID"
             :food-items.sync="diet.foodItems"
             :page-id="index"
             :_id="diet._id"
@@ -122,12 +122,6 @@
       }
     },
     methods: {
-      test(val, index){
-        console.log(val)
-        console.log(index)
-        console.log(this.WS.dietCases[index])
-        Object.assign(this.WS.dietCases[index], JSON.parse(JSON.stringify(val)))
-      },
       delRecepiItem(id){
         console.log(id)
         let res = []

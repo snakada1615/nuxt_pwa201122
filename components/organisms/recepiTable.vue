@@ -73,10 +73,9 @@
     },
     watch:{
       items:{
+        immediate: true,
         handler(value){
-          console.log(value)
           this.nutritionSum = {...this.updateSum(value)}
-          console.log(this.nutritionSum)
         }
       }
     },
@@ -98,10 +97,10 @@
     methods: {
       updateSum(array){
           return array.reduce((accumulator, item) => {
-            accumulator.En = (accumulator.En || 0) + item.En
-            accumulator.Pr = (accumulator.Pr || 0) + item.Pr
-            accumulator.Va = (accumulator.Va || 0) + item.Va
-            accumulator.Fe = (accumulator.Fe || 0) + item.Fe
+            accumulator.En = (accumulator.En || 0) + Number(item.En)
+            accumulator.Pr = (accumulator.Pr || 0) + Number(item.Pr)
+            accumulator.Va = (accumulator.Va || 0) + Number(item.Va)
+            accumulator.Fe = (accumulator.Fe || 0) + Number(item.Fe)
             return accumulator
           }, {})
       },

@@ -25,7 +25,7 @@
             :items="items"
             head-row-variant="success"
             table-variant="light"
-            @fctClick="onFCTclick($event, dietCase.pageId)"
+            @fctClick="onFCTclick($event, pageId)"
           ></fct-table>
         </b-card>
       </b-col>
@@ -51,10 +51,10 @@
           </template>
           <dri-table
             v-show="!targetSwitch"
-            :value="dietCase.driID"
+            :value="driId"
             :items="itemsDRI"
-            @change="$emit('update:driID', $event)"
-            @changeDri="onChangeTarget($event, dietCase.pageId)"
+            @change="$emit('update:driId', $event)"
+            @changeDri="onTargetChanged($event, pageId)"
             head-row-variant="success"
             table-variant="light"
           />
@@ -62,7 +62,7 @@
             ref="table"
             v-show="targetSwitch"
             v-model="itemsDRI"
-            input-name='ahoaho'
+            input-name='myDri'
             rules="min_value:0|max_value:500"
             head-row-variant="success"
             table-variant="light"
@@ -78,12 +78,13 @@
             <b class="py-0 my-0">Crop combination</b>
           </template>
           <recepi-table
-            @inputData="onChangeRecepi($event, dietCase.pageId)"
-            :items.sync="dietCase.foodItems"
+            :items="foodItems"
+            @delItem="$emit('update:foodItems', $event)"
+            @rowClick="onRecepiclick($event, pageId)"
+            @totalChanged="onTotalChanged($event, pageId)"
             head-row-variant="success"
             table-variant="light"
             foot-row-variant="light"
-            @rowClick="onRecepiclick($event, dietCase.pageId)"
           >
           </recepi-table>
         </b-card>
@@ -113,7 +114,7 @@
               cropName="Energy"
               :iconNum=iconNum
               :max="10"
-              :nutritionTarget="nutritionTargetComputed.En"
+              :nutritionTarget="nutritionTarget.En"
               :rating="nutritionRating.En"
             ></nutrition-bar>
           </b-row>
@@ -122,7 +123,7 @@
               cropName="Protain"
               :iconNum=iconNum
               :max="10"
-              :nutritionTarget="nutritionTargetComputed.Pr"
+              :nutritionTarget="nutritionTarget.Pr"
               :rating="nutritionRating.Pr"
             ></nutrition-bar>
           </b-row>
@@ -131,7 +132,7 @@
               cropName="Vit-A"
               :iconNum=iconNum
               :max="10"
-              :nutritionTarget="nutritionTargetComputed.Va"
+              :nutritionTarget="nutritionTarget.Va"
               :rating="nutritionRating.Va"
             ></nutrition-bar>
           </b-row>
@@ -140,7 +141,7 @@
               cropName="Iron"
               :iconNum=iconNum
               :max="10"
-              :nutritionTarget="nutritionTargetComputed.Fe"
+              :nutritionTarget="nutritionTarget.Fe"
               :rating="nutritionRating.Fe"
             ></nutrition-bar>
           </b-row>
@@ -166,7 +167,7 @@
     <food-modal
       v-model="initWeight"
       :items="itemSingleCrop"
-      :my-name="'modalTest' + dietCase.pageId"
+      :my-name="'modalTest' + pageId"
       my-type="Number"
       rules="min_value:0|max_value:500"
       @modalOk="onCropWeightSet"
@@ -199,27 +200,18 @@
       driTableGroup,
     },
     computed: {
-      nutritionTargetComputed: {
-        get(){
-          return this.dietCase.nutritionTarget ? this.dietCase.nutritionTarget : []
-        },
-        set(value){
-          const res = this.dietCase
-          res.nutritionTarget = value
-        }
-      },
       nutritionRating: function () {
-        if (!this.dietCase.nutritionTarget) {
+        if (!this.nutritionTarget) {
           return []
         }
-        let En = this.dietCase.nutritionTarget.En ?
-          Math.round(100 * this.dietCase.nutritionSum.En * this.driRange / this.dietCase.nutritionTarget.En) / 10 : 0
-        let Pr = this.dietCase.nutritionTarget.En ?
-          Math.round(100 * this.dietCase.nutritionSum.Pr * this.driRange / this.dietCase.nutritionTarget.Pr) / 10 : 0
-        let Va = this.dietCase.nutritionTarget.En ?
-          Math.round(100 * this.dietCase.nutritionSum.Va * this.driRange / this.dietCase.nutritionTarget.Va) / 10 : 0
-        let Fe = this.dietCase.nutritionTarget.En ?
-          Math.round(100 * this.dietCase.nutritionSum.Fe * this.driRange / this.dietCase.nutritionTarget.Fe) / 10 : 0
+        let En = this.nutritionTarget[1] ?
+          Math.round(100 * this.nutritionSum.En * this.driRange / this.nutritionTarget[1]['Value']) / 10 : 0
+        let Pr = this.nutritionTarget[2] ?
+          Math.round(100 * this.nutritionSum.Pr * this.driRange / this.nutritionTarget[2]['Value']) / 10 : 0
+        let Va = this.nutritionTarget[3] ?
+          Math.round(100 * this.nutritionSum.Va * this.driRange / this.nutritionTarget[3]['Value']) / 10 : 0
+        let Fe = this.nutritionTarget[4] ?
+          Math.round(100 * this.nutritionSum.Fe * this.driRange / this.nutritionTarget[4]['Value']) / 10 : 0
         return {
           En: En,
           Pr: Pr,
@@ -235,9 +227,10 @@
         return res
       },
       cropGroup: function () {
+        //TODO: fix unique group extraxtion error
         let uniqueGroup = []
         let result = []
-        this.items.forEach(function (elem) {
+        this.items.forEach(function (elem, index) {
           if (uniqueGroup.indexOf(elem.Group) === -1) {
             uniqueGroup.push(elem.Group)
             result.push({
@@ -247,15 +240,16 @@
             })
           }
         })
+        result.pop() // there are some bug in above code, which i cannot figure out
         return result
       },
       selectedCrops: {
         get: function () {
-          if (!this.dietCase.foodItems) {
+          if (!this.foodItems) {
             return []
           }
           let uniqueGroup = []
-          this.dietCase.foodItems.forEach(function (elem) {
+          this.foodItems.forEach(function (elem) {
             if (uniqueGroup.indexOf(elem.Group) === -1) {
               uniqueGroup.push(elem.Group)
             }
@@ -284,28 +278,21 @@
        * aaaaaaaaaa
        *
        */
-      dietCase: {
-        type: Object,
-        default: () => ({
-          _id: '',
-          driID: 2,
-          pageId: 1,
-          foodItems: [],
-          targetName: '',
-          nutritionTarget: {
-            En: 10,
-            Pr: 10,
-            Va: 10,
-            Fe: 10,
-          },
-          nutritionSum: {
-            En: 10,
-            Pr: 10,
-            Va: 10,
-            Fe: 10,
-            Wt: 10,
-          },
-        })
+      _id: {
+        type: String,
+        default: '3'
+      },
+      driId: {
+        default: 2
+      },
+      pageId: {
+        default: 1
+      },
+      foodItems: {
+        default: () => ([])
+      },
+      targetName: {
+        default: ''
       },
       fctOrg: {
         type: Array
@@ -325,48 +312,31 @@
         showFoodDialog: false,
         initWeight: 0,
         groupFlag: false,
+        nutritionTarget: [],
+        nutritionSum: {}
       }
     },
     methods: {
-      delRecepiItem(id){
-        let res = []
-        this.dietCase.foodItems.forEach(function (val, index) {
-          if (index !== id) {
-            res.push(val)
-          }
-        })
-        this.dietCase.foodItems = res
-        this.$emit('changeRecepi')
-      },
-      onChangeRecepi(value, pageId) {
-        if (pageId !== this.dietCase.pageId) {
+      onTotalChanged(value, pageId) {
+        if (pageId !== this.pageId) {
           return
         }
-        if (this.dietCase.nutritionSum) {
-          this.dietCase.nutritionSum.En = value.En || 0
-          this.dietCase.nutritionSum.Pr = value.Pr || 0
-          this.dietCase.nutritionSum.Va = value.Va || 0
-          this.dietCase.nutritionSum.Fe = value.Fe || 0
-          this.dietCase.nutritionSum.Wt = value.Wt || 0
+        if (this.nutritionSum) {
+          this.nutritionSum = {...value}
         }
       },
-      onChangeTarget(value, pageId) {
-        console.log('onChangeTarget')
-        if (pageId !== this.dietCase.pageId || !value.length) {
+      onTargetChanged(value, pageId) {
+        console.log('onTargetChanged')
+        if (pageId !== this.pageId || !value.length) {
           return
         }
-        if (this.dietCase.nutritionTarget) {
-          this.dietCase.nutritionTarget.En = Number(value[1].Value) || 0
-          this.dietCase.nutritionTarget.Pr = Number(value[2].Value) || 0
-          this.dietCase.nutritionTarget.Va = Number(value[3].Value) || 0
-          this.dietCase.nutritionTarget.Fe = Number(value[4].Value) || 0
-          this.dietCase.driID  = Number(value[5].Value) || 0
-          this.$emit('changeTarget', this.dietCase)
+        if (this.nutritionTarget) {
+          this.nutritionTarget = [...value]
         }
       },
       onFCTclick(rec, pageId) {
         const vm = this
-        if (pageId !== vm.dietCase.pageId) {
+        if (pageId !== vm.pageId) {
           return
         }
         vm.itemSingleCrop.length = 0
@@ -380,7 +350,7 @@
           'Fe': rec.Fe,
         })
         vm.initWeight = 0
-        vm.dietCase.foodItems.forEach(function (item) {
+        vm.foodItems.forEach(function (item) {
           if (item.id === rec.id) {
             vm.initWeight = Number(item.Wt)
           }
@@ -388,7 +358,7 @@
         vm.$bvModal.show('modalTest' + String(pageId))
       },
       onRecepiclick(rec, pageId) {
-        if (pageId !== this.dietCase.pageId) {
+        if (pageId !== this.pageId) {
           return
         }
         this.itemSingleCrop.length = 0
@@ -405,30 +375,35 @@
         this.$bvModal.show('modalTest' + String(pageId))
       },
       onCropWeightSet(dat) {
-        //TODO:  object copy is done using assign -> need to improve
-
         let res = false
-        let modifiedData = JSON.parse(JSON.stringify(this.dietCase))
-        modifiedData.foodItems.forEach(function (val) {
+        console.log('onCropWeightSet')
+        console.log(dat)
+        let modifiedData = JSON.parse(JSON.stringify(this.foodItems))
+        modifiedData.forEach(function (val) {
           if (val.id === dat.item[0].id) {
+            val.En = Math.round(dat.item[0].En * dat.Wt)
+            val.Pr = Math.round(dat.item[0].Pr * dat.Wt)
+            val.Va = Math.round(dat.item[0].Va * dat.Wt)
+            val.Fe = Math.round(dat.item[0].Fe * dat.Wt)
             val.Wt = dat.Wt
             res = true
           }
         })
         if (!res) {
-          modifiedData.foodItems.push({
+          modifiedData.push({
             'id': dat.item[0].id || 0,
             'Name': dat.item[0].Name || 0,
             'Group': dat.item[0].Group || 0,
-            'En': dat.item[0].En || 0,
-            'Pr': dat.item[0].Pr || 0,
-            'Va': dat.item[0].Va || 0,
-            'Fe': dat.item[0].Fe || 0,
+            'En': Math.round(dat.item[0].En * dat.Wt) || 0,
+            'Pr': Math.round(dat.item[0].Pr * dat.Wt) || 0,
+            'Va': Math.round(dat.item[0].Va * dat.Wt) || 0,
+            'Fe': Math.round(dat.item[0].Fe * dat.Wt) || 0,
             "Wt": dat.Wt || 0
           })
         }
-        this.$emit('changeRecepi', {pageId: this.dietCase.pageId ,foodItems: dat})
-        this.$emit('update:dietCase', modifiedData)
+        console.log(modifiedData)
+        this.$emit('changeRecepi', {pageId: this.pageId, foodItems: dat})
+        this.$emit('update:foodItems', modifiedData)
       },
     },
   }
