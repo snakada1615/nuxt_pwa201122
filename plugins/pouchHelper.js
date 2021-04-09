@@ -15,6 +15,20 @@ export function pouchGetDb(dbName) {
   return new PouchDB(dbName)
 }
 
+export function pouchDeleteDb(dbName) {
+  let promise = new Promise((resolve, reject) => {
+    console.log('we are here')
+    new PouchDB(dbName).destroy().then(function () {
+      console.log(dbName + 'successfully deleted')
+      resolve(true)
+    }).catch(function (err) {
+      console.log(dbName + 'failed to deleted')
+      reject(err)
+    })
+  })
+  return promise
+}
+
 export function pouchGetDoc(db, id){
   let promise = new Promise((resolve, reject) => {
     db.get(id).then(function (doc) {

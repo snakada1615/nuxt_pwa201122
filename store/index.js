@@ -1,6 +1,13 @@
 import firebase from '~/plugins/firebase'
 import PouchDB from 'pouchdb'
-import {pouchPutNewDoc, pouchGetDoc, pouchUpdateDoc, pouchPutNewOrUpdate, pouchWSPutNewOrUpdate} from "../plugins/pouchHelper";
+import {
+  pouchPutNewDoc,
+  pouchGetDoc,
+  pouchUpdateDoc,
+  pouchPutNewOrUpdate,
+  pouchWSPutNewOrUpdate,
+  pouchDeleteDb
+} from "../plugins/pouchHelper";
 
 export const state = () => ({
   packageVersion: process.env.PACKAGE_VERSION || '0',
@@ -101,6 +108,9 @@ export const actions = {
       console.log(error)
       return false
     });
+  },
+  removeUserDb({state}){
+    pouchDeleteDb(state.userDB)
   },
   saveUserToLastuser({state, dispatch, getters}, payload) {
     const lastUser = 'lastUser'
