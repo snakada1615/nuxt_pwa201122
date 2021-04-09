@@ -86,8 +86,8 @@
               :value="driId"
               :items="itemsDRI"
               :showTable=false
-              @changeDri="onChangeTarget"
-              @input="$emit('update:driId', $event)"
+              @changeDri="onTargetChanged($event, pageId)"
+              @change="$emit('update:driId', $event)"
               head-row-variant="success"
               table-variant="light"
             />
@@ -146,7 +146,7 @@
       nutritionBar,
     },
     methods: {
-      onInput(val, id){
+      onInput(val, id) {
         this.$emit('update:ansList[' + id + ']', val)
       },
       setFTC(docs) {
@@ -177,13 +177,14 @@
           })
         })
       },
-      onChangeTarget(value) {
-        console.log('onChangeTarget')
-        console.log(value)
-        this.nutritionTarget.En = Number(value[1].Value) || 0
-        this.nutritionTarget.Pr = Number(value[2].Value) || 0
-        this.nutritionTarget.Va = Number(value[3].Value) || 0
-        this.nutritionTarget.Fe = Number(value[4].Value) || 0
+      onTargetChanged(value, pageId) {
+        console.log('onTargetChanged')
+        if (pageId !== this.pageId || !value.length) {
+          return
+        }
+        if (this.nutritionTarget) {
+          this.nutritionTarget = [...value]
+        }
       },
       onItemSelected(value) {
         this.$emit('update:selectedItem', value)
@@ -225,36 +226,31 @@
         return sum
       },
       nutritionRatingSet: function () {
-        let Pr = this.nutritionTarget.En ?
-          Math.round(100 * this.nutritionSum.Pr / this.nutritionTarget.Pr) / 10 : 0
-        let Va = this.nutritionTarget.En ?
-          Math.round(100 * this.nutritionSum.Va / this.nutritionTarget.Va) / 10 : 0
-        let Fe = this.nutritionTarget.En ?
-          Math.round(100 * this.nutritionSum.Fe / this.nutritionTarget.Fe) / 10 : 0
+        console.log(this.nutritionTarget)
         return [
           {
             name: 'Energy',
-            target: this.nutritionTarget.En,
-            rating: this.nutritionTarget.En ?
-              Math.round(100 * this.nutritionSum.En / this.nutritionTarget.En) / 10 : 0
+            target: this.nutritionTarget[1] ? Number(this.nutritionTarget[1].Value) : 0,
+            rating: this.nutritionTarget[1] ?
+              Math.round(100 * this.nutritionSum.En / this.nutritionTarget[1].Value / 10) : 0
           },
           {
             name: 'Protein',
-            target: this.nutritionTarget.Pr,
-            rating: this.nutritionTarget.Pr ?
-              Math.round(100 * this.nutritionSum.Pr / this.nutritionTarget.Pr) / 10 : 0
+            target: this.nutritionTarget[2] ? Number(this.nutritionTarget[2].Value) : 0,
+            rating: this.nutritionTarget[2] ?
+              Math.round(100 * this.nutritionSum.Pr / this.nutritionTarget[2].Value / 10) : 0
           },
           {
             name: 'VitA',
-            target: this.nutritionTarget.Va,
-            rating: this.nutritionTarget.Va ?
-              Math.round(100 * this.nutritionSum.Va / this.nutritionTarget.Va) / 10 : 0
+            target: this.nutritionTarget[3] ? Number(this.nutritionTarget[3].Value) : 0,
+            rating: this.nutritionTarget[3] ?
+              Math.round(100 * this.nutritionSum.Va / this.nutritionTarget[3].Value) / 10 : 0
           },
           {
             name: 'Fe',
-            target: this.nutritionTarget.Fe,
-            rating: this.nutritionTarget.Fe ?
-              Math.round(100 * this.nutritionSum.Fe / this.nutritionTarget.Fe) / 10 : 0
+            target: this.nutritionTarget[4] ? Number(this.nutritionTarget[4].Value) : 0,
+            rating: this.nutritionTarget[4] ?
+              Math.round(100 * this.nutritionSum.Fe / this.nutritionTarget[4].Value) / 10 : 0
           },
         ]
       },
@@ -452,7 +448,7 @@
     props: {
       selectedItem: {
         type: Object,
-        default: ()=> ({})
+        default: () => ({})
       },
       driId: {
         type: String,
@@ -460,7 +456,7 @@
       },
       ansList: {
         type: Array,
-        default: () => ([-99, - 99, - 99, - 99,-99, -99, -99, -99, -99, -99, -99, -99])
+        default: () => ([-99, -99, -99, -99, -99, -99, -99, -99, -99, -99, -99, -99])
       },
       pageId: {
         type: Number,

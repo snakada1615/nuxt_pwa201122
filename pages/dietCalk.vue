@@ -13,7 +13,7 @@
     <b-row>
       <b-tabs lazy pills justified disabled="$store.state.isLoginChecked" content-class="mt-3">
         <b-tab v-for="(diet, index) in WS.dietCases" :key="index" :title="String(index + 1)">
-          <diet-calk-comp2
+          <diet-calk-comp
             :fct-org="items"
             :dri-org="itemsDRI"
             :dri-id.sync="diet.driID"
@@ -32,14 +32,14 @@
 
 <script>
   import driTable from "../components/organisms/driTable";
-  import dietCalkComp2 from "../components/organisms/dietCalkComp2";
+  import dietCalkComp from "../components/organisms/dietCalkComp";
   import navigationGuard from "../components/atoms/navigationGuard";
   import {getFCT, getDRI} from "../plugins/pouchHelper";
 
   export default {
     components: {
       driTable,
-      dietCalkComp2,
+      dietCalkComp,
       navigationGuard,
     },
     data() {
