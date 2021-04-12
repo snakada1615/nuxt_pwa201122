@@ -55,6 +55,8 @@ export default {
 
   // Modules (https://go.nuxtjs.dev/config-modules)
   modules: [
+    ['cookie-universal-nuxt', { parseJSON: false }],
+
     "@nuxtjs/axios",
 
     // https://go.nuxtjs.dev/bootstrap
@@ -72,7 +74,12 @@ export default {
         'BIconExclamationCircleFill',
         'BIconCheck',
         'BIconPeopleFill',
-        'BIconX'
+        'BIconX',
+        'BIconEnvelope',
+        'BIconFacebook',
+        'BIconTwitter',
+        'BIconGoogle',
+        'BIconChatDotsFill',
       ],
       componentPlugins: [
         'NavbarPlugin',
@@ -93,6 +100,7 @@ export default {
         'FormInputPlugin',
         'FormSelectPlugin',
         'FormCheckboxPlugin',
+        'FormRadioPlugin',
       ],
     }]
   ],

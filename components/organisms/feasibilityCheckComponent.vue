@@ -232,25 +232,25 @@
             name: 'Energy',
             target: this.nutritionTarget[1] ? Number(this.nutritionTarget[1].Value) : 0,
             rating: this.nutritionTarget[1] ?
-              Math.round(100 * this.nutritionSum.En / this.nutritionTarget[1].Value / 10) : 0
+              Math.round(this.nutritionSum.En / this.nutritionTarget[1].Value * 10) : 0
           },
           {
             name: 'Protein',
             target: this.nutritionTarget[2] ? Number(this.nutritionTarget[2].Value) : 0,
             rating: this.nutritionTarget[2] ?
-              Math.round(100 * this.nutritionSum.Pr / this.nutritionTarget[2].Value / 10) : 0
+              Math.round(this.nutritionSum.Pr / this.nutritionTarget[2].Value * 10) : 0
           },
           {
             name: 'VitA',
             target: this.nutritionTarget[3] ? Number(this.nutritionTarget[3].Value) : 0,
             rating: this.nutritionTarget[3] ?
-              Math.round(100 * this.nutritionSum.Va / this.nutritionTarget[3].Value) / 10 : 0
+              Math.round(this.nutritionSum.Va / this.nutritionTarget[3].Value) * 10 : 0
           },
           {
             name: 'Fe',
             target: this.nutritionTarget[4] ? Number(this.nutritionTarget[4].Value) : 0,
             rating: this.nutritionTarget[4] ?
-              Math.round(100 * this.nutritionSum.Fe / this.nutritionTarget[4].Value) / 10 : 0
+              Math.round(this.nutritionSum.Fe / this.nutritionTarget[4].Value) * 10 : 0
           },
         ]
       },

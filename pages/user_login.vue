@@ -3,28 +3,51 @@
     <p>current user: <span v-if="$store.state.user">{{ $store.state.user.email }}</span></p>
     {{ email }}
     <b-form @submit.prevent>
-      <b-row class="my-2">
-        <b-col>
-          <vee-input
-            name="input_email"
-            rules="required|email"
-            placeholder="email"
-            type="email"
-            v-model="email"
-          />
-        </b-col>
-      </b-row>
-      <b-row class="my-2">
-        <b-col>
-          <vee-input
-            name="input_pass"
-            rules="required|min:6"
-            placeholder="password"
-            type="password"
-            v-model="password"
-          />
-        </b-col>
-      </b-row>
+      <b-card no-body>
+        <b-tabs card content-class="mt-1" v-model="tabId">
+          <b-tab title="email & passward" active>
+            <b-row>
+              <b-col>
+                <vee-input
+                  name="input_email"
+                  rules="required|email"
+                  placeholder="email"
+                  type="email"
+                  v-model="email"
+                />
+              </b-col>
+            </b-row>
+            <b-row class="mt-2">
+              <b-col>
+                <vee-input
+                  name="input_pass"
+                  rules="required|min:6"
+                  placeholder="password"
+                  type="password"
+                  v-model="password"
+                />
+              </b-col>
+            </b-row>
+          </b-tab>
+          <b-tab title="social account">
+            <b-form-radio-group id="radio-group" v-model="loginProvider">
+              <b-form-radio value=1>
+                <b-icon icon="google">aaa</b-icon>
+                login using your <span class="text-danger">google</span> account
+              </b-form-radio>
+              <b-form-radio value=2>
+                <b-icon icon="twitter">aaa</b-icon>
+                login using your <span class="text-danger">twitter</span> account
+              </b-form-radio>
+              <b-form-radio value=3>
+                <b-icon icon="facebook">aaa</b-icon>
+                login using your <span class="text-danger">facebook</span> account
+              </b-form-radio>
+            </b-form-radio-group>
+          </b-tab>
+        </b-tabs>
+      </b-card>
+
       <b-row class="mt-3">
         <b-col>
           <p>current FileName: <span v-if="$store.state.caseId">{{ $store.state.caseId }}</span></p>
@@ -60,109 +83,101 @@
         </b-col>
       </b-row>
     </b-form>
+    tab: {{tabId}}
   </div>
 </template>
 
 <script>
-import veeInput from "@/components/atoms/veeInput";
+  import veeInput from "@/components/atoms/veeInput";
 
-export default {
-  components: {
-    veeInput,
-  },
-  data() {
-    return {
-      email: '',
-      password: '',
-      fileName: '',
-    }
-  },
-  computed: {
-    caseIdList: function () {
-      return this.$store.state.caseIdList
+  export default {
+    components: {
+      veeInput,
     },
-    fileNameValidator: function () {
-      return this.fileName.length > 3 ? true : false
-    },
-    isNewFileName: function () {
-      return this.fileName
-    }
-  },
-  methods: {
-    async login() {
-      const vm = this
-      console.log('vm.caseIdList')
-      const res = await vm.$store.dispatch('login', {
-        email: vm.email,
-        password: vm.password,
-      })
-      if (res) { // successfully logged in using firebase
-        //update $store
-        vm.$store.dispatch('setUser', {
-          'email': res.email,
-          'uid': res.uid
-        })
-
-        //update $store
-        vm.$store.dispatch('setCaseId',
-          vm.fileName
-        )
-
-        //update PouchDB-lastUser
-        await vm.$store.dispatch('saveUserToLastuser', {user: vm.$store.state.user, caseId: vm.$store.state.caseId})
-
-        //check if caseId is already registered to PouchDB
-        const res2 = vm.caseIdList.filter(function(val){
-          return val.caseId === vm.$store.state.caseId && val.user === vm.$store.state.user
-        })
-        if (res2.length === 0) {
-          await vm.$store.dispatch('initPouch', {user: vm.$store.state.user, caseId: vm.$store.state.caseId})
-
-          //move to top page
-          console.log('gotoindex')
-          vm.email = ''
-          vm.password = ''
-          vm.$router.push('/')
-        } else {
-
-          //move to top page
-          console.log('gotoindex2')
-          vm.email = ''
-          vm.password = ''
-          vm.$router.push('/')
-        }
+    data() {
+      return {
+        email: '',
+        password: '',
+        fileName: '',
+        loginProvider: 0,
+        tabId:0,
       }
     },
-    logout() {
-      this.$store.dispatch('logout')
-      this.email = ''
-      this.password = ''
-      this.$router.push('/')
-    },
-    async registUser() {
-      const res = await this.$store.dispatch('registUser', {
-        email: this.email,
-        password: this.password,
-        caseId: this.fileName
-      })
-      this.email = ''
-      this.password = ''
-      this.fileName = ''
-      if (res) {
-        this.$router.push('/')
+    computed: {
+      caseIdList: function () {
+        return this.$store.state.caseIdList
+      },
+      fileNameValidator: function () {
+        return this.fileName.length > 3 ? true : false
+      },
+      isNewFileName: function () {
+        return this.fileName
       }
     },
-    DBexists(targetDB) {
-      window.indexedDB.databases().then((namelist) => {
-        let res = false
-        for (let i = 0; i < namelist.length; i++) {
-          if (namelist[i].name === targetDB) {
-            res = true
+    methods: {
+      async login() {
+        const vm = this
+        console.log('vm.caseIdList')
+        const res = await vm.$store.dispatch('login', {
+          email: vm.email,
+          password: vm.password,
+        })
+        if (res) { // successfully logged in using firebase
+          //update $store
+          vm.$store.dispatch('setUser', {
+            'email': res.email,
+            'uid': res.uid
+          })
+
+          //update $store
+          vm.$store.dispatch('setCaseId',
+            vm.fileName
+          )
+
+          //update PouchDB-lastUser
+          await vm.$store.dispatch('saveUserToLastuser', {user: vm.$store.state.user, caseId: vm.$store.state.caseId})
+
+          //check if caseId is already registered to PouchDB
+          const res2 = vm.caseIdList.filter(function (val) {
+            return val.caseId === vm.$store.state.caseId && val.user === vm.$store.state.user
+          })
+          if (res2.length === 0) {
+            await vm.$store.dispatch('initPouch', {user: vm.$store.state.user, caseId: vm.$store.state.caseId})
+
+            //move to top page
+            console.log('gotoindex')
+            vm.email = ''
+            vm.password = ''
+            vm.$router.push('/')
+          } else {
+
+            //move to top page
+            console.log('gotoindex2')
+            vm.email = ''
+            vm.password = ''
+            vm.$router.push('/')
           }
         }
-        console.log(res)
-      })
+      },
+      logout() {
+        this.$store.dispatch('logout')
+        this.email = ''
+        this.password = ''
+        this.$router.push('/')
+      },
+      async registUser() {
+        const res = await this.$store.dispatch('registUser', {
+          email: this.email,
+          password: this.password,
+          caseId: this.fileName
+        })
+        this.email = ''
+        this.password = ''
+        this.fileName = ''
+        if (res) {
+          this.$router.push('/')
+        }
+      },
     }
   }
-}
 </script>

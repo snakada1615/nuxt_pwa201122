@@ -57,7 +57,7 @@ export const mutations = {
   },
   setOffUser: function (state) {
     state.user = {
-      email: 'anonymous',
+      email: '',
       uid: ''
     }
   },
@@ -108,6 +108,47 @@ export const actions = {
       console.log(error)
       return false
     });
+  },
+  loginProvider(state, flag){
+    let provider = null
+    console.log(flag)
+    switch (flag) {
+      case 1:
+        provider = new firebase.auth.GoogleAuthProvider()
+        break
+      case 2:
+        provider = new firebase.auth.TwitterAuthProvider()
+        break
+      case 3:
+        provider = new firebase.auth.FacebookAuthProvider()
+        break
+      default:
+        return false
+    }
+    let promise = new Promise((resolve, reject) =>{
+      firebase.auth().signInWithPopup(provider)
+        .then((result) => {
+          /** @type {firebase.auth.OAuthCredential} */
+          var credential = result.credential;
+
+          // This gives you a Google Access Token. You can use it to access the Google API.
+          var token = credential.accessToken;
+          // The signed-in user info.
+          var user = result.user;
+
+          resolve(user)
+        }).catch((error) => {
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // The email of the user's account used.
+        var email = error.email;
+        // The firebase.auth.AuthCredential type that was used.
+        var credential = error.credential;
+        reject(error)
+      });
+    })
+    return promise
   },
   removeUserDb({state}){
     pouchDeleteDb(state.userDB)

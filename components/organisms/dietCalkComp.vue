@@ -381,10 +381,10 @@
         let modifiedData = JSON.parse(JSON.stringify(this.foodItems))
         modifiedData.forEach(function (val) {
           if (val.id === dat.item[0].id) {
-            val.En = Math.round(dat.item[0].En * dat.Wt)
-            val.Pr = Math.round(dat.item[0].Pr * dat.Wt)
-            val.Va = Math.round(dat.item[0].Va * dat.Wt)
-            val.Fe = Math.round(dat.item[0].Fe * dat.Wt)
+            val.En = Math.round(dat.item[0].En * dat.Wt / 100)
+            val.Pr = Math.round(dat.item[0].Pr * dat.Wt / 100)
+            val.Va = Math.round(dat.item[0].Va * dat.Wt / 100)
+            val.Fe = Math.round(dat.item[0].Fe * dat.Wt / 100)
             val.Wt = dat.Wt
             res = true
           }
@@ -394,10 +394,10 @@
             'id': dat.item[0].id || 0,
             'Name': dat.item[0].Name || 0,
             'Group': dat.item[0].Group || 0,
-            'En': Math.round(dat.item[0].En * dat.Wt) || 0,
-            'Pr': Math.round(dat.item[0].Pr * dat.Wt) || 0,
-            'Va': Math.round(dat.item[0].Va * dat.Wt) || 0,
-            'Fe': Math.round(dat.item[0].Fe * dat.Wt) || 0,
+            'En': Math.round(dat.item[0].En * dat.Wt / 100) || 0,
+            'Pr': Math.round(dat.item[0].Pr * dat.Wt / 100) || 0,
+            'Va': Math.round(dat.item[0].Va * dat.Wt / 100) || 0,
+            'Fe': Math.round(dat.item[0].Fe * dat.Wt / 100) || 0,
             "Wt": dat.Wt || 0
           })
         }

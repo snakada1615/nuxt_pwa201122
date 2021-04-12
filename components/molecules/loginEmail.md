@@ -1,3 +1,6 @@
+loginEmail example:
+
+```vue
 <template>
   <b-container>
     <b-button variant="success"
@@ -5,7 +8,7 @@
               @click="$bvModal.show('test')"
     >push email</b-button>
     <login-email name="test" @login="loginOk"></login-email>
-    <div>user id: {{user.uid}}</div>
+    user:{{user.uid}}
   </b-container>
 </template>
 
@@ -30,3 +33,5 @@
     }
   }
 </script>
+
+```

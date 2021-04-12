@@ -18,20 +18,26 @@
   export default {
     methods: {
       unRegister() {
+        const vm = this
         navigator.serviceWorker.getRegistration()
           .then(registration => {
             registration.unregister();
-          }).then(
-          location.reload()
-        )
+          }).then(function(){
+            vm.$store.dispatch('logout')
+            //location.reload()
+            vm.$router.push('/')
+          })
       },
       deleteDb() {
+        const vm = this
         this.$store.dispatch('removeUserDb').then(function(){
           console.log('success')
-          this.$router.push('/')
-        }).catch(function () {
-          console.log(res)
-          alert('cannnot remove data')
+          vm.makeToast('useradta successfully deleted')
+          vm.$store.dispatch('logout')
+          vm.$router.push('/')
+        }).catch(function (err) {
+          console.log(err)
+          vm.makeToast('cannnot remove user data')
         })
       }
     },
