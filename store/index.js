@@ -15,7 +15,11 @@ export const state = () => ({
     name: '',
     email: '',
     country: '',
-    profession: '',
+    subnational1: '',
+    subnational2: '',
+    subnational3: '',
+    organization: '',
+    title: '',
     uid: ''
   },
   //dietCases: [],
@@ -57,7 +61,14 @@ export const mutations = {
   },
   setOffUser: function (state) {
     state.user = {
+      name: '',
       email: '',
+      country: '',
+      subnational1: '',
+      subnational2: '',
+      subnational3: '',
+      organization: '',
+      title: '',
       uid: ''
     }
   },
@@ -109,7 +120,7 @@ export const actions = {
       return false
     });
   },
-  loginProvider(state, flag){
+  loginProvider(state, flag) {
     let provider = null
     console.log(flag)
     switch (flag) {
@@ -125,7 +136,7 @@ export const actions = {
       default:
         return false
     }
-    let promise = new Promise((resolve, reject) =>{
+    let promise = new Promise((resolve, reject) => {
       firebase.auth().signInWithPopup(provider)
         .then((result) => {
           /** @type {firebase.auth.OAuthCredential} */
@@ -150,7 +161,7 @@ export const actions = {
     })
     return promise
   },
-  removeUserDb({state}){
+  removeUserDb({state}) {
     pouchDeleteDb(state.userDB)
   },
   saveUserToLastuser({state, dispatch, getters}, payload) {
@@ -207,10 +218,10 @@ export const actions = {
 
     // initialize caseId to store
     const caseInit = {
-        'email': state.user.email,
-        'caseId': state.caseId,
-        'saveDate': state.saveDate
-      }
+      'email': state.user.email,
+      'caseId': state.caseId,
+      'saveDate': state.saveDate
+    }
     dispatch('addCaseIdList', state.caseId)
 
     // set user and caseid to lastUser
@@ -252,7 +263,7 @@ export const actions = {
           //check if caseId is already registered to PouchDB
           //initialize data if caseId does not exists
           //check if caseId is already registered to PouchDB
-          const res3 = state.caseIdList.filter(function(val){
+          const res3 = state.caseIdList.filter(function (val) {
             return val.caseId === caseIdTmp && val.user === userTmp
           })
           if (!res3) {
@@ -387,25 +398,29 @@ export const actions = {
     return promise
   },
   async registUser({context, dispatch}, userInfo) {
-    const res = await firebase.auth().createUserWithEmailAndPassword(userInfo.email, userInfo.password).catch((error) => {
-      context.commit('setOffUser')
-      console.log('registration failed')
-      alert(error)
-      reject(error)
-    })
-    if (res){
-      console.log('regist ok！')
-      context.commit('setUser', {
-        'email': res.user.email,
-        'uid': res.user.uid
-      })
-      dispatch('initPouch', userInfo).then(function () {
-        dispatch('autoLogin').then(function (res) {
-          console.log('login -> autologin: loginStatus=' + res)
-          resolve(true)
+    console.log(userInfo)
+    let promise = new Promise(function (resolve, reject){
+      firebase.auth().createUserWithEmailAndPassword(userInfo.email, userInfo.password)
+        .then(function (res) {
+          console.log('regist ok！')
+          dispatch('setUser', {
+            'email': res.user.email,
+            'uid': res.user.uid
+          })
+          dispatch('initPouch', userInfo).then(function () {
+            dispatch('autoLogin').then(function (res) {
+              console.log('login -> autologin: loginStatus=' + res)
+              resolve(true)
+            })
+          })
         })
-      })
-    }
+        .catch(function (error) {
+          console.log('registration failed')
+          //context.commit('setOffUser')
+          reject(error)
+        })
+    })
+    return promise
   },
   setNow(context) {
     context.commit('setNow')

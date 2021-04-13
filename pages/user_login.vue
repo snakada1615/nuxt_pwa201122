@@ -29,7 +29,7 @@
               </b-col>
             </b-row>
           </b-tab>
-          <b-tab title="social account">
+          <b-tab title="social account" v-if="false">
             <b-form-radio-group id="radio-group" v-model="loginProvider">
               <b-form-radio value=1>
                 <b-icon icon="google">aaa</b-icon>
@@ -83,7 +83,6 @@
         </b-col>
       </b-row>
     </b-form>
-    tab: {{tabId}}
   </div>
 </template>
 
@@ -125,8 +124,15 @@
         if (res) { // successfully logged in using firebase
           //update $store
           vm.$store.dispatch('setUser', {
-            'email': res.email,
-            'uid': res.uid
+            name: '',
+            email: res.email,
+            country: '',
+            subnational1: '',
+            subnational2: '',
+            subnational3: '',
+            organization: '',
+            title: '',
+            uid: res.uid
           })
 
           //update $store
@@ -170,13 +176,17 @@
           email: this.email,
           password: this.password,
           caseId: this.fileName
+        }).then(function (){
+          this.email = ''
+          this.password = ''
+          this.fileName = ''
+          if (res) {
+            this.$router.push('/')
+          }
+        }).catch((err) =>{
+          alert(err)
+          this.$router.push('/user_login')
         })
-        this.email = ''
-        this.password = ''
-        this.fileName = ''
-        if (res) {
-          this.$router.push('/')
-        }
       },
     }
   }
