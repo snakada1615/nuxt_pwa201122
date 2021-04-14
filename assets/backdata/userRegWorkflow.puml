@@ -1,0 +1,34 @@
+@startuml
+title user registration (firebase with pouchDB)
+
+start
+
+:set user information;
+
+:send user to firebase;
+
+ if (get credential) then (false)
+  :failure message;
+  :stay current page;
+  stop
+  else (true)
+  package "user registration"{
+  :merge credential
+  with user;
+  :save user
+   to $store.state;
+  :save user
+   to lastUser_pouchDB;
+  }
+  package "initialization"{
+  :initialize userData
+    linked with caseId;
+  :set userData
+   to userDB_PouchDB;
+  }
+  :move to /index;
+   stop
+ endif
+
+
+@enduml

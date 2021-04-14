@@ -3,23 +3,23 @@ title autologin using cashed login info (PouchDB)
 
 start
 
-:autologin;
+if (parallel process) then
 
-
-:(preload caseId list)
-  load caseList
-  from PouchDB;
-
- if (load success) then (false)
+ if (load auth data
+   from local DB) then (false)
   :failure message;
   stop
-  else (true)
-  :load lastUser info
-    from PouchDB
-    -user
-    -caseId;
+
+ else (true)
+ :success;
  endif
 
+else
+  : load caseList
+   from local DB;
+  :success;
+
+endif
 
 if (lastUser not exists) then (true)
     :loginStatus = 0;

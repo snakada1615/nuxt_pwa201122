@@ -209,6 +209,7 @@ export const actions = {
     }
 
     console.log('initialize workspace data')
+    console.log(payload)
     // initialize user to store
     dispatch('setUser', payload.user)
     dispatch('setCaseId', payload.caseId)
@@ -216,12 +217,7 @@ export const actions = {
     //set time stump
     dispatch('setNow')
 
-    // initialize caseId to store
-    const caseInit = {
-      'email': state.user.email,
-      'caseId': state.caseId,
-      'saveDate': state.saveDate
-    }
+    //set time caseIdList
     dispatch('addCaseIdList', state.caseId)
 
     // set user and caseid to lastUser
@@ -233,10 +229,10 @@ export const actions = {
     const iCount = state.tabNumber
 
     WS.dietCases = initDiet(id, iCount)
-    WS.feasibilityCases = initFeasibilityCase(id, iCount)
     WS.saveDate = state.saveDate
     WS.user = state.user
     WS.caseId = state.caseId
+    WS.feasibilityCases = initFeasibilityCase(id, iCount)
     WS._id = getters.currentPouchID
 
     let db = new PouchDB(state.userDB)
@@ -383,6 +379,7 @@ export const actions = {
             if (value.doc.caseId) {
               res.push({
                 email: value.doc.user.email,
+                uid: value.doc.user.uid,
                 caseId: value.doc.caseId,
                 saveDate: value.doc.saveDate
               })
@@ -399,25 +396,39 @@ export const actions = {
   },
   async registUser({context, dispatch}, userInfo) {
     console.log(userInfo)
-    let promise = new Promise(function (resolve, reject){
-      firebase.auth().createUserWithEmailAndPassword(userInfo.email, userInfo.password)
-        .then(function (res) {
-          console.log('regist ok！')
-          dispatch('setUser', {
-            'email': res.user.email,
-            'uid': res.user.uid
-          })
-          dispatch('initPouch', userInfo).then(function () {
-            dispatch('autoLogin').then(function (res) {
-              console.log('login -> autologin: loginStatus=' + res)
-              resolve(true)
+    let promise = new Promise(function (resolve, reject) {
+      firebase.auth().createUserWithEmailAndPassword(userInfo.user.email, userInfo.user.password)
+        .then(
+          // if success
+          function (res) {
+            console.log('regist ok！')
+            dispatch('setUser', {
+              email: res.user.email,
+              uid: res.user.uid,
+              name: userInfo.user.name,
+              country: userInfo.user.country,
+              subnational1: userInfo.user.subnational1,
+              subnational2: userInfo.user.subnational2,
+              subnational3: userInfo.user.subnational3,
+              organization: userInfo.user.organization,
+              title: userInfo.user.title,
             })
+            dispatch('initPouch', userInfo).then(function () {
+              dispatch('autoLogin').then(function (res) {
+                console.log('login -> autologin: loginStatus=' + res)
+                console.log(res)
+                resolve(true)
+              })
+            })
+          },
+          //if failure
+          function (error) {
+            console.log('registration failed')
+            //context.commit('setOffUser')
+            reject(error)
           })
-        })
-        .catch(function (error) {
-          console.log('registration failed')
-          //context.commit('setOffUser')
-          reject(error)
+        .catch(function (err){
+          console.log(err)
         })
     })
     return promise

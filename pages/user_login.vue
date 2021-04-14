@@ -87,107 +87,114 @@
 </template>
 
 <script>
-  import veeInput from "@/components/atoms/veeInput";
+import veeInput from "@/components/atoms/veeInput";
 
-  export default {
-    components: {
-      veeInput,
+export default {
+  components: {
+    veeInput,
+  },
+  data() {
+    return {
+      email: '',
+      password: '',
+      fileName: '',
+      loginProvider: 0,
+      tabId: 0,
+    }
+  },
+  computed: {
+    caseIdList: function () {
+      return this.$store.state.caseIdList
     },
-    data() {
-      return {
-        email: '',
-        password: '',
-        fileName: '',
-        loginProvider: 0,
-        tabId:0,
-      }
+    fileNameValidator: function () {
+      return this.fileName.length > 3 ? true : false
     },
-    computed: {
-      caseIdList: function () {
-        return this.$store.state.caseIdList
-      },
-      fileNameValidator: function () {
-        return this.fileName.length > 3 ? true : false
-      },
-      isNewFileName: function () {
-        return this.fileName
-      }
-    },
-    methods: {
-      async login() {
-        const vm = this
-        console.log('vm.caseIdList')
-        const res = await vm.$store.dispatch('login', {
-          email: vm.email,
-          password: vm.password,
+    isNewFileName: function () {
+      return this.fileName
+    }
+  },
+  methods: {
+    async login() {
+      const vm = this
+      console.log('vm.caseIdList')
+      const res = await vm.$store.dispatch('login', {
+        email: vm.email,
+        password: vm.password,
+      })
+      if (res) { // successfully logged in using firebase
+        //update $store
+        vm.$store.dispatch('setUser', {
+          name: '',
+          email: res.email,
+          country: '',
+          subnational1: '',
+          subnational2: '',
+          subnational3: '',
+          organization: '',
+          title: '',
+          uid: res.uid
         })
-        if (res) { // successfully logged in using firebase
-          //update $store
-          vm.$store.dispatch('setUser', {
-            name: '',
-            email: res.email,
-            country: '',
-            subnational1: '',
-            subnational2: '',
-            subnational3: '',
-            organization: '',
-            title: '',
-            uid: res.uid
-          })
 
-          //update $store
-          vm.$store.dispatch('setCaseId',
-            vm.fileName
-          )
+        //update $store
+        vm.$store.dispatch('setCaseId',
+          vm.fileName
+        )
 
-          //update PouchDB-lastUser
-          await vm.$store.dispatch('saveUserToLastuser', {user: vm.$store.state.user, caseId: vm.$store.state.caseId})
+        //update PouchDB-lastUser
+        await vm.$store.dispatch('saveUserToLastuser', {user: vm.$store.state.user, caseId: vm.$store.state.caseId})
 
-          //check if caseId is already registered to PouchDB
-          const res2 = vm.caseIdList.filter(function (val) {
-            return val.caseId === vm.$store.state.caseId && val.user === vm.$store.state.user
-          })
-          if (res2.length === 0) {
-            await vm.$store.dispatch('initPouch', {user: vm.$store.state.user, caseId: vm.$store.state.caseId})
+        //check if caseId is already registered to PouchDB
+        const res2 = vm.caseIdList.filter(function (val) {
+          return val.caseId === vm.$store.state.caseId && val.user === vm.$store.state.user
+        })
+        if (res2.length === 0) {
+          await vm.$store.dispatch('initPouch', {user: vm.$store.state.user, caseId: vm.$store.state.caseId})
 
-            //move to top page
-            console.log('gotoindex')
-            vm.email = ''
-            vm.password = ''
-            vm.$router.push('/')
-          } else {
+          //move to top page
+          console.log('gotoindex')
+          vm.email = ''
+          vm.password = ''
+          vm.$router.push('/')
+        } else {
 
-            //move to top page
-            console.log('gotoindex2')
-            vm.email = ''
-            vm.password = ''
-            vm.$router.push('/')
-          }
+          //move to top page
+          console.log('gotoindex2')
+          vm.email = ''
+          vm.password = ''
+          vm.$router.push('/')
         }
-      },
-      logout() {
-        this.$store.dispatch('logout')
-        this.email = ''
-        this.password = ''
-        this.$router.push('/')
-      },
-      async registUser() {
-        const res = await this.$store.dispatch('registUser', {
+      }
+    },
+    logout() {
+      this.$store.dispatch('logout')
+      this.email = ''
+      this.password = ''
+      this.$router.push('/')
+    },
+    async registUser() {
+      const res = await this.$store.dispatch('registUser', {
+        user: {
           email: this.email,
           password: this.password,
-          caseId: this.fileName
-        }).then(function (){
+        },
+        caseId: this.fileName
+      }).then(
+        // if success
+        function () {
           this.email = ''
           this.password = ''
           this.fileName = ''
           if (res) {
             this.$router.push('/')
           }
-        }).catch((err) =>{
+        },
+        // if failed
+        function (err) {
           alert(err)
+          console.log('registuser fail')
           this.$router.push('/user_login')
         })
-      },
-    }
+    },
   }
+}
 </script>
