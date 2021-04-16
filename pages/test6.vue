@@ -1,22 +1,19 @@
-loginEmail example:
-
-```vue
 <template>
   <b-container>
     <div>Hello world!</div>
     <b-button variant="success" @click="$bvModal.show('test')">test</b-button>
-    <login-email name="test" :uid.sync="uid" :email.sync="email"/>
+    <regist-email id="test" :uid.sync="uid" :email.sync="email"/>
     <div>user: {{uid}}</div>
     <div>email: {{email}}</div>
   </b-container>
 </template>
 
 <script>
-  import loginEmail from "@/components/molecules/loginEmail";
+  import registEmail from "../components/molecules/registEmail";
 
   export default {
     components:{
-      loginEmail
+      registEmail
     },
     data(){
       return {
@@ -26,5 +23,3 @@ loginEmail example:
     }
   }
 </script>
-
-```

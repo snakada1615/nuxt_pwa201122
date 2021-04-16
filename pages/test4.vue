@@ -2,31 +2,42 @@
   <b-container>
     <b-button variant="success"
               class="mt-2"
-              @click="$bvModal.show('test')"
-    >push email</b-button>
-    <login-email name="test" @login="loginOk"></login-email>
-    <div>user id: {{user.uid}}</div>
+              @click="$bvModal.show('WS')"
+    >push WS</b-button>
+    <select-workspace
+      id="WS"
+      :workspaceList="items"
+      @workspaceCreated="test1"
+      @workspaceSelected="test2"/>
   </b-container>
 </template>
 
 <script>
-  import loginEmail from "@/components/molecules/loginEmail";
+  import selectWorkspace from "@/components/molecules/selectWorkspace"
 
   export default {
-    components:{
-      loginEmail
-    },
-    data() {
+    data () {
       return {
-        user:''
+        items: [
+          {caseId: 'homework'},
+          {caseId: 'tonight'},
+          {caseId: 'good morning'},
+          {caseId: 'bye bye'},
+        ],
       }
+    },
+    components:{
+      selectWorkspace
     },
     methods:{
-      loginOk(val){
-        this.user = val
-        console.log('loginOk')
-        console.log(this.user)
-      }
+      test1(val){
+        console.log('created')
+        console.log(val)
+      },
+      test2(val){
+        console.log('selected')
+        console.log(val)
+      },
     }
   }
 </script>

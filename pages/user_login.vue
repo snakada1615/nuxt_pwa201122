@@ -1,200 +1,181 @@
 <template>
-  <div class="container" style="max-width: 540px">
-    <p>current user: <span v-if="$store.state.user">{{ $store.state.user.email }}</span></p>
-    {{ email }}
-    <b-form @submit.prevent>
-      <b-card no-body>
-        <b-tabs card content-class="mt-1" v-model="tabId">
-          <b-tab title="email & passward" active>
-            <b-row>
-              <b-col>
-                <vee-input
-                  name="input_email"
-                  rules="required|email"
-                  placeholder="email"
-                  type="email"
-                  v-model="email"
-                />
-              </b-col>
-            </b-row>
-            <b-row class="mt-2">
-              <b-col>
-                <vee-input
-                  name="input_pass"
-                  rules="required|min:6"
-                  placeholder="password"
-                  type="password"
-                  v-model="password"
-                />
-              </b-col>
-            </b-row>
-          </b-tab>
-          <b-tab title="social account" v-if="false">
-            <b-form-radio-group id="radio-group" v-model="loginProvider">
-              <b-form-radio value=1>
-                <b-icon icon="google">aaa</b-icon>
-                login using your <span class="text-danger">google</span> account
-              </b-form-radio>
-              <b-form-radio value=2>
-                <b-icon icon="twitter">aaa</b-icon>
-                login using your <span class="text-danger">twitter</span> account
-              </b-form-radio>
-              <b-form-radio value=3>
-                <b-icon icon="facebook">aaa</b-icon>
-                login using your <span class="text-danger">facebook</span> account
-              </b-form-radio>
-            </b-form-radio-group>
-          </b-tab>
-        </b-tabs>
-      </b-card>
-
-      <b-row class="mt-3">
-        <b-col>
-          <p>current FileName: <span v-if="$store.state.caseId">{{ $store.state.caseId }}</span></p>
-          <b-input-group size="sm">
-            <b-form-input
-              v-model="fileName"
-              type="text"
-              id="input_filename"
-              placeholder="file name"
-              :state="fileNameValidator"
-            ></b-form-input>
-            <template #append>
-              <b-dropdown text="Dropdown" variant="info" size="sm">
-                <b-dropdown-item
-                  v-for="caseId in caseIdList"
-                  :key="caseId.caseId"
-                  :value="caseId.caseId"
-                  @click="fileName = caseId.caseId"
-                >{{ caseId.caseId }}
-                </b-dropdown-item>
-              </b-dropdown>
-              <b-button variant="warning" :disabled="!fileName" @click="fileName = ''">clear</b-button>
-            </template>
-          </b-input-group>
-          <p>please specify file name to store your work record</p>
-        </b-col>
-      </b-row>
-      <b-row class="my-2 mt-4">
-        <b-col>
-          <b-button @click="login()" variant="primary" size="sm">login</b-button>
-          <b-button @click="registUser" variant="primary" size="sm">new user</b-button>
-          <b-button @click="logout()" size="sm">logout</b-button>
-        </b-col>
-      </b-row>
-    </b-form>
-  </div>
+  <b-container>
+    <b-row>
+      <b-col>
+        <b-card bg-variant="gray-300" class="mt-3 mb-2">
+          <b-form-group label="login option" class="my-0" :state="loginOptionState">
+            <b-form-radio v-model="loginOption" value="1">
+              <b-icon icon="envelope"/>
+              email
+            </b-form-radio>
+            <b-form-radio v-model="loginOption" disabled value="2">
+              <b-icon icon="chat-dots-fill"/>
+              SMS
+            </b-form-radio>
+            <b-form-radio v-model="loginOption" disabled value="3">
+              <b-icon icon="google"/>
+              Google
+            </b-form-radio>
+            <b-form-radio v-model="loginOption" disabled value="4">
+              <b-icon icon="twitter"/>
+              Twitter
+            </b-form-radio>
+            <b-form-radio v-model="loginOption" disabled value="5">
+              <b-icon icon="facebook"/>
+              Facebook
+            </b-form-radio>
+            <b-form-invalid-feedback :state="loginOptionState">Please select one</b-form-invalid-feedback>
+          </b-form-group>
+        </b-card>
+        <b-card bg-variant="gray-300" class="mt-1 mb-2">
+          <b-row class="my-1 py-0">
+            <b-col cols="3">workspace name:</b-col>
+            <b-col cols="9">
+              <b-form-input
+                id="caseIdInput"
+                v-model="userWorkspace"
+                :state="wsState"
+                placeholder="workspace name"
+                size="sm"
+              >
+              </b-form-input>
+            </b-col>
+          </b-row>
+        </b-card>
+      </b-col>
+    </b-row>
+    <b-row>
+      <b-col cols="8">
+        <span>
+          <b-button variant="success" @click="loginUser(loginOption)" :disabled="!loginReady">login</b-button>
+          <b-button variant="success" @click="logout" :disabled="!isLogin">logout</b-button>
+        </span>
+      </b-col>
+    </b-row>
+    <login-sms name="loginSms" :uid.sync="userId"/>
+    <login-email id="loginEmail" :email.sync="userEmail" :uid.sync="userId"/>
+  </b-container>
 </template>
 
 <script>
-import veeInput from "@/components/atoms/veeInput";
+  import loginSms from "@/components/molecules/loginSms"
+  import loginEmail from "@/components/molecules/loginEmail"
+  import registEmail from "@/components/molecules/registEmail";
 
-export default {
-  components: {
-    veeInput,
-  },
-  data() {
-    return {
-      email: '',
-      password: '',
-      fileName: '',
-      loginProvider: 0,
-      tabId: 0,
-    }
-  },
-  computed: {
-    caseIdList: function () {
-      return this.$store.state.caseIdList
+  export default {
+    components: {
+      loginSms,
+      registEmail,
+      loginEmail,
     },
-    fileNameValidator: function () {
-      return this.fileName.length > 3 ? true : false
+    data() {
+      return {
+        loginOption: 0,
+        userName: '',
+        userCountry: '',
+        userSubNational1: '',
+        userSubNational2: '',
+        userSubNational3: '',
+        userOrgainzation: '',
+        userTitle: '',
+        userWorkspace: '',
+        userEmail: '',
+        userId: '',
+      }
     },
-    isNewFileName: function () {
-      return this.fileName
-    }
-  },
-  methods: {
-    async login() {
-      const vm = this
-      console.log('vm.caseIdList')
-      const res = await vm.$store.dispatch('login', {
-        email: vm.email,
-        password: vm.password,
-      })
-      if (res) { // successfully logged in using firebase
-        //update $store
-        vm.$store.dispatch('setUser', {
-          name: '',
-          email: res.email,
-          country: '',
-          subnational1: '',
-          subnational2: '',
-          subnational3: '',
-          organization: '',
-          title: '',
-          uid: res.uid
-        })
-
-        //update $store
-        vm.$store.dispatch('setCaseId',
-          vm.fileName
-        )
-
-        //update PouchDB-lastUser
-        await vm.$store.dispatch('saveUserToLastuser', {user: vm.$store.state.user, caseId: vm.$store.state.caseId})
-
-        //check if caseId is already registered to PouchDB
-        const res2 = vm.caseIdList.filter(function (val) {
-          return val.caseId === vm.$store.state.caseId && val.user === vm.$store.state.user
-        })
-        if (res2.length === 0) {
-          await vm.$store.dispatch('initPouch', {user: vm.$store.state.user, caseId: vm.$store.state.caseId})
-
-          //move to top page
-          console.log('gotoindex')
-          vm.email = ''
-          vm.password = ''
-          vm.$router.push('/')
-        } else {
-
-          //move to top page
-          console.log('gotoindex2')
-          vm.email = ''
-          vm.password = ''
-          vm.$router.push('/')
+    computed: {
+      isLogin() {
+        return (this.$store.state.user.uid !== '')
+      },
+      loginOptionState() {
+        return this.loginOption > 0
+      },
+      loginReady() {
+        return (!this.isLogin && this.loginOption > 0 && this.wsState)
+      },
+      nameState() {
+        return (/^[a-zA-Z][a-zA-Z .,'-]{1,47}[a-zA-Z]{1,3}$/).test(this.userName)
+      },
+      wsState() {
+        return (/^[a-zA-Z][a-zA-Z .,'-]{1,27}[a-zA-Z]{1,3}$/).test(this.userWorkspace)
+      },
+      countryState() {
+        return (/^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/).test(this.userName)
+      },
+      userInfo(){
+        return {
+          email: this.userEmail,
+          uid: this.userId,
+          name: this.userName,
+          country: this.userCountry,
+          subnational1: this.userSubNational1,
+          subnational2: this.userSubNational2,
+          subnational3: this.userSubNational3,
+          organization: this.userOrgainzation,
+          title: this.userTitle,
         }
       }
     },
-    logout() {
-      this.$store.dispatch('logout')
-      this.email = ''
-      this.password = ''
-      this.$router.push('/')
+    watch: {
+      userId: function (val) {
+        //triggered when userId set through login function
+        if (val){
+          this.initNewUser(this.userInfo, this.userWorkspace)
+        }
+      }
     },
-    async registUser() {
-      const res = await this.$store.dispatch('registUser', {
-        user: {
-          email: this.email,
-          password: this.password,
-        },
-        caseId: this.fileName
-      }).then(
-        // if success
-        function () {
-          this.email = ''
-          this.password = ''
-          this.fileName = ''
-          if (res) {
-            this.$router.push('/')
-          }
-        },
-        // if failed
-        function (err) {
-          alert(err)
-          console.log('registuser fail')
-          this.$router.push('/user_login')
-        })
+    methods: {
+      async initNewUser(user, workSpace) {
+        const vm = this
+        //update $store
+        vm.$store.dispatch('setUser', user)
+
+        //update $store
+        vm.$store.dispatch('setCaseId', workSpace)
+
+        //update PouchDB-lastUser
+        await vm.$store.dispatch('saveUserToLastuser', {user: user, caseId: workSpace})
+
+        //initialieze user workspace
+        await vm.$store.dispatch('initPouch', {user: user, caseId: workSpace})
+
+        //move to top page
+        console.log('registion complete')
+        vm.email = ''
+        vm.password = ''
+        vm.$router.push('/')
+      },
+      loginUser(val) {
+        const val1 = Number(val)
+        let isExit = false
+        //console.log(val1)
+        switch (val1) {
+          case 1:
+            this.$bvModal.show('loginEmail')
+            console.log('1')
+            break
+          case 2:
+            console.log('2')
+            break
+          case 3:
+            console.log('3')
+            break
+          default:
+            isExit = true
+            console.log('no selection')
+        }
+        if (isExit){
+          // exit if register failed
+          return false
+        }
+        return true
+      },
+      logout() {
+        this.$store.dispatch('logout')
+        this.email = ''
+        this.password = ''
+        //this.$router.push('/')
+      },
     },
   }
-}
 </script>

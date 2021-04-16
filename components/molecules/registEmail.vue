@@ -11,7 +11,7 @@
       <b-form @submit.prevent>
         <b-row class="my-2">
           <b-col>
-            you are going to login as:
+            you are going to register as:
           </b-col>
         </b-row>
         <b-row class="my-2">
@@ -40,7 +40,7 @@
     </validation-observer>
     <b-row class="my-2">
       <b-col>
-        <b-button @click="login()" variant="info" size="sm">login</b-button>
+        <b-button @click="register()" variant="info" size="sm">register</b-button>
         <b-button @click="cancel(id)" size="sm" variant="warning">cancel</b-button>
       </b-col>
     </b-row>
@@ -72,7 +72,7 @@
       },
       myModalHeader: {
         type: String,
-        default: 'User Login'
+        default: 'User register'
       },
       email: {
         type: String,
@@ -84,26 +84,25 @@
       }
     },
     methods: {
-      login() {
+      register() {
         const vm = this
-        this.$store.dispatch('login', {email: this.myEmail, password: this.myPassword}).then(function (res) {
+        this.$store.dispatch('registUserEmial', {email: this.myEmail, password: this.myPassword}).then(function (res) {
           vm.myEmail = ''
           vm.password = ''
           if (res){
-            console.log('login success')
-            vm.$emit('update:uid', res.uid)
-            vm.$emit('update:email', res.email)
+            console.log('register success')
+            vm.$emit('update:uid', res.user.uid)
+            vm.$emit('update:email', res.user.email)
             vm.$bvModal.hide(vm.id)
           }
         }).catch(function(err){
           vm.myEmail = ''
           vm.password = ''
-          console.log(err)
           alert(err.message)
         })
       },
       cancel(val){
-        this.$emit('cancelLoginEmail')
+        this.$emit('cancelRegistEmail')
         this.$bvModal.hide(val)
       },
     }

@@ -87,7 +87,7 @@ export const mutations = {
 
 export const actions = {
   async autoLogin({dispatch}) {
-    await dispatch('loadCaseListFromPouch')
+    dispatch('loadCaseListFromPouch')
     const res = await dispatch('loadUserFromPouch')
     dispatch('setLoginStatus', res)
   },
@@ -149,14 +149,14 @@ export const actions = {
 
           resolve(user)
         }).catch((error) => {
-        // Handle Errors here.
-        var errorCode = error.code;
-        var errorMessage = error.message;
-        // The email of the user's account used.
-        var email = error.email;
-        // The firebase.auth.AuthCredential type that was used.
-        var credential = error.credential;
-        reject(error)
+          // Handle Errors here.
+          var errorCode = error.code;
+          var errorMessage = error.message;
+          // The email of the user's account used.
+          var email = error.email;
+          // The firebase.auth.AuthCredential type that was used.
+          var credential = error.credential;
+          reject(error)
       });
     })
     return promise
@@ -255,17 +255,6 @@ export const actions = {
         caseIdTmp ? dispatch('setCaseId', caseIdTmp) : res2 = 0
         if (res1 && res2) {
           result = 1
-
-          //check if caseId is already registered to PouchDB
-          //initialize data if caseId does not exists
-          //check if caseId is already registered to PouchDB
-          const res3 = state.caseIdList.filter(function (val) {
-            return val.caseId === caseIdTmp && val.user === userTmp
-          })
-          if (!res3) {
-            dispatch('initPouch', {user: state.user, caseId: state.caseId})
-          }
-
         } else if (!res1) {
           result = 2
         } else if (!res2) {
@@ -391,6 +380,28 @@ export const actions = {
         console.log(err)
         reject(err)
       })
+    })
+    return promise
+  },
+  async registUserEmial({context, dispatch}, userInfo){
+    let promise = new Promise(function (resolve, reject) {
+      firebase.auth().createUserWithEmailAndPassword(userInfo.email, userInfo.password)
+        .then(
+          // if success
+          function (res) {
+          resolve(res)
+        },
+          //if failure
+          function (err) {
+            console.log('registration failed')
+            console.log(err)
+            //context.commit('setOffUser')
+            reject(err)
+          })
+        .catch(function (err){
+          console.log(err)
+          reject(err)
+        })
     })
     return promise
   },

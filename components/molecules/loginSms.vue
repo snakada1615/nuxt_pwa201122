@@ -25,7 +25,7 @@
 
       <div v-show="state==='authComplete'">
         <div>you are already logged in. please log out first if you are going to login as another user</div>
-        <div v-if="user">{{`user id: ${user.uid}`}}</div>
+        <div>user: {{uid}}</div>
       </div>
 
     </b-modal>
@@ -40,6 +40,14 @@
       name: {
         type: String,
         required: true,
+      },
+      email: {
+        type: String,
+        default: ''
+      },
+      uid:{
+        type: String,
+        default: ''
       }
     },
     data() {
@@ -49,56 +57,41 @@
         confirmationResult: null,
         waitingVerify: false,
         verificationCode: '',
-        user: null,
         regExTel: /^(\+\d{1,2})?\d{10}$/gm,
 //        regExTel: /^\d{10}$/gm,
       }
     },
     computed: {
       state() {
-        if (!this.waitingVerify && !this.user) {
+        if (!this.waitingVerify && !this.uid) {
           return 'startLogin'
         }
-        if (this.waitingVerify && !this.user) {
+        if (this.waitingVerify && !this.uid) {
           return 'waitingVerify'
         }
         return 'authComplete'
       },
       modalTitle(){
-        if (!this.waitingVerify && !this.user) {
+        if (this.state === 'startLogin') {
           return 'send mobile number'
         }
-        if (this.waitingVerify && !this.user) {
+        if (this.state === 'waitingVerify') {
           return 'send confirmation code'
+        }
+        if (this.state === 'autoComplete') {
+          return 'please logout first'
         }
       },
     },
     async mounted() {
-      const myCookie = this.$cookies.get('OTZ')
-      this.$cookies.set('OTZ', myCookie, {
-        path: '/',
-        maxAge: 60 * 60 * 24 * 7,
-        sameSite: 'none',
-        secure: true
-      });
-
-      const vm = this
-      firebase.auth().getRedirectResult().then((result) => {
-        if (result.credential) {
-          console.log(result.user)
-          vm.user = result.user
-          vm.waitingVerify = true
-        }
-      })
-
+      if (this.uid) {
+        this.waitingVerify = true
+      }
       this.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('linkPhoneNumberBtn', {
         'size': 'invisible',
       })
     },
     methods: {
-      openModal(){
-        this.$bvModal.show('credModal')
-      },
       async sendSmsVerification() {
         try {
           this.confirmationResult = await firebase.auth().signInWithPhoneNumber(this.phoneNumber, this.recaptchaVerifier)
@@ -108,9 +101,11 @@
         }
       },
       async confirmVerification() {
+        console.log('check01')
         const result = await this.confirmationResult.confirm(this.verificationCode)
-        this.user = result.user
-        this.$emit('login', result.user)
+        console.log(result.user)
+        this.$emit('update:email', result.user.email)
+        this.$emit('update:uid', result.user.uid)
         this.recaptchaVerifier = null
         this.confirmationResult = null
         this.result = null

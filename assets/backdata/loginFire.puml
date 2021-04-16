@@ -1,40 +1,42 @@
 @startuml
-title original login through firebase
+title login through firebase
 
 start
 
 :(params)
- user.email
- user.uid
+ user
  caseId;
 
-if (parallel process) then (email, uid)
-  :login using firebase;
-  if (firelogin success) then (true)
-      :set user
-       to $store;
-  else (false)
-      :failure message;
-      :stay @loginPage;
-      stop
-  endif
-else (caseId)
-  :set caseId
-   to $store;
-endif
-
-:set user & caseId to
- PouchDB-lastUser;
-
-if (user & caseId exists
- in caseList) then (true)
-
+:login using firebase;
+if (get credential) then (true)
+  package "set $store" {
+    :merge credential
+      with user info;
+    :set user
+     to $store;
+    :set caseId
+     to $store;
+  }
 else (false)
-  :initialize userData
-    for caseId;
-  :set userData
-   to PouchDB-userDB;
+  :failure message;
+  :stay @loginPage;
+  stop
 endif
+
+package "set pouchDB" {
+  :set user & caseId to
+   PouchDB-lastUser;
+
+  if (user & caseId exists
+   in caseList) then (true)
+
+  else (false)
+    :initialize userData
+      for caseId;
+    :set userData
+     to PouchDB-userDB;
+  endif
+}
 
 :move to '/index';
 

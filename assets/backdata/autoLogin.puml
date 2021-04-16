@@ -28,17 +28,6 @@ else if (user != null &&
     :set user & caseId
       to $store;
     :loginStatus = 1;
-    if (user & caseId exists
-     in caseList) then (true)
-
-    else (false)
-      :initialize userData
-        for caseId;
-      :set userData
-       to PouchDB-userDB;
-      :reload ceseId list
-        from PouchDB;
-    endif
 else if (user != null) then (yes)
     :set user to $store;
     :loginStatus = 2;

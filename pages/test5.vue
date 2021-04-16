@@ -1,47 +1,22 @@
 <template>
-  <div>Hello world!</div>
+  <b-container>
+    <div>Hello world!</div>
+    <b-button variant="success" @click="$bvModal.show('test')">test</b-button>
+    <login-sms name="test" :uid.sync="uid"/>
+    <div>user: {{uid}}</div>
+  </b-container>
 </template>
 
 <script>
-  /**
-   * @vue-prop {Number} initialCounter - Initial counter's value
-   * @vue-prop {Number} [step=1] - Step
-   * @vue-data {Number} counter - Current counter's value
-   * @param {string} somebody
-   * @vue-computed {String} message
-   * @vue-computed {String} message
-   * @vue-event {Number} increment - Emit counter's value after increment
-   * @vue-event {Number} decrement - Emit counter's value after decrement
-   */
+  import loginSms from "@/components/molecules/loginSms";
+
   export default {
-    props: {
-      initialCounter: {
-        type: Number,
-        default: "8",
-      },
-      step: {
-        type: Number,
-        default: 1,
-      },
+    components:{
+      loginSms
     },
-    data () {
+    data(){
       return {
-        counter: 0,
-      }
-    },
-    computed: {
-      message() {
-        return `Current value is ${this.counter}`;
-      }
-    },
-    methods: {
-      increment() {
-        this.counter += 1;
-        this.$emit('increment', this.counter);
-      },
-      decrement() {
-        this.counter -= 1;
-        this.$emit('decrement', this.counter);
+        uid:'',
       }
     }
   }

@@ -3,95 +3,42 @@
     <b-row>
       <b-col>
         <b-card bg-variant="gray-300" class="mt-3 mb-2">
-          <b-form-group label="login option" class="my-0">
+          <b-form-group label="login option" class="my-0" :state="loginOptionState">
             <b-form-radio v-model="loginOption" value="1">
               <b-icon icon="envelope"/>
               email
             </b-form-radio>
-            <b-form-radio v-model="loginOption" value="2">
+            <b-form-radio v-model="loginOption" disabled value="2">
               <b-icon icon="chat-dots-fill"/>
               SMS
             </b-form-radio>
-            <b-form-radio v-model="loginOption" value="3">
+            <b-form-radio v-model="loginOption" disabled value="3">
               <b-icon icon="google"/>
               Google
             </b-form-radio>
-            <b-form-radio v-model="loginOption" value="4">
+            <b-form-radio v-model="loginOption" disabled value="4">
               <b-icon icon="twitter"/>
               Twitter
             </b-form-radio>
-            <b-form-radio v-model="loginOption" value="5">
+            <b-form-radio v-model="loginOption" disabled value="5">
               <b-icon icon="facebook"/>
               Facebook
             </b-form-radio>
+            <b-form-invalid-feedback :state="loginOptionState">Please select one</b-form-invalid-feedback>
           </b-form-group>
         </b-card>
         <b-card bg-variant="gray-300" class="mt-1 mb-2">
-          <b-row class="my-1">
-            <b-col cols="3">Name:</b-col>
+          <b-row class="my-1 py-0">
+            <b-col cols="3">workspace name:</b-col>
             <b-col cols="9">
               <b-form-input
-                id="nameInput"
-                v-model="userName"
-                placeholder="your name"
+                id="caseIdInput"
+                v-model="userWorkspace"
+                :state="wsState"
+                placeholder="workspace name"
                 size="sm"
-                :state="nameState"
-              />
-            </b-col>
-          </b-row>
-          <b-row class="my-1">
-            <b-col cols="3">Country:</b-col>
-            <b-col cols="9">
-              <b-form-input
-                id="countryInput"
-                v-model="userCountry"
-                placeholder="country"
-                size="sm"
-              />
-            </b-col>
-          </b-row>
-          <b-row class="my-1">
-            <b-col cols="3">Aera1:</b-col>
-            <b-col cols="9">
-              <b-form-input
-                id="countryInput2"
-                v-model="userSubNational1"
-                placeholder="Area1"
-                size="sm"
-              />
-            </b-col>
-          </b-row>
-          <b-row class="my-1">
-            <b-col cols="3">Area2:</b-col>
-            <b-col cols="9">
-              <b-form-input
-                id="countryInput3"
-                v-model="userSubNational2"
-                placeholder="Area2"
-                size="sm"
-              />
-            </b-col>
-          </b-row>
-          <b-row class="my-1">
-            <b-col cols="3">Organization:</b-col>
-            <b-col cols="9">
-              <b-form-input
-                id="organizationInput"
-                v-model="userOrgainzation"
-                placeholder="your organization"
-                size="sm"
-              />
-            </b-col>
-          </b-row>
-          <b-row class="my-1">
-            <b-col cols="3">Title:</b-col>
-            <b-col cols="9">
-              <b-form-input
-                id="titleInput"
-                v-model="userTitle"
-                placeholder="your title"
-                size="sm"
-              />
+              >
+              </b-form-input>
             </b-col>
           </b-row>
         </b-card>
@@ -100,27 +47,26 @@
     <b-row>
       <b-col cols="8">
         <span>
-          <b-button variant="success" @click="test" :disabled="!loginReady">login</b-button>
-          <b-button variant="success" @click="test" :disabled="!isLogin">logout</b-button>
+          <b-button variant="success" @click="loginUser(loginOption)" :disabled="!loginReady">login</b-button>
+          <b-button variant="success" @click="logout" :disabled="!isLogin">logout</b-button>
         </span>
       </b-col>
     </b-row>
-    <login-sms name="loginSms"/>
-    <login-email name="loginEmail"/>
-    {{isLogin}}
-    {{loginOption}}
-    {{nameState}}
+    <login-sms name="loginSms" :uid.sync="userId"/>
+    <login-email id="loginEmail" :email.sync="userEmail" :uid.sync="userId"/>
   </b-container>
 </template>
 
 <script>
   import loginSms from "@/components/molecules/loginSms"
   import loginEmail from "@/components/molecules/loginEmail"
+  import registEmail from "@/components/molecules/registEmail";
 
   export default {
     components: {
       loginSms,
-      loginEmail
+      registEmail,
+      loginEmail,
     },
     data() {
       return {
@@ -132,37 +78,104 @@
         userSubNational3: '',
         userOrgainzation: '',
         userTitle: '',
+        userWorkspace: '',
+        userEmail: '',
+        userId: '',
       }
     },
     computed: {
       isLogin() {
         return (this.$store.state.user.uid !== '')
       },
-      loginReady(){
-        return (!this.isLogin && this.loginOption > 0 && this.nameState)
+      loginOptionState() {
+        return this.loginOption > 0
+      },
+      loginReady() {
+        return (!this.isLogin && this.loginOption > 0 && this.wsState)
       },
       nameState() {
-        return (/^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/).test(this.userName)
+        return (/^[a-zA-Z][a-zA-Z .,'-]{1,47}[a-zA-Z]{1,3}$/).test(this.userName)
+      },
+      wsState() {
+        return (/^[a-zA-Z][a-zA-Z .,'-]{1,27}[a-zA-Z]{1,3}$/).test(this.userWorkspace)
       },
       countryState() {
         return (/^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/).test(this.userName)
+      },
+      userInfo(){
+        return {
+          email: this.userEmail,
+          uid: this.userId,
+          name: this.userName,
+          country: this.userCountry,
+          subnational1: this.userSubNational1,
+          subnational2: this.userSubNational2,
+          subnational3: this.userSubNational3,
+          organization: this.userOrgainzation,
+          title: this.userTitle,
+        }
+      }
+    },
+    watch: {
+      userId: function (val) {
+        //triggered when userId set through login function
+        if (val){
+          this.initNewUser(this.userInfo, this.userWorkspace)
+        }
       }
     },
     methods: {
-      test(val) {
-        this.$store.dispatch('loginProvider', val).then(function (val) {
-          console.log(val)
-          console.log(val.email)
-          console.log(val.user)
-        })
+      async initNewUser(user, workSpace) {
+        const vm = this
+        //update $store
+        vm.$store.dispatch('setUser', user)
+
+        //update $store
+        vm.$store.dispatch('setCaseId', workSpace)
+
+        //update PouchDB-lastUser
+        await vm.$store.dispatch('saveUserToLastuser', {user: user, caseId: workSpace})
+
+        //initialieze user workspace
+        await vm.$store.dispatch('initPouch', {user: user, caseId: workSpace})
+
+        //move to top page
+        console.log('registion complete')
+        vm.email = ''
+        vm.password = ''
+        vm.$router.push('/')
+      },
+      loginUser(val) {
+        const val1 = Number(val)
+        let isExit = false
+        //console.log(val1)
+        switch (val1) {
+          case 1:
+            this.$bvModal.show('loginEmail')
+            console.log('1')
+            break
+          case 2:
+            console.log('2')
+            break
+          case 3:
+            console.log('3')
+            break
+          default:
+            isExit = true
+            console.log('no selection')
+        }
+        if (isExit){
+          // exit if register failed
+          return false
+        }
+        return true
       },
       logout() {
         this.$store.dispatch('logout')
         this.email = ''
         this.password = ''
-        this.$router.push('/')
+        //this.$router.push('/')
       },
     },
   }
 </script>
-

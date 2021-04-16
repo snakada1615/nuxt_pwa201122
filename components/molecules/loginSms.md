@@ -3,13 +3,10 @@ loginSms example:
 ```vue
 <template>
   <b-container>
-    <b-button block variant="success" 
-      class="mt-2" 
-      @click="$bvModal.show('loginSms')"
-      @login="user=$event"
-    >push email</b-button>
-    <login-sms name="loginSms"/>
-    {{user}}
+    <div>Hello world!</div>
+    <b-button variant="success" @click="$bvModal.show('test')">test</b-button>
+    <login-sms name="test" :uid.sync="uid"/>
+    <div>user: {{uid}}</div>
   </b-container>
 </template>
 
@@ -20,15 +17,11 @@ loginSms example:
     components:{
       loginSms
     },
-    data() {
+    data(){
       return {
-        user:''
+        uid:'',
       }
-    },
-    methods: {
-    },
+    }
   }
 </script>
-
-
 ```
