@@ -34,8 +34,8 @@ package "set caseId" {
    else (true)
      :set caseId
       to $store;
-     :set user & caseId
-       to $store;
+     :set user & caseId to
+      lastUser_DB;
    package "initialize userData" {
      :initialize userData
       for caseId;

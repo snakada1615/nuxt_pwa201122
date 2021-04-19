@@ -400,16 +400,11 @@ export const actions = {
   },
   getListWorkspace({getters}, payload) {
     let promise = new Promise((resolve, reject) => {
-      console.log('getListWorkspace1')
       if (!payload) {
-        console.log('getListWorkspace2')
         reject('no workSpace is set:getListWorkspace')
       } else {
-        console.log('getListWorkspace3')
         const db = new PouchDB(payload)
         db.allDocs({include_docs: true}).then(function (docs) {
-          console.log('getListWorkspace4')
-          console.log(docs)
           let res = []
           docs.rows.forEach(function (value, index) {
             if (value.id !== 'lastUser') {
@@ -423,7 +418,6 @@ export const actions = {
               }
             }
           })
-          console.log(res)
           resolve(res)
         }).catch(function (err) {
           console.log(err)

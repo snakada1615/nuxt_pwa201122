@@ -79,8 +79,7 @@
           vm.items = await getFCT()
           vm.itemsDRI = await getDRI()
 
-          const res = await vm.$store.dispatch('loadDietfromPouch')
-          vm.WS.dietCases = JSON.parse(JSON.stringify(res))
+          vm.WS.dietCases = JSON.parse(JSON.stringify(vm.$store.state.dietCases))
           vm.WS.user = JSON.parse(JSON.stringify(vm.$store.state.user))
           vm.WS.caseId = vm.$store.state.caseId
           vm.$store.dispatch('setNow')
@@ -108,9 +107,8 @@
         myitemsDRI =  getDRI()
 
         store.dispatch('setNow')
-        const res = await store.dispatch('loadDietfromPouch')
 
-        myWS.dietCases = JSON.parse(JSON.stringify(res))
+        myWS.dietCases = JSON.parse(JSON.stringify(store.state.dietCases))
         myWS.user = JSON.parse(JSON.stringify(store.state.user))
         myWS.caseId = store.state.caseId
         myWS.saveDate = store.state.saveDate
@@ -122,17 +120,6 @@
       }
     },
     methods: {
-      delRecepiItem(id){
-        console.log(id)
-        let res = []
-        this.dietCase.foodItems.forEach(function (val, index) {
-          if (index !== id) {
-            res.push(val)
-          }
-        })
-        console.log(res)
-        this.dietCase.foodItems = res
-      },
       /**
        * emit modified signal
        * @param {String} val - indicate which DOM have changed
@@ -148,11 +135,8 @@
        */
       async saveWS() {
         const res1 = await this.$store.dispatch('saveDietToPouch', this.WS)
-        const res2 = await this.$store.dispatch('saveUserToLastuser',
-          {user: this.$store.state.user, caseId: this.$store.state.caseId})
-        if (res1 && res2) {
+        if (res1) {
           this.$store.dispatch('setEdit', false)
-          await this.$store.dispatch('loadCaseListFromPouch')
           console.log('WS saved')
           return true
         } else {

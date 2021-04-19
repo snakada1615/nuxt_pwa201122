@@ -362,14 +362,19 @@
           return
         }
         this.itemSingleCrop.length = 0
+
+        const filteredItem = this.items.filter(function (elem) {
+          return elem.id === rec.id
+        })
+
         this.itemSingleCrop.push({
           'id': rec.id,
           'Name': rec.Name,
           'Group': rec.Group,
-          'En': rec.En,
-          'Pr': rec.Pr,
-          'Va': rec.Va,
-          'Fe': rec.Fe,
+          'En': filteredItem[0].En,
+          'Pr': filteredItem[0].Pr,
+          'Va': filteredItem[0].Va,
+          'Fe': filteredItem[0].Fe,
         })
         this.initWeight = Number(rec.Wt)
         this.$bvModal.show('modalTest' + String(pageId))
@@ -377,7 +382,6 @@
       onCropWeightSet(dat) {
         let res = false
         console.log('onCropWeightSet')
-        console.log(dat)
         let modifiedData = JSON.parse(JSON.stringify(this.foodItems))
         modifiedData.forEach(function (val) {
           if (val.id === dat.item[0].id) {
@@ -401,7 +405,6 @@
             "Wt": dat.Wt || 0
           })
         }
-        console.log(modifiedData)
         this.$emit('changeRecepi', {pageId: this.pageId, foodItems: dat})
         this.$emit('update:foodItems', modifiedData)
       },
