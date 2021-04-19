@@ -128,6 +128,8 @@ export const actions = {
       dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId}).then(function () {
         console.log('firebase:successfully sign out')
       })
+      // set loginStatus to 0
+      dispatch('setLoginStatus', 0)
     }).catch(function (error) {
       // An error happened.
       console.log('firebase:sign out failed')

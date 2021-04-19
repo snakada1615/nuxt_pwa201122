@@ -34,8 +34,9 @@
         <span>
           <b-button variant="success" @click="loginUser(loginOption)" :disabled="!loginReady">login</b-button>
           <b-button variant="success" @click="logout" :disabled="!isLogin">logout</b-button>
-          <b-button variant="warning" @click="moveToRegister" :disabled="!isLogin">new user</b-button>
+          <b-button variant="warning" @click="moveToRegister">new user</b-button>
         </span>
+        <h1>please logout first before</h1>
       </b-col>
     </b-row>
     <login-sms name="loginSms" :uid.sync="userId"/>
@@ -153,7 +154,7 @@
         this.$store.dispatch('logout')
         this.email = ''
         this.password = ''
-        //this.$router.push('/')
+        this.$router.push('/')
       },
     },
   }
