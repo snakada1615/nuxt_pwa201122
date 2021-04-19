@@ -6,15 +6,12 @@ start
 :(params)
  user
  caseId;
-
 :login using firebase;
-if (get credential) then (true)
-  package "set $store" {
+if (get credential?) then (true)
+  package "set user" {
     :merge credential
       with user info;
     :set user
-     to $store;
-    :set caseId
      to $store;
   }
 else (false)
@@ -22,24 +19,35 @@ else (false)
   :stay @loginPage;
   stop
 endif
-
-package "set pouchDB" {
-  :set user & caseId to
-   PouchDB-lastUser;
-
-  if (user & caseId exists
-   in caseList) then (true)
-
-  else (false)
-    :initialize userData
+  :select caseId from
+   selectWorkspace;
+package "set caseId" {
+   if (new caseId?) then (false)
+     :set caseId
+      to $store;
+     :set user & caseId to
+      lastUser_DB;
+     :get userData from
+       userData_DB;
+     :set userData
+       to $store;
+   else (true)
+     :set caseId
+      to $store;
+     :set user & caseId
+       to $store;
+   package "initialize userData" {
+     :initialize userData
       for caseId;
-    :set userData
-     to PouchDB-userDB;
+     :set userData
+      to userData_DB;
+   }
+   :set userData
+     to $store;
+
   endif
 }
-
 :move to '/index';
-
 stop
 
 @enduml

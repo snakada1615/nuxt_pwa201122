@@ -91,8 +91,7 @@
           vm.password = ''
           if (res){
             console.log('register success')
-            vm.$emit('update:uid', res.user.uid)
-            vm.$emit('update:email', res.user.email)
+            vm.$emit('registSuccess', res.user)
             vm.$bvModal.hide(vm.id)
           }
         }).catch(function(err){

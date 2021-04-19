@@ -27,21 +27,6 @@
             <b-form-invalid-feedback :state="loginOptionState">Please select one</b-form-invalid-feedback>
           </b-form-group>
         </b-card>
-        <b-card bg-variant="gray-300" class="mt-1 mb-2">
-          <b-row class="my-1 py-0">
-            <b-col cols="3">workspace name:</b-col>
-            <b-col cols="9">
-              <b-form-input
-                id="caseIdInput"
-                v-model="userWorkspace"
-                :state="wsState"
-                placeholder="workspace name"
-                size="sm"
-              >
-              </b-form-input>
-            </b-col>
-          </b-row>
-        </b-card>
       </b-col>
     </b-row>
     <b-row>
@@ -49,38 +34,36 @@
         <span>
           <b-button variant="success" @click="loginUser(loginOption)" :disabled="!loginReady">login</b-button>
           <b-button variant="success" @click="logout" :disabled="!isLogin">logout</b-button>
+          <b-button variant="warning" @click="moveToRegister" :disabled="!isLogin">new user</b-button>
         </span>
       </b-col>
     </b-row>
     <login-sms name="loginSms" :uid.sync="userId"/>
-    <login-email id="loginEmail" :email.sync="userEmail" :uid.sync="userId"/>
+    <login-email id="loginEmail" @loginEmail="getWorkspace"/>
+    <select-workspace
+      id="selectWs"
+      :workspaceList="$store.state.caseIdList"
+      @workspaceSelected="setWorkspace($event,1)"
+      @workspaceCreated="setWorkspace($event,2)"/>
   </b-container>
 </template>
 
 <script>
   import loginSms from "@/components/molecules/loginSms"
   import loginEmail from "@/components/molecules/loginEmail"
-  import registEmail from "@/components/molecules/registEmail";
+  import selectWorkspace from "@/components/molecules/selectWorkspace"
 
   export default {
     components: {
       loginSms,
-      registEmail,
       loginEmail,
+      selectWorkspace,
     },
     data() {
       return {
         loginOption: 0,
-        userName: '',
-        userCountry: '',
-        userSubNational1: '',
-        userSubNational2: '',
-        userSubNational3: '',
-        userOrgainzation: '',
-        userTitle: '',
-        userWorkspace: '',
-        userEmail: '',
         userId: '',
+        user: {},
       }
     },
     computed: {
@@ -91,59 +74,56 @@
         return this.loginOption > 0
       },
       loginReady() {
-        return (!this.isLogin && this.loginOption > 0 && this.wsState)
+        return (!this.isLogin && this.loginOption > 0)
       },
-      nameState() {
-        return (/^[a-zA-Z][a-zA-Z .,'-]{1,47}[a-zA-Z]{1,3}$/).test(this.userName)
-      },
-      wsState() {
-        return (/^[a-zA-Z][a-zA-Z .,'-]{1,27}[a-zA-Z]{1,3}$/).test(this.userWorkspace)
-      },
-      countryState() {
-        return (/^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/).test(this.userName)
-      },
-      userInfo(){
-        return {
-          email: this.userEmail,
-          uid: this.userId,
-          name: this.userName,
-          country: this.userCountry,
-          subnational1: this.userSubNational1,
-          subnational2: this.userSubNational2,
-          subnational3: this.userSubNational3,
-          organization: this.userOrgainzation,
-          title: this.userTitle,
+      workspaceList() {
+        const vm = this
+        let res = []
+        if (this.$store.caseIdList) {
+          res = this.$store.caseIdList.filter(function (val) {
+            return val.uid === vm.userId
+          })
         }
-      }
-    },
-    watch: {
-      userId: function (val) {
-        //triggered when userId set through login function
-        if (val){
-          this.initNewUser(this.userInfo, this.userWorkspace)
-        }
+        return res
       }
     },
     methods: {
-      async initNewUser(user, workSpace) {
+      async getWorkspace(val) {
         const vm = this
-        //update $store
-        vm.$store.dispatch('setUser', user)
+        vm.userId = val.uid
+
+        //get user data from PouchDB using 'uid' as filter
+        const userTemp = await vm.$store.dispatch('getUserInfo', vm.userId)
+        vm.user = {...userTemp.user}
 
         //update $store
-        vm.$store.dispatch('setCaseId', workSpace)
+        vm.$store.dispatch('setUser', vm.user)
+
+        //update caseIdList
+        vm.$store.dispatch('setCaseIdList',
+          await vm.$store.dispatch('getListWorkspace', vm.$store.getters.userDb)
+        )
+
+        this.$bvModal.show('selectWs')
+      },
+      async setWorkspace(val, flag) {
+        const vm = this
+
+        //update $store
+        vm.$store.dispatch('setCaseId', val)
 
         //update PouchDB-lastUser
-        await vm.$store.dispatch('saveUserToLastuser', {user: user, caseId: workSpace})
+        await vm.$store.dispatch('saveUserToLastuser', {user: vm.user, caseId: val})
 
-        //initialieze user workspace
-        await vm.$store.dispatch('initPouch', {user: user, caseId: workSpace})
-
+        if (flag === 2) {
+          //initialieze user workspace
+          await vm.$store.dispatch('initPouch', {user: vm.user, caseId: val})
+        }
         //move to top page
-        console.log('registion complete')
+        console.log('login complete')
         vm.email = ''
         vm.password = ''
-        vm.$router.push('/')
+        await vm.$router.push('/')
       },
       loginUser(val) {
         const val1 = Number(val)
@@ -164,11 +144,10 @@
             isExit = true
             console.log('no selection')
         }
-        if (isExit){
-          // exit if register failed
-          return false
-        }
-        return true
+        return !isExit;
+      },
+      moveToRegister(){
+        this.$router.push('/user_reg')
       },
       logout() {
         this.$store.dispatch('logout')

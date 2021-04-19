@@ -122,7 +122,7 @@
       </b-col>
     </b-row>
     <login-sms name="loginSms" :uid.sync="userId"/>
-    <regist-email id="registEmail" :email.sync="userEmail" :uid.sync="userId"/>
+    <regist-email id="registEmail" @registSuccess="initNewUser($event, userWorkspace)"/>
   </b-container>
 </template>
 
@@ -184,27 +184,30 @@
         }
       }
     },
-    watch: {
-      userId: function (val) {
-        if (val){
-          this.initNewUser(this.userInfo, this.userWorkspace)
-        }
-      }
-    },
     methods: {
       async initNewUser(user, workSpace) {
+        //create initialized userData
+        const userInfo = {
+            email: user.email,
+            uid: user.uid,
+            name: this.userName,
+            country: this.userCountry,
+            subnational1: this.userSubNational1,
+            subnational2: this.userSubNational2,
+            subnational3: this.userSubNational3,
+            organization: this.userOrgainzation,
+            title: this.userTitle,
+        }
         const vm = this
-        //update $store
-        vm.$store.dispatch('setUser', user)
 
-        //update $store
-        vm.$store.dispatch('setCaseId', workSpace)
+        //save initialized userData to $store and PouchDb
+        await vm.$store.dispatch('initPouch', {user: userInfo, caseId: workSpace})
+
+        //update PouchDB-userSet
+        await vm.$store.dispatch('saveUseToUserSet', {_id: userInfo.uid, user: userInfo})
 
         //update PouchDB-lastUser
-        await vm.$store.dispatch('saveUserToLastuser', {user: user, caseId: workSpace})
-
-        //initialieze user workspace
-        await vm.$store.dispatch('initPouch', {user: user, caseId: workSpace})
+        await vm.$store.dispatch('saveUserToLastuser', {user: userInfo, caseId: workSpace})
 
         //move to top page
         console.log('registion complete')

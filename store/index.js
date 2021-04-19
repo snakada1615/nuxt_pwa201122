@@ -22,13 +22,15 @@ export const state = () => ({
     title: '',
     uid: ''
   },
-  //dietCases: [],
+  dietCases: [],
+  feasibilityCases: [],
   caseId: '',
   caseIdList: [],
 
   loginStatus: 0,
   tabNumber: 10,
-  userDB: 'userWorkSpace',
+  userInfoDb: 'userList',
+  loginDb: 'loginDb',
   lastUser: 'lastUser',
   isEdited: false,
   saveDate: '',
@@ -36,10 +38,13 @@ export const state = () => ({
 
 export const getters = {
   currentPouchID: (state) => {
-    return state.user.email + '_' + state.caseId
+    return state.user.uid + '_' + state.caseId
   },
   appVersion: (state) => {
     return state.packageVersion
+  },
+  userDb: (state) => {
+    return 'userData_' + state.user.uid
   },
 }
 
@@ -51,13 +56,23 @@ export const mutations = {
     state.caseId = payload
   },
   setCaseIdList: function (state, payload) {
-    state.caseIdList = payload
+    if (payload) {
+      state.caseIdList = JSON.parse(JSON.stringify(payload))
+    } else {
+      state.caseIdList = []
+    }
   },
   addCaseIdList: function (state, payload) {
     state.caseIdList.push(payload)
   },
+  setDietCases: function (state, payload) {
+    state.dietCases = JSON.parse(JSON.stringify(payload))
+  },
+  setFeasibilityCases: function (state, payload) {
+    state.feasibilityCases = JSON.parse(JSON.stringify(payload))
+  },
   setUser: function (state, payload) {
-    state.user = payload
+    state.user = {...payload}
   },
   setOffUser: function (state) {
     state.user = {
@@ -86,9 +101,9 @@ export const mutations = {
 }
 
 export const actions = {
-  async autoLogin({dispatch}) {
-    dispatch('loadCaseListFromPouch')
+  async autoLogin({dispatch, getters}) {
     const res = await dispatch('loadUserFromPouch')
+    dispatch('setCaseIdList', await dispatch('getListWorkspace', getters.userDb))
     dispatch('setLoginStatus', res)
   },
   login({dispatch, state}, userInfo) {
@@ -149,27 +164,36 @@ export const actions = {
 
           resolve(user)
         }).catch((error) => {
-          // Handle Errors here.
-          var errorCode = error.code;
-          var errorMessage = error.message;
-          // The email of the user's account used.
-          var email = error.email;
-          // The firebase.auth.AuthCredential type that was used.
-          var credential = error.credential;
-          reject(error)
+        // Handle Errors here.
+        var errorCode = error.code;
+        var errorMessage = error.message;
+        // The email of the user's account used.
+        var email = error.email;
+        // The firebase.auth.AuthCredential type that was used.
+        var credential = error.credential;
+        reject(error)
       });
     })
     return promise
   },
-  removeUserDb({state}) {
-    pouchDeleteDb(state.userDB)
+  removeUserDb({getters}) {
+    pouchDeleteDb(getters.userDb)
+  },
+  saveUseToUserSet({state}, payload) {
+    let promise = new Promise(async (resolve, reject) => {
+      //save all user-> pouchDB(lastUser)
+      let db = new PouchDB(state.userInfoDb)
+      const res = await pouchPutNewOrUpdate(db, payload)
+      res ? resolve(res) : reject(res)
+    })
+    return promise
   },
   saveUserToLastuser({state, dispatch, getters}, payload) {
     const lastUser = 'lastUser'
     let promise = new Promise(async (resolve, reject) => {
 
       //save from store.user -> pouchDB(lastUser)
-      let db = new PouchDB(state.userDB)
+      let db = new PouchDB(state.loginDb)
       const userTemp = {}
       userTemp._id = lastUser
       userTemp.user = payload.user
@@ -209,7 +233,6 @@ export const actions = {
     }
 
     console.log('initialize workspace data')
-    console.log(payload)
     // initialize user to store
     dispatch('setUser', payload.user)
     dispatch('setCaseId', payload.caseId)
@@ -217,43 +240,58 @@ export const actions = {
     //set time stump
     dispatch('setNow')
 
-    //set time caseIdList
-    dispatch('addCaseIdList', state.caseId)
-
-    // set user and caseid to lastUser
-    await dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId})
-
     // initialize and set caseId to PouchDB
     let WS = {}
-    const id = getters.currentPouchID
     const iCount = state.tabNumber
+    const id = getters.currentPouchID
 
     WS.dietCases = initDiet(id, iCount)
-    WS.saveDate = state.saveDate
-    WS.user = state.user
-    WS.caseId = state.caseId
     WS.feasibilityCases = initFeasibilityCase(id, iCount)
-    WS._id = getters.currentPouchID
+    WS.saveDate = state.saveDate
+    WS.user = {...payload.user}
+    WS.caseId = payload.caseId
+    WS._id = id
 
-    let db = new PouchDB(state.userDB)
+    // set dietCases to $store
+    dispatch('setDietCases', WS.dietCases)
+
+    // set feasibilityCases to $store
+    dispatch('setFeasibilityCases', WS.feasibilityCases)
+
+    let db = new PouchDB(getters.userDb)
     const res = await pouchPutNewOrUpdate(db, WS).catch((err) => reject(err))
-    console.log('data saved to Pouch')
+    console.log('data initialized')
+    console.log(res)
     return res
+  },
+  // get user information from userInfoDb
+  getUserInfo({state}, payload) {
+    let promise = new Promise(async (resolve, reject) => {
+      //save all user-> pouchDB(lastUser)
+      let db = new PouchDB(state.userInfoDb)
+      const res = await pouchGetDoc(db, payload)
+      res ? resolve(res) : reject(res)
+    })
+    return promise
   },
   loadUserFromPouch({state, dispatch}) {
     const lastUser = 'lastUser'
     let result = 0
     let res1 = 1
     let res2 = 1
-    let db = new PouchDB(state.userDB)
+    let db = new PouchDB(state.loginDb)
     let promise = new Promise((resolve) => {
-      pouchGetDoc(db, lastUser).then(function (docTemp) {
+      pouchGetDoc(db, lastUser).then(async function (docTemp) {
         const userTmp = docTemp.user
         const caseIdTmp = docTemp.caseId
 
         userTmp ? dispatch('setUser', userTmp) : res1 = 0
         caseIdTmp ? dispatch('setCaseId', caseIdTmp) : res2 = 0
         if (res1 && res2) {
+          const userData = await dispatch('loadUserDataFromPouch')
+          console.log(userData)
+          dispatch('setDietCases', userData.dietCases)
+          dispatch('setFeasibilityCases', await userData.feasibilityCases)
           result = 1
         } else if (!res1) {
           result = 2
@@ -277,8 +315,25 @@ export const actions = {
    * load list of Diet from PouchDB
    * @returns {Promise<unknown>}
    */
-  loadDietfromPouch({state, getters}) {
-    let db = new PouchDB(state.userDB)
+  loadUserDataFromPouch({getters}) {
+    let db = new PouchDB(getters.userDb)
+    let currentDiet = {}
+    let promise = new Promise((resolve) => {
+      pouchGetDoc(db, getters.currentPouchID).then(function (doc) {
+        resolve(doc)
+      }).catch(function (err) {
+        console.log('no data exists in PouchDB')
+        resolve(err)
+      })
+    })
+    return promise
+  },
+  /**
+   * load list of Diet from PouchDB
+   * @returns {Promise<unknown>}
+   */
+  loadDietfromPouch({getters}) {
+    let db = new PouchDB(getters.userDb)
     let currentDiet = {}
     let promise = new Promise((resolve) => {
       pouchGetDoc(db, getters.currentPouchID).then(function (doc) {
@@ -299,7 +354,7 @@ export const actions = {
   saveDietToPouch({state, getters, dispatch}, record) {
     console.log('saveDietToPouch')
     console.log(record)
-    const db = new PouchDB(state.userDB)
+    const db = new PouchDB(getters.userDb)
     dispatch('setNow')
     record.saveDate = state.saveDate
     record._id = getters.currentPouchID
@@ -314,7 +369,7 @@ export const actions = {
     return promise
   },
   loadFeasibilityCasefromPouch({state, getters}) {
-    let db = new PouchDB(state.userDB)
+    let db = new PouchDB(getters.userDb)
     let currentFeasibilityCases = {}
     let promise = new Promise((resolve) => {
       pouchGetDoc(db, getters.currentPouchID).then(function (doc) {
@@ -329,7 +384,7 @@ export const actions = {
   },
   saveFeasibilityToPouch({state, getters, dispatch}, record) {
     console.log('saveFeasibilityToPouch')
-    const db = new PouchDB(state.userDB)
+    const db = new PouchDB(getters.userDb)
     dispatch('setNow')
     record.saveDate = state.saveDate
     record._id = getters.currentPouchID
@@ -343,54 +398,49 @@ export const actions = {
     })
     return promise
   },
-  loadCaseListFromPouch({state, dispatch}) {
-    let promise = new Promise(async (resolve, reject) => {
-      const caseTemp = await dispatch('getListWorkspace', state.user.email)
-      if (caseTemp) {
-        // load list from pouchdb
-        dispatch('setCaseIdList', caseTemp)
-        resolve(caseTemp)
+  getListWorkspace({getters}, payload) {
+    let promise = new Promise((resolve, reject) => {
+      console.log('getListWorkspace1')
+      if (!payload) {
+        console.log('getListWorkspace2')
+        reject('no workSpace is set:getListWorkspace')
       } else {
-        // if no caseId
-        console.log('no caseId set in pouchDB: loadCaseListFromPouch')
-        resolve(false)
+        console.log('getListWorkspace3')
+        const db = new PouchDB(payload)
+        db.allDocs({include_docs: true}).then(function (docs) {
+          console.log('getListWorkspace4')
+          console.log(docs)
+          let res = []
+          docs.rows.forEach(function (value, index) {
+            if (value.id !== 'lastUser') {
+              if (value.doc.caseId) {
+                res.push({
+                  email: value.doc.user.email,
+                  uid: value.doc.user.uid,
+                  caseId: value.doc.caseId,
+                  saveDate: value.doc.saveDate
+                })
+              }
+            }
+          })
+          console.log(res)
+          resolve(res)
+        }).catch(function (err) {
+          console.log(err)
+          reject(err)
+        })
       }
     })
     return promise
   },
-  getListWorkspace({dispatch, state}, userEmail) {
-    const db = new PouchDB(state.userDB)
-    let promise = new Promise((resolve, reject) => {
-      db.allDocs({include_docs: true}).then(function (docs) {
-        let res = []
-        docs.rows.forEach(function (value, index) {
-          if (value.id !== 'lastUser') {
-            if (value.doc.caseId) {
-              res.push({
-                email: value.doc.user.email,
-                uid: value.doc.user.uid,
-                caseId: value.doc.caseId,
-                saveDate: value.doc.saveDate
-              })
-            }
-          }
-        })
-        resolve(res)
-      }).catch(function (err) {
-        console.log(err)
-        reject(err)
-      })
-    })
-    return promise
-  },
-  async registUserEmial({context, dispatch}, userInfo){
+  async registUserEmial({context, dispatch}, userInfo) {
     let promise = new Promise(function (resolve, reject) {
       firebase.auth().createUserWithEmailAndPassword(userInfo.email, userInfo.password)
         .then(
           // if success
           function (res) {
-          resolve(res)
-        },
+            resolve(res)
+          },
           //if failure
           function (err) {
             console.log('registration failed')
@@ -398,48 +448,9 @@ export const actions = {
             //context.commit('setOffUser')
             reject(err)
           })
-        .catch(function (err){
+        .catch(function (err) {
           console.log(err)
           reject(err)
-        })
-    })
-    return promise
-  },
-  async registUser({context, dispatch}, userInfo) {
-    console.log(userInfo)
-    let promise = new Promise(function (resolve, reject) {
-      firebase.auth().createUserWithEmailAndPassword(userInfo.user.email, userInfo.user.password)
-        .then(
-          // if success
-          function (res) {
-            console.log('regist ok！')
-            dispatch('setUser', {
-              email: res.user.email,
-              uid: res.user.uid,
-              name: userInfo.user.name,
-              country: userInfo.user.country,
-              subnational1: userInfo.user.subnational1,
-              subnational2: userInfo.user.subnational2,
-              subnational3: userInfo.user.subnational3,
-              organization: userInfo.user.organization,
-              title: userInfo.user.title,
-            })
-            dispatch('initPouch', userInfo).then(function () {
-              dispatch('autoLogin').then(function (res) {
-                console.log('login -> autologin: loginStatus=' + res)
-                console.log(res)
-                resolve(true)
-              })
-            })
-          },
-          //if failure
-          function (error) {
-            console.log('registration failed')
-            //context.commit('setOffUser')
-            reject(error)
-          })
-        .catch(function (err){
-          console.log(err)
         })
     })
     return promise
@@ -461,6 +472,12 @@ export const actions = {
   },
   setCaseIdList: function (context, payload) {
     context.commit('setCaseIdList', payload)
+  },
+  setDietCases(context, payload) {
+    context.commit('setDietCases', payload)
+  },
+  setFeasibilityCases(context, payload) {
+    context.commit('setFeasibilityCases', payload)
   },
   addCaseIdList: function (context, payload) {
     context.commit('addCaseIdList', payload)

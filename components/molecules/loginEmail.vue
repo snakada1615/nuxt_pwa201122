@@ -93,6 +93,7 @@
             console.log('login success')
             vm.$emit('update:uid', res.uid)
             vm.$emit('update:email', res.email)
+            vm.$emit('loginEmail', {uid: res.uid, email: res.email})
             vm.$bvModal.hide(vm.id)
           }
         }).catch(function(err){
