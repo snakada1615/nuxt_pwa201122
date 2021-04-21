@@ -6,7 +6,7 @@ import {
   pouchUpdateDoc,
   pouchPutNewOrUpdate,
   pouchWSPutNewOrUpdate,
-  pouchDeleteDb
+  pouchDeleteDb, syncCloudant
 } from "../plugins/pouchHelper";
 
 export const state = () => ({
@@ -29,9 +29,9 @@ export const state = () => ({
 
   loginStatus: 0,
   tabNumber: 10,
-  userInfoDb: 'userList',
-  loginDb: 'loginDb',
-  lastUser: 'lastUser',
+  userInfoDb: 'userlist',
+  loginDb: 'logindb',
+  lastUser: 'lastuser',
   isEdited: false,
   saveDate: '',
 })
@@ -260,8 +260,12 @@ export const actions = {
     // set feasibilityCases to $store
     dispatch('setFeasibilityCases', WS.feasibilityCases)
 
+    // set workSpace to pouchDb
     let db = new PouchDB(getters.userDb)
     const res = await pouchPutNewOrUpdate(db, WS).catch((err) => reject(err))
+
+    // set workSpace to cloudant
+    await syncCloudant(getters.userDb)
     console.log('data initialized')
     console.log(res)
     return res
@@ -271,8 +275,10 @@ export const actions = {
     let promise = new Promise(async (resolve, reject) => {
       //save all user-> pouchDB(lastUser)
       let db = new PouchDB(state.userInfoDb)
-      const res = await pouchGetDoc(db, payload)
-      res ? resolve(res) : reject(res)
+      const res = await pouchGetDoc(db, payload).catch(function(err){
+        reject(err)
+      })
+      resolve(res)
     })
     return promise
   },

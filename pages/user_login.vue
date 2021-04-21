@@ -36,7 +36,7 @@
           <b-button variant="success" @click="logout" :disabled="!isLogin">logout</b-button>
           <b-button variant="warning" @click="moveToRegister">new user</b-button>
         </span>
-        <h1>please logout first before</h1>
+        <h6>please logout first before</h6>
       </b-col>
     </b-row>
     <login-sms name="loginSms" :uid.sync="userId"/>
@@ -53,6 +53,7 @@
   import loginSms from "@/components/molecules/loginSms"
   import loginEmail from "@/components/molecules/loginEmail"
   import selectWorkspace from "@/components/molecules/selectWorkspace"
+  import {syncCloudant} from "@/plugins/pouchHelper";
 
   export default {
     components: {
@@ -93,8 +94,17 @@
         const vm = this
         vm.userId = val.uid
 
-        //get user data from PouchDB using 'uid' as filter
-        const userTemp = await vm.$store.dispatch('getUserInfo', vm.userId)
+        console.log('getWorkspace01')
+        console.log(val)
+
+        //get user information from PouchDB using 'uid' as filter
+        let userTemp = {}
+        userTemp = await vm.$store.dispatch('getUserInfo', vm.userId).catch(async function(err){
+          // if no localDB then sync with cloudant
+          console.log(err)
+          console.log('fetch data from cloudant')
+          userTemp = await syncCloudant(vm.$store.state.userInfoDb)
+        })
         vm.user = {...userTemp.user}
 
         //update $store

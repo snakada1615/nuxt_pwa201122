@@ -130,6 +130,7 @@
   import loginSms from "@/components/molecules/loginSms"
   import loginEmail from "@/components/molecules/loginEmail"
   import registEmail from "@/components/molecules/registEmail";
+  import {syncCloudant} from "../plugins/pouchHelper";
 
   export default {
     components: {
@@ -208,6 +209,9 @@
 
         //update PouchDB-lastUser
         await vm.$store.dispatch('saveUserToLastuser', {user: userInfo, caseId: workSpace})
+
+        //sync PouchDB(local) with cloudant(remote)
+        syncCloudant(vm.$store.state.userInfoDb)
 
         //move to top page
         console.log('registion complete')
