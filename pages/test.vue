@@ -1,60 +1,12 @@
 <template>
   <b-container>
-    <vue-csv-import
-      v-model="csv"
-      url="/hello"
-      :map-fields=fields>
-
-      <template slot="hasHeaders" slot-scope="{headers, toggle}">
-        <label>
-          <input type="checkbox" id="hasHeaders" :value="headers" @change="toggle">
-          do you have header in your file?
-        </label>
-      </template>
-
-      <template slot="error">
-        File type is invalid
-      </template>
-
-      <template slot="thead">
-        <tr>
-          <th>My Fields</th>
-          <th>Column</th>
-        </tr>
-      </template>
-
-      <template slot="next" slot-scope="{load}">
-        <button @click.prevent="load">import!</button>
-      </template>
-
-      <template slot="submit" slot-scope="{submit}">
-        <button @click.prevent="submit">extract!</button>
-      </template>
-    </vue-csv-import>
-    <b-card>
-      <fct-table
-        v-if="csvState"
-        :items="csv"
-        head-row-variant="success"
-        table-variant="light"
-      />
-    </b-card>
-    <b-card>
-      {{csv}}
-    </b-card>
     <b-card>
       <b-row class="my-1">
         <b-col cols="3">
           Name:
         </b-col>
         <b-col cols="9">
-          <b-form-input
-            placeholder="database name"
-            v-model="dbName"
-            :disabled="!csvState"
-            size="sm"
-            :state="dbNameState"
-          ></b-form-input>
+          {{this.$store.state.dbName}}
         </b-col>
       </b-row>
       <b-row class="my-1">
@@ -86,9 +38,22 @@
             size="sm"
             :disabled="!isSaveReady"
             @click="saveFct"
-          >save to server</b-button>
+          >save FCT</b-button>
         </b-col>
       </b-row>
+      <b-button
+        variant="info"
+        size="sm"
+        @click="openFct"
+      >open FCT</b-button>
+    </b-card>
+    <b-card>
+      <fct-table
+        v-if="csvState"
+        :items="csv"
+        head-row-variant="success"
+        table-variant="light"
+      />
     </b-card>
   </b-container>
 </template>
@@ -138,7 +103,7 @@
         return this.csvState && this.dbNameState && this.dbDescriptionState
       },
       dbUniqueName(){
-        return this.dbName + '_' + this.$store.state.user.uid
+        return (this.dbName + '_' + this.$store.state.user.uid).toLowerCase()
       }
     },
     data() {
@@ -159,6 +124,17 @@
       };
     },
     methods:{
+      async openFct(){
+        console.log(this.$store.state.user.name)
+        let res = []
+        await this.$store.dispatch('loadFctFromPouch', this.$store.state.fctDb)
+        .then(function(val){
+          return val.forEach(function (item) {
+            res.push(item.doc)
+          })
+        })
+        this.csv = res
+      },
       saveFct(){
         console.log(this.dbName)
         console.log(this.dbDescription)

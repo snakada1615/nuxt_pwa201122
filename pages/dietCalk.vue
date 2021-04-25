@@ -105,7 +105,6 @@
       } else {
         //myItem = getFCT(store.state.fctDb)
         myItem = await store.dispatch('loadFctFromPouch', store.state.fctDb)
-        console.log(myItem)
         myitemsDRI =  getDRI()
 
         store.dispatch('setNow')

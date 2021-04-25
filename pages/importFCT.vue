@@ -87,8 +87,6 @@
         </b-col>
       </b-row>
     </b-card>
-    dbUniqueName:{{dbUniqueName}}
-    dbName:{{dbName}}
   </b-container>
 </template>
 

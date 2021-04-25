@@ -23,6 +23,14 @@ export const state = () => ({
     title: '',
     uid: ''
   },
+  fctData: {
+    _id: '',
+    dbName: '',
+    description: '',
+    creator: '',
+    data: [],
+  },
+
   dietCases: [],
   feasibilityCases: [],
   caseId: '',

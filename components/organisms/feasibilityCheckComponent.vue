@@ -149,20 +149,6 @@
       onInput(val, id) {
         this.$emit('update:ansList[' + id + ']', val)
       },
-      setFTC(docs) {
-        let vm = this
-        docs.forEach(function (val, index) {
-          vm.items.push({
-            'id': val.doc.food_item_id,
-            'Group': val.doc.food_group_unicef,
-            'Name': val.doc.Food_name,
-            'En': val.doc.Energy,
-            'Pr': val.doc.Protein,
-            'Va': val.doc.VITA_RAE,
-            'Fe': val.doc.FE
-          })
-        })
-      },
       setDRI(docs) {
         let vm = this
         docs.forEach(function (val, index) {
@@ -226,7 +212,6 @@
         return sum
       },
       nutritionRatingSet: function () {
-        console.log(this.nutritionTarget)
         return [
           {
             name: 'Energy',
@@ -256,7 +241,13 @@
       },
       items: {
         get: function () {
-          return this.fctOrg
+          let res  =[]
+          if (this.fctOrg){
+            this.fctOrg.forEach(function(val){
+              res.push(val.doc)
+            })
+          }
+          return res
         }
       },
       itemsDRI: {

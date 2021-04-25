@@ -1,7 +1,6 @@
 <template>
   <b-container style="max-width: 540px; min-width: 530px;">
     <b-row >
-      <navigation-guard :form_dirty="$store.state.isEdited"/>
       <b-col>
         <b-button
           size="sm"
@@ -91,7 +90,7 @@
       loginChecked: async function () {
         let vm = this
         if (this.loginChecked) {
-          vm.items = await getFCT()
+          vm.items = await this.$store.dispatch('loadFctFromPouch', this.$store.state.fctDb)
           vm.itemsDRI = await getDRI()
 
           vm.WS.feasibilityCases = JSON.parse(JSON.stringify(
@@ -120,7 +119,7 @@
       if (store.state.loginStatus !== 1) {
         return
       } else {
-        myItem =  getFCT()
+        myItem = await store.dispatch('loadFctFromPouch', store.state.fctDb)
         myitemsDRI =  getDRI()
 
         myWS.feasibilityCases = JSON.parse(JSON.stringify(store.state.feasibilityCases))
