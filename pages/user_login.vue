@@ -94,18 +94,16 @@
         const vm = this
         vm.userId = val.uid
 
-        console.log('getWorkspace01')
-        console.log(val)
-
         //get user information from PouchDB using 'uid' as filter
-        let userTemp = {}
-        userTemp = await vm.$store.dispatch('getUserInfo', vm.userId).catch(async function(err){
-          // if no localDB then sync with cloudant
+        const userTemp = await vm.$store.dispatch('loadUserPersonalInfo', vm.userId).catch(async function(err){
           console.log(err)
-          console.log('fetch data from cloudant')
-          userTemp = await syncCloudant(vm.$store.state.userInfoDb)
+          throw err
         })
-        vm.user = {...userTemp.user}
+        if (userTemp) {
+          vm.user = {...userTemp.user}
+        } else {
+          throw new Error('there is some problem in getting userInfo in getWorkspace:user_login.vue');
+        }
 
         //update $store
         vm.$store.dispatch('setUser', vm.user)
@@ -120,15 +118,26 @@
       async setWorkspace(val, flag) {
         const vm = this
 
+
+        console.log('setWorkspace01')
         //update $store
         vm.$store.dispatch('setCaseId', val)
 
         //update PouchDB-lastUser
         await vm.$store.dispatch('saveUserToLastuser', {user: vm.user, caseId: val})
 
+        console.log('setWorkspace02')
         if (flag === 2) {
           //initialieze user workspace
           await vm.$store.dispatch('initPouch', {user: vm.user, caseId: val})
+        } else {
+          // get user workspace from PouchDb-userDb
+          const userData = await vm.$store.dispatch('loadUserDataFromPouch',{
+            dbName: vm.$store.getters.userDb,
+            dataId: vm.$store.getters.currentPouchID
+          })
+          vm.$store.dispatch('setFeasibilityCases', userData.feasibilityCases)
+          vm.$store.dispatch('setDietCases', userData.dietCases)
         }
         //move to top page
         console.log('login complete')

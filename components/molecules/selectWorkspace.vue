@@ -89,7 +89,6 @@
             return WS.caseId === vm.fileName
           })
         }
-        console.log(res)
         if (res.length) {
           vm.$emit('workspaceSelected', vm.fileName)
         } else {

@@ -28,7 +28,7 @@ export function pouchDeleteDb(dbName) {
   return promise
 }
 
-export function pouchGetDoc(db, id){
+export function pouchGetDoc(db, id) {
   let promise = new Promise((resolve, reject) => {
     db.get(id).then(function (doc) {
       resolve(doc)
@@ -38,7 +38,8 @@ export function pouchGetDoc(db, id){
   })
   return promise
 }
-export function pouchUpdateDoc(db, id, newDoc){
+
+export function pouchUpdateDoc(db, id, newDoc) {
   let promise = new Promise((resolve, reject) => {
     db.get(id).then(function (doc) {
       newDoc._rev = doc._rev
@@ -52,10 +53,10 @@ export function pouchUpdateDoc(db, id, newDoc){
   return promise
 }
 
-export function pouchPutNewDoc(db, newDoc){
+export function pouchPutNewDoc(db, newDoc) {
   let promise = new Promise((resolve) => {
     db.put(newDoc).then(function () {
-        resolve(true)
+      resolve(true)
     }).catch(function (err) {
       console.log(err)
       console.log(newDoc)
@@ -65,9 +66,9 @@ export function pouchPutNewDoc(db, newDoc){
   return promise
 }
 
-export function pouchPutNewOrUpdate(db, doc){
-  let promise = new Promise( (resolve) => {
-    if (!doc._id){
+export function pouchPutNewOrUpdate(db, doc) {
+  let promise = new Promise((resolve) => {
+    if (!doc._id) {
       console.log('_id is missing')
       resolve(false)
     } else {
@@ -76,7 +77,7 @@ export function pouchPutNewOrUpdate(db, doc){
         pouchUpdateDoc(db, doc._id, doc).then(function (res) {
           resolve(res)
         })
-      }).catch(function(err){
+      }).catch(function (err) {
         console.log(err)
         pouchPutNewDoc(db, doc).then(function (res) {
           resolve(res)
@@ -100,7 +101,7 @@ export async function getPouchData(dataset) {
         reject(err)
       })
   })
-  return await promise
+  return promise
 }
 
 export async function syncCloudant(value) {
@@ -108,30 +109,24 @@ export async function syncCloudant(value) {
   let sync_count = 0;
   let url = "https://82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix:f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6@82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix.cloudantnosqldb.appdomain.cloud"
   // Replicating a local database to Remote
-  console.log('syncCloudant01')
+  console.log('syncCloudant in progress...')
   let promise = new Promise((resolve, reject) => {
     const localdb = new PouchDB(value)
     const remotedb = new PouchDB(url + '/' + value)
     localdb
       .sync(remotedb)
       .on('complete', function () {
-        console.log('syncCloudant02')
-        console.log(localdb)
-        console.log(remotedb)
         resolve(localdb)
       })
       .on('error', function (err) {
-        console.log('syncCloudant03')
         console.log(err)
         reject(err)
       })
   })
-  let output = await promise
-  return output
+  return promise
 }
-
-export function getFCT() {
-  const fct = new PouchDB('fct');
+export function getFCT(val) {
+  const fct = new PouchDB(val);
   let res = []
   let promise = new Promise((resolve) => {
     fct.info().then(function (info) {
@@ -176,7 +171,7 @@ export function getDRI() {
     })
   })
   return promise
- }
+}
 
 export function setFTC(docs) {
   let items = []
@@ -210,9 +205,9 @@ export function setDRI(docs) {
   return itemsDRI
 }
 
-export function pouchWSPutNewOrUpdate(db, doc, WStype){
-  let promise = new Promise( (resolve) => {
-    if (!doc._id){
+export function pouchWSPutNewOrUpdate(db, doc, WStype) {
+  let promise = new Promise((resolve) => {
+    if (!doc._id) {
       console.log('_id is missing')
       resolve(false)
     } else {
@@ -230,7 +225,7 @@ export function pouchWSPutNewOrUpdate(db, doc, WStype){
         pouchUpdateDoc(db, doc._id, currentDoc).then(function (res) {
           resolve(res)
         })
-      }).catch(function(err){
+      }).catch(function (err) {
         console.log(err)
         pouchPutNewDoc(db, doc).then(function (res) {
           resolve(res)

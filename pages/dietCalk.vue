@@ -76,7 +76,7 @@
       loginChecked: async function () {
         let vm = this
         if (vm.loginChecked) {
-          vm.items = await getFCT()
+          vm.items = await getFCT(vm.$store.state.fctDb)
           vm.itemsDRI = await getDRI()
 
           vm.WS.dietCases = JSON.parse(JSON.stringify(vm.$store.state.dietCases))
@@ -103,7 +103,7 @@
       if (store.state.loginStatus !== 1) {
         return
       } else {
-        myItem =  getFCT()
+        myItem =  getFCT(store.state.fctDb)
         myitemsDRI =  getDRI()
 
         store.dispatch('setNow')

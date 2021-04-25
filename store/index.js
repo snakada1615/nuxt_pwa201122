@@ -6,7 +6,8 @@ import {
   pouchUpdateDoc,
   pouchPutNewOrUpdate,
   pouchWSPutNewOrUpdate,
-  pouchDeleteDb, syncCloudant
+  pouchDeleteDb,
+  syncCloudant,
 } from "../plugins/pouchHelper";
 
 export const state = () => ({
@@ -29,6 +30,8 @@ export const state = () => ({
 
   loginStatus: 0,
   tabNumber: 10,
+  fctDb: 'fct',
+  fctListDb: 'fctListDb',
   userInfoDb: 'userlist',
   loginDb: 'logindb',
   lastUser: 'lastuser',
@@ -44,7 +47,7 @@ export const getters = {
     return state.packageVersion
   },
   userDb: (state) => {
-    return 'userData_' + state.user.uid
+    return 'userdata_' + state.user.uid.toLowerCase()
   },
 }
 
@@ -130,6 +133,7 @@ export const actions = {
       })
       // set loginStatus to 0
       dispatch('setLoginStatus', 0)
+      return true
     }).catch(function (error) {
       // An error happened.
       console.log('firebase:sign out failed')
@@ -191,13 +195,12 @@ export const actions = {
     return promise
   },
   saveUserToLastuser({state, dispatch, getters}, payload) {
-    const lastUser = 'lastUser'
     let promise = new Promise(async (resolve, reject) => {
 
       //save from store.user -> pouchDB(lastUser)
       let db = new PouchDB(state.loginDb)
       const userTemp = {}
-      userTemp._id = lastUser
+      userTemp._id = state.lastUser
       userTemp.user = payload.user
       userTemp.caseId = payload.caseId
       dispatch('setNow')
@@ -270,36 +273,65 @@ export const actions = {
     console.log(res)
     return res
   },
-  // get user information from userInfoDb
-  getUserInfo({state}, payload) {
+  //
+  // fetch db if no localDb exists
+  syncIfNoDb({state}, payload) {
     let promise = new Promise(async (resolve, reject) => {
+      let db = new PouchDB(payload)
+      db.info()
+        .then(function (info) {
+          if (!(info.doc_count)) {
+            console.log('your dataset is currently empty. the application will try to fetch data from server!')
+            syncCloudant(payload).then(dataset => {
+              resolve(true)
+            })
+          } else {
+            resolve(false)
+          }
+        })
+        .catch(function (err) {
+          console.log(err)
+          reject(err)
+        })
+    })
+    return promise
+  },
+  // get user information from userInfoDb
+  loadUserPersonalInfo({state, dispatch}, payload) {
+    let promise = new Promise(async (resolve, reject) => {
+      // fetch remoeteDb if localDb is not available
+      await dispatch('syncIfNoDb', state.userInfoDb)
+
       //save all user-> pouchDB(lastUser)
       let db = new PouchDB(state.userInfoDb)
-      const res = await pouchGetDoc(db, payload).catch(function(err){
+      const res = await pouchGetDoc(db, payload).catch(function (err) {
         reject(err)
       })
       resolve(res)
     })
     return promise
   },
-  loadUserFromPouch({state, dispatch}) {
-    const lastUser = 'lastUser'
+  loadUserFromPouch({state, dispatch, getters}) {
     let result = 0
     let res1 = 1
     let res2 = 1
     let db = new PouchDB(state.loginDb)
     let promise = new Promise((resolve) => {
-      pouchGetDoc(db, lastUser).then(async function (docTemp) {
+      pouchGetDoc(db, state.lastUser).then(async function (docTemp) {
         const userTmp = docTemp.user
         const caseIdTmp = docTemp.caseId
 
         userTmp ? dispatch('setUser', userTmp) : res1 = 0
         caseIdTmp ? dispatch('setCaseId', caseIdTmp) : res2 = 0
         if (res1 && res2) {
-          const userData = await dispatch('loadUserDataFromPouch')
-          console.log(userData)
+          // get user workspace from PouchDb-userDb
+          const userData = await dispatch('loadUserDataFromPouch',{
+            dbName: getters.userDb,
+            dataId: getters.currentPouchID
+          })
+          // set user workspace to store
+          dispatch('setFeasibilityCases', userData.feasibilityCases)
           dispatch('setDietCases', userData.dietCases)
-          dispatch('setFeasibilityCases', await userData.feasibilityCases)
           result = 1
         } else if (!res1) {
           result = 2
@@ -323,11 +355,14 @@ export const actions = {
    * load list of Diet from PouchDB
    * @returns {Promise<unknown>}
    */
-  loadUserDataFromPouch({getters}) {
-    let db = new PouchDB(getters.userDb)
+  async loadUserDataFromPouch({getters, dispatch}, payload) {
+    // fetch remoeteDb if localDb is not available
+    await dispatch('syncIfNoDb', payload.dbName)
+
+    let db = new PouchDB(payload.dbName)
     let currentDiet = {}
     let promise = new Promise((resolve) => {
-      pouchGetDoc(db, getters.currentPouchID).then(function (doc) {
+      pouchGetDoc(db, payload.dataId).then(function (doc) {
         resolve(doc)
       }).catch(function (err) {
         console.log('no data exists in PouchDB')
@@ -340,7 +375,10 @@ export const actions = {
    * load list of Diet from PouchDB
    * @returns {Promise<unknown>}
    */
-  loadDietfromPouch({getters}) {
+  async loadDietfromPouch({getters}) {
+    // fetch remoeteDb if localDb is not available
+    await dispatch('syncIfNoDb', getters.userDb)
+
     let db = new PouchDB(getters.userDb)
     let currentDiet = {}
     let promise = new Promise((resolve) => {
@@ -369,6 +407,9 @@ export const actions = {
     let promise = new Promise(async (resolve) => {
       const res = await pouchWSPutNewOrUpdate(db, record, 'diet')
       if (res) {
+        // sync localDb with remoteDb
+        await syncCloudant(getters.userDb)
+
         resolve(res)
       } else {
         resolve(false)
@@ -376,7 +417,10 @@ export const actions = {
     })
     return promise
   },
-  loadFeasibilityCasefromPouch({state, getters}) {
+  async loadFeasibilityCasefromPouch({state, getters}) {
+    // fetch remoeteDb if localDb is not available
+    await dispatch('syncIfNoDb', getters.userDb)
+
     let db = new PouchDB(getters.userDb)
     let currentFeasibilityCases = {}
     let promise = new Promise((resolve) => {
@@ -399,6 +443,9 @@ export const actions = {
     let promise = new Promise(async (resolve) => {
       const res = await pouchWSPutNewOrUpdate(db, record, 'feasibility')
       if (res) {
+        // sync localDb with remoteDb
+        await syncCloudant(getters.userDb)
+
         resolve(res)
       } else {
         resolve(false)
@@ -406,16 +453,39 @@ export const actions = {
     })
     return promise
   },
-  getListWorkspace({getters}, payload) {
-    let promise = new Promise((resolve, reject) => {
+  saveFctToPouch({state, getters, dispatch}, payload) {
+    console.log('saveFeasibilityToPouch')
+    const db = new PouchDB(payload.name)
+    dispatch('setNow')
+    payload.saveDate = state.saveDate
+    //record._id = getters.currentPouchID
+    let promise = new Promise(async (resolve) => {
+      const res = await db.bulkDocs(payload.data)
+      if (res) {
+        // sync localDb with remoteDb
+        await syncCloudant(getters.userDb)
+
+        resolve(res)
+      } else {
+        resolve(false)
+      }
+    })
+    return promise
+  },
+  getListWorkspace({getters, state, dispatch}, payload) {
+    let promise = new Promise(async (resolve, reject) => {
       if (!payload) {
         reject('no workSpace is set:getListWorkspace')
       } else {
+
+        // fetch remoeteDb if localDb is not available
+        await dispatch('syncIfNoDb', payload)
+
         const db = new PouchDB(payload)
         db.allDocs({include_docs: true}).then(function (docs) {
           let res = []
           docs.rows.forEach(function (value, index) {
-            if (value.id !== 'lastUser') {
+            if (value.id !== state.lastUser) {
               if (value.doc.caseId) {
                 res.push({
                   email: value.doc.user.email,

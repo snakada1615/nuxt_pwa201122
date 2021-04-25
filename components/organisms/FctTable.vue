@@ -81,19 +81,23 @@
         type: Array,
         default: () => [],
       },
-      FoodGrp: {
-        type: Array,
-        default: () => [
-          {name: 'Grains, roots and tubers'},
-          {name: 'Legumes and nuts'},
-          {name: 'Vitamin A rich fruits and Vegetable'},
-          {name: 'Other fruits and vegetables'},
-          {name: 'Flesh foods'},
-          {name: 'Dairy products'},
-          {name: 'Eggs'},
-          {name: 'non-category'}
-        ],
-      }
+    },
+    computed:{
+      FoodGrp: function () {
+        let uniqueGroup = []
+        let result = []
+        if (this.items){
+          this.items.forEach(function (elem, index) {
+            if (uniqueGroup.indexOf(elem.Group) === -1) {
+              uniqueGroup.push(elem.Group)
+              result.push({
+                name: elem.Group
+              })
+            }
+          })
+        }
+        return result
+      },
     },
     data() {
       return {

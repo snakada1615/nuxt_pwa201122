@@ -4,6 +4,7 @@ export default function ({store, redirect, route}) {
     if (route.name !=='index'
       && route.name !=='user_login'
       && route.name !== 'user_reg'
+      && route.name !== 'updateSW'
       && route.name !== 'test'
       && route.name !== 'test4'
       && store.state.loginStatus!==1
