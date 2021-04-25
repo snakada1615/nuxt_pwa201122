@@ -67,10 +67,10 @@ export function pouchPutNewDoc(db, newDoc) {
 }
 
 export function pouchPutNewOrUpdate(db, doc) {
-  let promise = new Promise((resolve) => {
+  let promise = new Promise((resolve, reject) => {
     if (!doc._id) {
       console.log('_id is missing')
-      resolve(false)
+      reject('_id is missing: pouchPutNewOrUpdate')
     } else {
       db.get(doc._id).then(function (currentDoc) {
         doc._rev = currentDoc._rev
@@ -78,10 +78,14 @@ export function pouchPutNewOrUpdate(db, doc) {
           resolve(res)
         })
       }).catch(function (err) {
-        console.log(err)
-        pouchPutNewDoc(db, doc).then(function (res) {
-          resolve(res)
-        })
+        if (err.name === 'not_found') {
+          pouchPutNewDoc(db, doc).then(function (res) {
+            resolve(res)
+          })
+        } else {
+          console.log(err)
+          reject(err)
+        }
       })
     }
   })
@@ -132,14 +136,14 @@ export function getFCT(val) {
     fct.info().then(function (info) {
       if (!(info.doc_count)) {
         console.log('your dataset is currently empty. the application will try to getch data from server!')
-        syncCloudant('fct').then(dataset => {
+        syncCloudant(val).then(dataset => {
           getPouchData(dataset).then(docs => {
             res = setFTC(docs)
             resolve(res)
           })
         })
       } else {
-        getPouchData(fct).then(docs => {
+        getPouchData(val).then(docs => {
           res = setFTC(docs)
           resolve(res)
         })

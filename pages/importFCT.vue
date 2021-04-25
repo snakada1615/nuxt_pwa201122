@@ -40,9 +40,6 @@
       />
     </b-card>
     <b-card>
-      {{csv}}
-    </b-card>
-    <b-card>
       <b-row class="my-1">
         <b-col cols="3">
           Name:
@@ -90,6 +87,8 @@
         </b-col>
       </b-row>
     </b-card>
+    dbUniqueName:{{dbUniqueName}}
+    dbName:{{dbName}}
   </b-container>
 </template>
 
@@ -138,7 +137,7 @@
         return this.csvState && this.dbNameState && this.dbDescriptionState
       },
       dbUniqueName(){
-        return this.dbName + '_' + this.$store.state.user.uid
+        return (this.dbName + '_' + this.$store.state.user.uid).toLowerCase()
       }
     },
     data() {

@@ -227,7 +227,6 @@
         return res
       },
       cropGroup: function () {
-        //TODO: fix unique group extraxtion error
         let uniqueGroup = []
         let result = []
         this.items.forEach(function (elem, index) {
@@ -240,7 +239,6 @@
             })
           }
         })
-        result.pop() // there are some bug in above code, which i cannot figure out
         return result
       },
       selectedCrops: {
@@ -262,7 +260,13 @@
       },
       items: {
         get: function () {
-          return this.fctOrg
+          let res  =[]
+          if (this.fctOrg){
+            this.fctOrg.forEach(function(val){
+              res.push(val.doc)
+            })
+          }
+          return res
         }
       },
       itemsDRI: {

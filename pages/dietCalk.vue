@@ -34,7 +34,7 @@
   import driTable from "../components/organisms/driTable";
   import dietCalkComp from "../components/organisms/dietCalkComp";
   import navigationGuard from "../components/atoms/navigationGuard";
-  import {getFCT, getDRI} from "../plugins/pouchHelper";
+  import {getDRI, getFCT} from "../plugins/pouchHelper";
 
   export default {
     components: {
@@ -76,7 +76,7 @@
       loginChecked: async function () {
         let vm = this
         if (vm.loginChecked) {
-          vm.items = await getFCT(vm.$store.state.fctDb)
+          vm.items = await vm.$store.dispatch('loadFctFromPouch', vm.$store.state.fctDb)
           vm.itemsDRI = await getDRI()
 
           vm.WS.dietCases = JSON.parse(JSON.stringify(vm.$store.state.dietCases))
@@ -103,7 +103,9 @@
       if (store.state.loginStatus !== 1) {
         return
       } else {
-        myItem =  getFCT(store.state.fctDb)
+        //myItem = getFCT(store.state.fctDb)
+        myItem = await store.dispatch('loadFctFromPouch', store.state.fctDb)
+        console.log(myItem)
         myitemsDRI =  getDRI()
 
         store.dispatch('setNow')
