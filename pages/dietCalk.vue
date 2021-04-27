@@ -58,6 +58,7 @@
           dietCases: [],
           user: '',
           saveDate: '',
+          fctDb: '',
         },
       }
     },
@@ -84,6 +85,7 @@
           vm.WS.caseId = vm.$store.state.caseId
           vm.$store.dispatch('setNow')
           vm.WS.saveDate = vm.$store.state.saveDate
+          vm.WS.fctDb = vm.$store.state.fctDb
         }
       },
       currentCaseId: function (value) {
@@ -113,6 +115,7 @@
         myWS.user = JSON.parse(JSON.stringify(store.state.user))
         myWS.caseId = store.state.caseId
         myWS.saveDate = store.state.saveDate
+        myWS.fctDb = store.state.fctDb
       }
       return {
         items: await myItem,

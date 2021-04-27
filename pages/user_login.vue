@@ -118,7 +118,6 @@
       async setWorkspace(val, flag) {
         const vm = this
 
-
         console.log('setWorkspace01')
         //update $store
         vm.$store.dispatch('setCaseId', val)
@@ -129,7 +128,7 @@
         console.log('setWorkspace02')
         if (flag === 2) {
           //initialieze user workspace
-          await vm.$store.dispatch('initPouch', {user: vm.user, caseId: val})
+          await vm.$store.dispatch('initPouch', {user: vm.user, caseId: val, fctDb:'fct_org'})
         } else {
           // get user workspace from PouchDb-userDb
           const userData = await vm.$store.dispatch('loadUserDataFromPouch',{

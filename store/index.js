@@ -7,7 +7,7 @@ import {
   pouchPutNewOrUpdate,
   pouchWSPutNewOrUpdate,
   pouchDeleteDb,
-  syncCloudant, getPouchData, setFTC,
+  syncCloudant, getPouchData, setFTC, getFCT,
 } from "../plugins/pouchHelper";
 
 export const state = () => ({
@@ -36,6 +36,8 @@ export const state = () => ({
   caseId: '',
   caseIdList: [],
 
+  cloudantUrl: "https://82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix:f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6@82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix.cloudantnosqldb.appdomain.cloud/",
+
   loginStatus: 0,
   tabNumber: 10,
   lastUser: 'lastuser',
@@ -50,7 +52,7 @@ export const state = () => ({
   // loginDb: record of last user logged in
   /////////////////////
   fctDb: 'fct_org',
-  fctListDb: 'fctListDb',
+  fctListDb: 'fctlist_db',
   userInfoDb: 'userlist',
   loginDb: 'logindb',
 })
@@ -70,6 +72,9 @@ export const getters = {
 export const mutations = {
   setLoginStatus: function (state, payload) {
     state.loginStatus = payload
+  },
+  setFctDb: function (state, payload) {
+    state.fctDb = payload
   },
   setCaseId: function (state, payload) {
     state.caseId = payload
@@ -272,6 +277,7 @@ export const actions = {
     WS.user = {...payload.user}
     WS.caseId = payload.caseId
     WS._id = id
+    WS.fctDb = payload.fctDb
 
     // set dietCases to $store
     dispatch('setDietCases', WS.dietCases)
@@ -348,6 +354,7 @@ export const actions = {
           // set user workspace to store
           dispatch('setFeasibilityCases', userData.feasibilityCases)
           dispatch('setDietCases', userData.dietCases)
+          dispatch('setFctDb', userData.fctDb)
           result = 1
         } else if (!res1) {
           result = 2
@@ -386,6 +393,13 @@ export const actions = {
       })
     })
     return promise
+  },
+  async getFctInfo({state}){
+    const fct = new PouchDB(state.fctDb)
+    const res = await pouchGetDoc(fct, 'fct_info').catch(function (err) {
+      throw err
+    })
+    return Promise.resolve(res)
   },
   loadFctFromPouch({state}, payload) {
     const fct = new PouchDB(payload);
@@ -465,7 +479,7 @@ export const actions = {
     })
     return promise
   },
-  async saveFctToPouch({state, getters, dispatch}, payload) {
+  async saveFctToPouch_bulk({state, getters, dispatch}, payload) {
     console.log('saveFeasibilityToPouch')
     const dbName = 'fct_' + payload.dbName
 
@@ -480,7 +494,9 @@ export const actions = {
       try {
         const res1 = await db.bulkDocs(payload.data)
         const res2 = await pouchPutNewOrUpdate(db, {
-          _id: payload._id,
+          _id: 'fct_info',
+          dbId: dbName,
+          dbName: payload._id,
           description: payload.description,
           creator: payload.creator,
           saveDate: payload.saveDate
@@ -489,6 +505,16 @@ export const actions = {
           // sync localDb with remoteDb
           await syncCloudant(dbName)
 
+          //register new FCT to dbFctList
+          const dbFctList = new PouchDB(state.cloudantUrl + state.fctListDb)
+          await pouchPutNewDoc( dbFctList, {
+            _id: dbName,
+            dbId: dbName,
+            dbName: payload._id,
+            description: payload.description,
+            creator: payload.creator,
+            saveDate: payload.saveDate
+          })
           resolve(db)
         } else {
           reject(false)
@@ -496,6 +522,69 @@ export const actions = {
       } catch (err) {
         throw err
       }
+    })
+    return promise
+  },
+  async saveFctToPouch_replace({state, getters, dispatch}, payload) {
+    console.log('saveFctToPouch_replace')
+    const dbName = 'fct_' + payload.dbName
+
+    // fetch remoeteDb if localDb is not available
+    await dispatch('syncIfNoDb', dbName)
+
+    console.log('saveFctToPouch_replace02')
+    let db = new PouchDB(dbName)
+
+    dispatch('setNow')
+    payload.saveDate = state.saveDate
+    //record._id = getters.currentPouchID
+    let promise = new Promise(async (resolve, reject) => {
+      try {
+        console.log('saveFctToPouch_replace03')
+        const res1 = await db.bulkDocs(payload.data)
+        console.log('saveFctToPouch_replace04')
+        const res2 = await pouchPutNewOrUpdate(db, {
+          _id: 'fct_info',
+          dbId: dbName,
+          dbName: payload._id,
+          description: payload.description,
+          creator: payload.creator,
+          saveDate: payload.saveDate
+        })
+        console.log('saveFctToPouch_replace05')
+        if (res1 && res2) {
+          // sync localDb with remoteDb
+          await syncCloudant(dbName)
+
+          //register new FCT to dbFctList
+          const dbFctList = new PouchDB(state.cloudantUrl + state.fctListDb)
+          await pouchPutNewDoc( dbFctList, {
+            _id: dbName,
+            dbId: dbName,
+            dbName: payload._id,
+            description: payload.description,
+            creator: payload.creator,
+            saveDate: payload.saveDate
+          })
+          resolve(db)
+        } else {
+          reject(false)
+        }
+      } catch (err) {
+        throw err
+      }
+    })
+    return promise
+  },
+  async getFctList({state}) {
+    let promise = new Promise(async (resolve, reject) => {
+      const db = new PouchDB(state.cloudantUrl + state.fctListDb)
+      db.allDocs({include_docs: true}).then(function (docs) {
+        resolve(docs)
+      }).catch(function (err) {
+        console.log('error in getFctList')
+        reject(err)
+      })
     })
     return promise
   },
@@ -565,6 +654,9 @@ export const actions = {
   },
   setOffUser(context) {
     context.commit('setOffUser')
+  },
+  setFctDb: function (context, payload) {
+    context.commit('setFctDb', payload)
   },
   setCaseId: function (context, payload) {
     context.commit('setCaseId', payload)

@@ -12,6 +12,10 @@
     </b-card>
     <b-button @click="deleteDb" class="mx-2 my-2" variant="primary">delete all records</b-button>
     <b-card bg-variant="gray-400" class="mt-3">
+      <div>please use buttton below to <span class="text-danger">change</span> Food Composition Table</div>
+    </b-card>
+    <b-button to="selectFct" class="mx-2 my-2" variant="primary">select FCT</b-button>
+    <b-card bg-variant="gray-400" class="mt-3">
       <div>please use buttton below to import <span class="text-danger">new Food Composition Table</span></div>
     </b-card>
     <b-button to="importFCT" class="mx-2 my-2" variant="primary">import FCT</b-button>

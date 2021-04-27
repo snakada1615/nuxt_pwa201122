@@ -1,92 +1,98 @@
 <template>
   <b-container>
-    <vue-csv-import
-      v-model="csv"
-      url="/hello"
-      :map-fields=fields>
+    <div v-if="$nuxt.isOffline">
+      Sorry, this page works only online
+    </div>
 
-      <template slot="hasHeaders" slot-scope="{headers, toggle}">
-        <label>
-          <input type="checkbox" id="hasHeaders" :value="headers" @change="toggle">
-          do you have header in your file?
-        </label>
-      </template>
+    <div v-if="$nuxt.isOnline">
+      <vue-csv-import
+        v-model="csv"
+        url="/hello"
+        :map-fields=fields>
 
-      <template slot="error">
-        File type is invalid
-      </template>
+        <template slot="hasHeaders" slot-scope="{headers, toggle}">
+          <label>
+            <input type="checkbox" id="hasHeaders" :value="headers" @change="toggle">
+            do you have header in your file?
+          </label>
+        </template>
 
-      <template slot="thead">
-        <tr>
-          <th>My Fields</th>
-          <th>Column</th>
-        </tr>
-      </template>
+        <template slot="error">
+          File type is invalid
+        </template>
 
-      <template slot="next" slot-scope="{load}">
-        <button @click.prevent="load">import!</button>
-      </template>
+        <template slot="thead">
+          <tr>
+            <th>My Fields</th>
+            <th>Column</th>
+          </tr>
+        </template>
 
-      <template slot="submit" slot-scope="{submit}">
-        <button @click.prevent="submit">extract!</button>
-      </template>
-    </vue-csv-import>
-    <b-card>
-      <fct-table
-        v-if="csvState"
-        :items="csv"
-        head-row-variant="success"
-        table-variant="light"
-      />
-    </b-card>
-    <b-card>
-      <b-row class="my-1">
-        <b-col cols="3">
-          Name:
-        </b-col>
-        <b-col cols="9">
-          <b-form-input
-            placeholder="database name"
-            v-model="dbName"
-            :disabled="!csvState"
-            size="sm"
-            :state="dbNameState"
-          ></b-form-input>
-        </b-col>
-      </b-row>
-      <b-row class="my-1">
-        <b-col cols="3">
-          Description:
-        </b-col>
-        <b-col cols="9">
-          <b-form-input
-            placeholder="description of database"
-            v-model="dbDescription"
-            :disabled="!csvState"
-            size="sm"
-            :state="dbDescriptionState"
-          ></b-form-input>
-        </b-col>
-      </b-row>
-      <b-row class="my-1">
-        <b-col cols="3">
-          Creator:
-        </b-col>
-        <b-col cols="9">
-          {{$store.state.user.name}}
-        </b-col>
-      </b-row>
-      <b-row class="my-1">
-        <b-col class="mx-0">
-          <b-button
-            variant="info"
-            size="sm"
-            :disabled="!isSaveReady"
-            @click="saveFct"
-          >save to server</b-button>
-        </b-col>
-      </b-row>
-    </b-card>
+        <template slot="next" slot-scope="{load}">
+          <button @click.prevent="load">import!</button>
+        </template>
+
+        <template slot="submit" slot-scope="{submit}">
+          <button @click.prevent="submit">extract!</button>
+        </template>
+      </vue-csv-import>
+      <b-card>
+        <fct-table
+          v-if="csvState"
+          :items="csv"
+          head-row-variant="success"
+          table-variant="light"
+        />
+      </b-card>
+      <b-card>
+        <b-row class="my-1">
+          <b-col cols="3">
+            Name:
+          </b-col>
+          <b-col cols="9">
+            <b-form-input
+              placeholder="database name"
+              v-model="dbName"
+              :disabled="!csvState"
+              size="sm"
+              :state="dbNameState"
+            ></b-form-input>
+          </b-col>
+        </b-row>
+        <b-row class="my-1">
+          <b-col cols="3">
+            Description:
+          </b-col>
+          <b-col cols="9">
+            <b-form-input
+              placeholder="description of database"
+              v-model="dbDescription"
+              :disabled="!csvState"
+              size="sm"
+              :state="dbDescriptionState"
+            ></b-form-input>
+          </b-col>
+        </b-row>
+        <b-row class="my-1">
+          <b-col cols="3">
+            Creator:
+          </b-col>
+          <b-col cols="9">
+            {{$store.state.user.name}}
+          </b-col>
+        </b-row>
+        <b-row class="my-1">
+          <b-col class="mx-0">
+            <b-button
+              variant="info"
+              size="sm"
+              :disabled="!isSaveReady"
+              @click="saveFct"
+            >save to server</b-button>
+          </b-col>
+        </b-row>
+      </b-card>
+    </div>
   </b-container>
 </template>
 
@@ -157,10 +163,7 @@
     },
     methods:{
       saveFct(){
-        console.log(this.dbName)
-        console.log(this.dbDescription)
-        console.log(this.$store.state.user.name)
-        this.$store.dispatch('saveFctToPouch',{
+        this.$store.dispatch('saveFctToPouch_bulk',{
           _id: this.dbName,
           dbName: this.dbUniqueName,
           description: this.dbDescription,

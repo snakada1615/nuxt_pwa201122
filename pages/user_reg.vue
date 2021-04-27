@@ -202,7 +202,7 @@
         const vm = this
 
         //save initialized userData to $store and PouchDb
-        await vm.$store.dispatch('initPouch', {user: userInfo, caseId: workSpace})
+        await vm.$store.dispatch('initPouch', {user: userInfo, caseId: workSpace, fctDb: 'fct_org'})
 
         //update PouchDB-userSet
         await vm.$store.dispatch('saveUseToUserSet', {_id: userInfo.uid, user: userInfo})

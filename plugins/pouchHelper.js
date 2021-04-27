@@ -54,13 +54,11 @@ export function pouchUpdateDoc(db, id, newDoc) {
 }
 
 export function pouchPutNewDoc(db, newDoc) {
-  let promise = new Promise((resolve) => {
+  let promise = new Promise((resolve, reject) => {
     db.put(newDoc).then(function () {
       resolve(true)
     }).catch(function (err) {
-      console.log(err)
-      console.log(newDoc)
-      resolve(false)
+      reject(err)
     })
   })
   return promise
