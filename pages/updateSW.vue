@@ -40,7 +40,7 @@
         const vm = this
         this.$store.dispatch('removeUserDb').then(function(){
           console.log('success')
-          vm.makeToast('useradta successfully deleted')
+          vm.makeToast('userdata successfully deleted')
           vm.$store.dispatch('logout')
           vm.$router.push('/')
         }).catch(function (err) {
