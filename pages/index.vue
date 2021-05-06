@@ -41,7 +41,7 @@
         <b-card class="bg-info my-2">
             <b-card-body class="px-0 py-0">
               <b-card-text class="text-center font-weight-bold text-secondary bg-white">diet calculation</b-card-text>
-              <b-button :disabled="!loginStatus" class="btn btn-warning m-auto btn-block" to="/dietCalk" Nuxt>go</b-button>
+              <b-button :disabled="!loginOk" class="btn btn-warning m-auto btn-block" to="/dietCalk" Nuxt>go</b-button>
             </b-card-body>
         </b-card>
       </b-col>
@@ -49,7 +49,7 @@
         <b-card class="bg-info my-2">
             <b-card-body class="px-0 py-0">
               <b-card-text class="text-center font-weight-bold text-secondary bg-white">crop feasibility</b-card-text>
-              <b-button :disabled="!loginStatus" class="btn btn-warning m-auto btn-block" to="/feasibilityCheck" Nuxt>go</b-button>
+              <b-button :disabled="!loginOk" class="btn btn-warning m-auto btn-block" to="/feasibilityCheck" Nuxt>go</b-button>
             </b-card-body>
         </b-card>
       </b-col>
@@ -76,7 +76,7 @@
 <script>
   export default {
     computed:{
-      loginStatus:function () {
+      loginOk:function () {
         if (this.$store.state.loginStatus === 1){
           return true
         } else {

@@ -30,8 +30,7 @@
 
 <script>
   import feasibilityCheckComponent from "@/components/organisms/feasibilityCheckComponent";
-  import {getDRI, getFCT, pouchGetDoc, pouchWSPutNewOrUpdate} from "@/plugins/pouchHelper";
-  import PouchDB from "pouchdb";
+  import {makeToast} from "@/plugins/pouchHelper";
 
   /**
    * Component to calculate nutrition balance of combined food
@@ -90,8 +89,9 @@
       loginChecked: async function () {
         let vm = this
         if (this.loginChecked) {
-          vm.items = await this.$store.dispatch('loadFctFromPouch', this.$store.state.fctDb)
-          vm.itemsDRI = await getDRI()
+          vm.items = await this.$store.dispatch('loadFctFromPouch',
+            {dbName: store.state.fctDb, url: store.state.cloudantUrl})
+          vm.itemsDRI =  await vm.$store.dispatch('loadDriFromPouch', 'dri')
 
           vm.WS.feasibilityCases = JSON.parse(JSON.stringify(
             this.$store.state.feasibilityCases))
@@ -119,8 +119,9 @@
       if (store.state.loginStatus !== 1) {
         return
       } else {
-        myItem = await store.dispatch('loadFctFromPouch', store.state.fctDb)
-        myitemsDRI =  getDRI()
+        myItem = await store.dispatch('loadFctFromPouch',
+          {dbName: store.state.fctDb, url: store.state.cloudantUrl})
+        myitemsDRI =  await store.dispatch('loadDriFromPouch', 'dri')
 
         myWS.feasibilityCases = JSON.parse(JSON.stringify(store.state.feasibilityCases))
         myWS.user = JSON.parse(JSON.stringify(store.state.user))

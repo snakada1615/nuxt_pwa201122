@@ -36,7 +36,7 @@
           <b-button variant="success" @click="logout" :disabled="!isLogin">logout</b-button>
           <b-button variant="warning" @click="moveToRegister">new user</b-button>
         </span>
-        <h6>please logout first before</h6>
+        <h6 v-if="isLogin" class="text-danger">please logout first before login/register</h6>
       </b-col>
     </b-row>
     <login-sms name="loginSms" :uid.sync="userId"/>
@@ -118,17 +118,15 @@
       async setWorkspace(val, flag) {
         const vm = this
 
-        console.log('setWorkspace01')
         //update $store
         vm.$store.dispatch('setCaseId', val)
 
         //update PouchDB-lastUser
         await vm.$store.dispatch('saveUserToLastuser', {user: vm.user, caseId: val})
 
-        console.log('setWorkspace02')
         if (flag === 2) {
           //initialieze user workspace
-          await vm.$store.dispatch('initPouch', {user: vm.user, caseId: val, fctDb:'fct_org'})
+          await vm.$store.dispatch('initPouch', {user: vm.user, caseId: val, fctDb: vm.$store.state.fctDb})
         } else {
           // get user workspace from PouchDb-userDb
           const userData = await vm.$store.dispatch('loadUserDataFromPouch',{

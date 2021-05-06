@@ -3,11 +3,10 @@ import PouchDB from 'pouchdb'
 import {
   pouchPutNewDoc,
   pouchGetDoc,
-  pouchUpdateDoc,
   pouchPutNewOrUpdate,
   pouchWSPutNewOrUpdate,
   pouchDeleteDb,
-  syncCloudant, getPouchData, setFTC, getFCT,
+  getPouchDataAll, makeToast, setDRI, syncRemoteDb, pouchDeleteDoc
 } from "../plugins/pouchHelper";
 
 export const state = () => ({
@@ -52,6 +51,7 @@ export const state = () => ({
   // loginDb: record of last user logged in
   /////////////////////
   fctDb: 'fct_org',
+  driDb: 'dri',
   fctListDb: 'fctlist_db',
   userInfoDb: 'userlist',
   loginDb: 'logindb',
@@ -66,10 +66,13 @@ export const getters = {
   },
   userDb: (state) => {
     return 'userdata_' + state.user.uid.toLowerCase()
-  },
+  }
 }
 
 export const mutations = {
+  setCloudantUrl: function (state, payload) {
+    state.cloudantUrl = payload
+  },
   setLoginStatus: function (state, payload) {
     state.loginStatus = payload
   },
@@ -203,11 +206,21 @@ export const actions = {
     })
     return promise
   },
-  removeUserDb({getters}) {
-    pouchDeleteDb(getters.userDb)
-  },
-  saveUseToUserSet({state}, payload) {
+  removeUserDoc({state},payload) {
     let promise = new Promise(async (resolve, reject) => {
+      const db = new PouchDB(payload.dbName)
+      await pouchDeleteDoc(db, payload.docId).catch(err=>{reject(err)})
+      await pouchDeleteDb(state.lastUser).catch(err => { reject(err) })
+      await syncRemoteDb({dbName: payload.dbName, url: payload.url}).catch(err => reject(err))
+      resolve(true)
+    })
+    return promise
+  },
+  saveUseToUserSet({state, dispatch}, payload) {
+    let promise = new Promise(async (resolve, reject) => {
+      // fetch remoeteDb if localDb is not available
+      await dispatch('syncIfNoDb', state.userInfoDb).catch(err => {reject(err)})
+
       //save all user-> pouchDB(lastUser)
       let db = new PouchDB(state.userInfoDb)
       const res = await pouchPutNewOrUpdate(db, payload)
@@ -290,7 +303,8 @@ export const actions = {
     const res = await pouchPutNewOrUpdate(db, WS).catch((err) => reject(err))
 
     // set workSpace to cloudant
-    await syncCloudant(getters.userDb)
+    await syncRemoteDb({dbName: getters.userDb, url: state.cloudantUrl})
+    //await syncCloudant(getters.userDb)
     console.log('data initialized')
     console.log(res)
     return res
@@ -304,9 +318,10 @@ export const actions = {
         .then(function (info) {
           if (!(info.doc_count)) {
             console.log('your dataset is currently empty. the application will try to fetch data from server!')
-            syncCloudant(payload).then(dataset => {
-              resolve(true)
-            })
+            syncRemoteDb({dbName: payload, url: state.cloudantUrl})
+              .then(dataset => {
+                resolve(true)
+              })
           } else {
             resolve(false)
           }
@@ -368,8 +383,7 @@ export const actions = {
         // if no record
         console.log(err)
         console.log('no user info set on lastuser')
-        result = 0
-        resolve(result)
+        resolve(0)
       })
     })
     return promise
@@ -394,33 +408,63 @@ export const actions = {
     })
     return promise
   },
-  async getFctInfo({state}){
-    const fct = new PouchDB(state.fctDb)
-    const res = await pouchGetDoc(fct, 'fct_info').catch(function (err) {
-      throw err
+  getFctInfo({state}) {
+    let promise = new Promise(async (resolve, reject) => {
+      console.log(state.fctDb)
+      const fct = new PouchDB(state.fctDb)
+      const res = await pouchGetDoc(fct, 'fct_info').catch(function (err) {
+        reject(err)
+      })
+      resolve(res)
     })
-    return Promise.resolve(res)
+    return promise
   },
   loadFctFromPouch({state}, payload) {
-    const fct = new PouchDB(payload);
+    const fct = new PouchDB(payload.dbName);
+    let res = []
+    let promise = new Promise((resolve, reject) => {
+      try {
+        fct.info().then(async function (info) {
+          if (!(info.doc_count)) {
+            console.log('your dataset is currently empty. the application will try to getch data from server!')
+            const dataset = await syncRemoteDb({dbName: payload.dbName, url: payload.url})
+            const docs = await getPouchDataAll(dataset)
+            res = docs.filter(function (val) {
+              //remove one record from db (db metadata)
+              return val._id !== payload.dbName
+            })
+            resolve(res)
+          } else {
+            const docs = await getPouchDataAll(fct)
+            res = docs.filter(function (val) {
+              //remove one record from db (db metadata)
+              return val._id !== payload.dbName
+            })
+            resolve(res)
+          }
+        })
+      } catch (err) {
+        reject(err)
+      }
+    })
+    return promise
+  },
+  loadDriFromPouch({state}, payload) {
+    const dri = new PouchDB(payload);
     let res = []
     let promise = new Promise((resolve) => {
-      fct.info().then(function (info) {
+      dri.info().then(function (info) {
         if (!(info.doc_count)) {
           console.log('your dataset is currently empty. the application will try to getch data from server!')
-          syncCloudant(payload).then(dataset => {
-            getPouchData(dataset).then(docs => {
-              res = docs.filter(function (val) {
-                return val._id !== payload
-              })
+          syncRemoteDb({dbName:payload, url: state.cloudantUrl}).then(dataset => {
+            getPouchDataAll(dataset).then(docs => {
+              res = setDRI(docs)
               resolve(res)
             })
           })
         } else {
-          getPouchData(fct).then(docs => {
-            res = docs.filter(function (val) {
-              return val._id !== payload
-            })
+          getPouchDataAll(dri).then(docs => {
+            res = setDRI(docs)
             resolve(res)
           })
         }
@@ -447,7 +491,8 @@ export const actions = {
       const res = await pouchWSPutNewOrUpdate(db, record, 'diet')
       if (res) {
         // sync localDb with remoteDb
-        await syncCloudant(getters.userDb)
+        await syncRemoteDb({dbName: getters.userDb, url: state.cloudantUrl})
+        //await syncCloudant(getters.userDb)
 
         resolve(res)
       } else {
@@ -470,7 +515,8 @@ export const actions = {
       const res = await pouchWSPutNewOrUpdate(db, record, 'feasibility')
       if (res) {
         // sync localDb with remoteDb
-        await syncCloudant(getters.userDb)
+        await syncRemoteDb({dbName: getters.userDb, url: state.cloudantUrl})
+        //await syncCloudant(getters.userDb)
 
         resolve(res)
       } else {
@@ -503,11 +549,12 @@ export const actions = {
         })
         if (res1 && res2) {
           // sync localDb with remoteDb
-          await syncCloudant(dbName)
+          await syncRemoteDb({dbName: dbName, url: state.cloudantUrl})
+          //await syncCloudant(dbName)
 
           //register new FCT to dbFctList
           const dbFctList = new PouchDB(state.cloudantUrl + state.fctListDb)
-          await pouchPutNewDoc( dbFctList, {
+          await pouchPutNewDoc(dbFctList, {
             _id: dbName,
             dbId: dbName,
             dbName: payload._id,
@@ -520,7 +567,7 @@ export const actions = {
           reject(false)
         }
       } catch (err) {
-        throw err
+        reject(err)
       }
     })
     return promise
@@ -554,11 +601,12 @@ export const actions = {
         console.log('saveFctToPouch_replace05')
         if (res1 && res2) {
           // sync localDb with remoteDb
-          await syncCloudant(dbName)
+          await syncRemoteDb({dbName: dbName, url: state.cloudantUrl})
+          //await syncCloudant(dbName)
 
           //register new FCT to dbFctList
           const dbFctList = new PouchDB(state.cloudantUrl + state.fctListDb)
-          await pouchPutNewDoc( dbFctList, {
+          await pouchPutNewDoc(dbFctList, {
             _id: dbName,
             dbId: dbName,
             dbName: payload._id,
@@ -595,7 +643,7 @@ export const actions = {
       } else {
 
         // fetch remoeteDb if localDb is not available
-        await dispatch('syncIfNoDb', payload)
+        await dispatch('syncIfNoDb', payload).catch(err => {reject(err)})
 
         const db = new PouchDB(payload)
         db.allDocs({include_docs: true}).then(function (docs) {
@@ -675,6 +723,45 @@ export const actions = {
   },
   setEdit: function (context, payload) {
     context.commit('setEdit', payload)
+  },
+  // "loadCouchUrl" is used only for Rwanda version
+  // which use couchDb installed on MINAGRI server instead of IBM cloudant
+  loadCouchUrl: function (context) {
+    const dbName = 'couch_info'
+    const myId = 'myCouch'
+    let url = ''
+    const promise = new Promise(async (resolve, reject) => {
+      const db = new PouchDB(dbName)
+      pouchGetDoc(db, myId).then(function (doc) {
+        url = "http://" + doc.user + ":" + doc.pass + "@" + doc.ip + ":5984/"
+        //replace cloudant Url by CouchDb URL
+        context.commit('setCloudantUrl', url)
+        context.commit()
+        resolve(doc)
+      }).catch(function (err) {
+        reject(err)
+      })
+    })
+    return promise
+  },
+  //"saveCouchUrl" is used only for Rwanda version
+  // which use couchDb installed on MINAGRI server instead of IBM cloudant
+  saveCouchUrl: function (context, payload) {
+    const dbName = 'couch_info'
+    const promise = new Promise(async (resolve, reject) => {
+      const db = new PouchDB(dbName)
+      pouchPutNewOrUpdate(db, {
+        _id: 'myCouch',
+        user: payload.user,
+        pass: payload.pass,
+        ip: payload.ip
+      }).then(() => {
+        resolve('db info saved successfully')
+      }).catch((err) => {
+        reject(err)
+      })
+    })
+    return promise
   },
   async DBexists(context, dbname) {
     var req = indexedDB.open(dbname);

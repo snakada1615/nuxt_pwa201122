@@ -169,6 +169,11 @@
           description: this.dbDescription,
           creator: this.$store.state.user.name,
           data: this.csv,
+        }).then(function () {
+          alert('import success')
+          this.$router.push('/')
+        }).catch(err => {
+          this.$nuxt.error(err)
         })
       }
     }

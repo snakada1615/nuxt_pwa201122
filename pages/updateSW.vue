@@ -1,24 +1,32 @@
 <template>
   <b-container class="py-2">
-    <b-card bg-variant="gray-400">
-      <div>please use buttton below to fetch <span class="text-danger">latest version </span>of application</div>
-      <div>current version: {{$store.state.appVersion}}</div>
-      <div>latest version on server: {{$store.state.appVersion}}</div>
-    </b-card>
-    <b-button @click="unRegister" class="mx-2 my-2" variant="primary">update app</b-button>
-    <b-card bg-variant="gray-400" class="mt-3">
-      <div>please use buttton below to <span class="text-danger">remove </span>all user data</div>
-      <div>to refresh database</div>
-    </b-card>
-    <b-button @click="deleteDb" class="mx-2 my-2" variant="primary">delete all records</b-button>
-    <b-card bg-variant="gray-400" class="mt-3">
-      <div>please use buttton below to <span class="text-danger">change</span> Food Composition Table</div>
-    </b-card>
-    <b-button to="selectFct" class="mx-2 my-2" variant="primary">select FCT</b-button>
-    <b-card bg-variant="gray-400" class="mt-3">
-      <div>please use buttton below to import <span class="text-danger">new Food Composition Table</span></div>
-    </b-card>
-    <b-button to="importFCT" class="mx-2 my-2" variant="primary">import FCT</b-button>
+    <div v-if="$nuxt.isOnline">
+      <b-card bg-variant="gray-400">
+        <div>please use buttton below to fetch <span class="text-danger">latest version </span>
+          of application current version: {{$store.state.appVersion}}</div>
+        <b-button @click="unRegister" class="my-1" variant="info">update app</b-button>
+      </b-card>
+      <b-card bg-variant="gray-400" class="mt-3">
+        <div>please use buttton below to <span class="text-danger">remove </span>
+          all user data to refresh database</div>
+        <b-button @click="deleteDb" class="my-2"
+                  variant="info" :disabled="$store.state.loginStatus !== 1"
+        >delete user records</b-button>
+      </b-card>
+      <b-card bg-variant="gray-400" class="mt-3">
+        <div>please use buttton below to <span class="text-danger">change</span> Food Composition Table</div>
+        <b-button to="selectFct" class="my-2" variant="info">select FCT</b-button>
+      </b-card>
+      <b-card bg-variant="gray-400" class="mt-3">
+        <div>please use buttton below to import <span class="text-danger">new Food Composition Table</span></div>
+        <b-button to="importFCT" class="my-2" variant="info">import FCT</b-button>
+      </b-card>
+      <b-card bg-variant="gray-400" class="mt-3">
+        <div>please use buttton below to <span class="text-danger">change workspace</span></div>
+        <b-button to="changeWorkspace" class="my-2" variant="info">change WS</b-button>
+      </b-card>
+    </div>
+    <div v-if="!$nuxt.isOnline">this function is available when netrowk connection is available</div>
   </b-container>
 </template>
 
@@ -38,14 +46,13 @@
       },
       deleteDb() {
         const vm = this
-        this.$store.dispatch('removeUserDb').then(function(){
-          console.log('success')
-          vm.makeToast('userdata successfully deleted')
+        vm.$store.dispatch('removeUserDoc', {
+          dbName: vm.$store.getters.userDb, docId: vm.$store.getters.currentPouchID
+        }).then(function(){
           vm.$store.dispatch('logout')
           vm.$router.push('/')
         }).catch(function (err) {
-          console.log(err)
-          vm.makeToast('cannnot remove user data')
+          $nuxt.error(err)
         })
       }
     },

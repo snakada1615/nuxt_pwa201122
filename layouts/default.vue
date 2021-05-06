@@ -13,6 +13,7 @@
   import Footer from "@/components/footer.vue"; // footerをインポート
   export default {
     components: {
+      name: "default",
       Header,
       Footer
     }

@@ -5,8 +5,7 @@ export default function ({store, redirect, route}) {
       && route.name !=='user_login'
       && route.name !== 'user_reg'
       && route.name !== 'updateSW'
-      && route.name !== 'test'
-      && route.name !== 'test4'
+      && !(/^test*$/).test(route.name)
       && store.state.loginStatus!==1
     ) {
       alert('please login/register first')

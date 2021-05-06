@@ -101,6 +101,7 @@ export default {
         'FormSelectPlugin',
         'FormCheckboxPlugin',
         'FormRadioPlugin',
+        'ListGroupPlugin',
       ],
     }]
   ],

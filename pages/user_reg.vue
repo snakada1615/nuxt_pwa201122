@@ -119,6 +119,7 @@
           <b-button variant="success" @click="registUser(loginOption)" :disabled="!registReady">register</b-button>
           <b-button variant="success" @click="logout" :disabled="!isLogin">logout</b-button>
         </span>
+        <h5 v-if="isLogin" class="text-danger">please logout first to register</h5>
       </b-col>
     </b-row>
     <login-sms name="loginSms" :uid.sync="userId"/>
@@ -130,7 +131,7 @@
   import loginSms from "@/components/molecules/loginSms"
   import loginEmail from "@/components/molecules/loginEmail"
   import registEmail from "@/components/molecules/registEmail";
-  import {syncCloudant} from "../plugins/pouchHelper";
+  import {syncRemoteDb} from "../plugins/pouchHelper";
 
   export default {
     components: {
@@ -211,7 +212,8 @@
         await vm.$store.dispatch('saveUserToLastuser', {user: userInfo, caseId: workSpace})
 
         //sync PouchDB(local) with cloudant(remote)
-        syncCloudant(vm.$store.state.userInfoDb)
+        syncRemoteDb({url:vm.$store.state.cloudantUrl, dbName: vm.$store.state.userInfoDb})
+        //syncCloudant(vm.$store.state.userInfoDb)
 
         //move to top page
         console.log('registion complete')

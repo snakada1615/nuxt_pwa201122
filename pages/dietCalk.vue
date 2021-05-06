@@ -34,7 +34,7 @@
   import driTable from "../components/organisms/driTable";
   import dietCalkComp from "../components/organisms/dietCalkComp";
   import navigationGuard from "../components/atoms/navigationGuard";
-  import {getDRI, getFCT} from "../plugins/pouchHelper";
+  import {makeToast} from "../plugins/pouchHelper";
 
   export default {
     components: {
@@ -77,15 +77,20 @@
       loginChecked: async function () {
         let vm = this
         if (vm.loginChecked) {
-          vm.items = await vm.$store.dispatch('loadFctFromPouch', vm.$store.state.fctDb)
-          vm.itemsDRI = await getDRI()
+          try {
+            vm.items = await vm.$store.dispatch('loadFctFromPouch',
+              {dbName: vm.$store.state.fctDb, url: vm.$store.state.cloudantUrl})
+            vm.itemsDRI =  await vm.$store.dispatch('loadDriFromPouch', 'dri')
 
-          vm.WS.dietCases = JSON.parse(JSON.stringify(vm.$store.state.dietCases))
-          vm.WS.user = JSON.parse(JSON.stringify(vm.$store.state.user))
-          vm.WS.caseId = vm.$store.state.caseId
-          vm.$store.dispatch('setNow')
-          vm.WS.saveDate = vm.$store.state.saveDate
-          vm.WS.fctDb = vm.$store.state.fctDb
+            vm.WS.dietCases = JSON.parse(JSON.stringify(vm.$store.state.dietCases))
+            vm.WS.user = JSON.parse(JSON.stringify(vm.$store.state.user))
+            vm.WS.caseId = vm.$store.state.caseId
+            vm.$store.dispatch('setNow')
+            vm.WS.saveDate = vm.$store.state.saveDate
+            vm.WS.fctDb = vm.$store.state.fctDb
+          } catch (err) {
+            vm.$nuxt.error(err)
+          }
         }
       },
       currentCaseId: function (value) {
@@ -106,8 +111,9 @@
         return
       } else {
         //myItem = getFCT(store.state.fctDb)
-        myItem = await store.dispatch('loadFctFromPouch', store.state.fctDb)
-        myitemsDRI =  getDRI()
+        myItem = await store.dispatch('loadFctFromPouch',
+          {dbName: store.state.fctDb, url: store.state.cloudantUrl})
+        myitemsDRI =  await store.dispatch('loadDriFromPouch', 'dri')
 
         store.dispatch('setNow')
 
