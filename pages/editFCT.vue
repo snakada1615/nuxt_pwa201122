@@ -287,6 +287,11 @@
           description: this.dbDescription,
           creator: this.$store.state.user.name,
           data: this.csv,
+        }).catch(err => {
+          console.log(err)
+          if (err.error = "conflict") {
+            console.log('this error code [conflict:409] is normal and replication will continue')
+          }
         })
       }
     }

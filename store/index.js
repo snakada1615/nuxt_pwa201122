@@ -616,10 +616,10 @@ export const actions = {
           })
           resolve(db)
         } else {
-          reject(false)
+          reject(new Error('update failed or sync failed for ' + dbName))
         }
       } catch (err) {
-        throw err
+        reject(err)
       }
     })
     return promise

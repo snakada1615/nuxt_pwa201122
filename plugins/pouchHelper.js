@@ -1,4 +1,5 @@
-import PouchDB from "pouchdb";
+import PouchDB from "pouchdb"
+PouchDB.plugin(require('pouchdb-upsert'))
 
 export function makeToast(vm, mes) {
   const id = String(Math.floor(100 * Math.random()))
@@ -111,17 +112,32 @@ export async function getPouchDataAll(dataset) {
   })
   return promise
 }
+export async function replicateDb(sourceDb, destinationDb) {
+  let promise = new Promise((resolve, reject) => {
+    const source = new PouchDB(sourceDb)
+    const destination = new PouchDB(destinationDb)
+    source.allDocs({revs: true}, function (docs) {
+      destination.bulkDocs([doc], {new_edits: false}).then(res => {
+        resolve(res)
+      })
+    }).catch(err => {
+      reject(err)
+    })
+  })
+  return promise
+}
 
 export async function syncRemoteDb(value) {
   const vm = this;
 
   // Replicating a local database to Remote
   console.log('syncCouch in progress...')
+  console.log(value)
   let promise = new Promise((resolve, reject) => {
     const localdb = new PouchDB(value.dbName)
     const remotedb = new PouchDB(value.url + '/' + value.dbName)
     localdb
-      .sync(remotedb)
+      .sync(remotedb, {retry: true})
       .on('complete', function () {
         console.log('syncCouch Complete')
         resolve(localdb)
