@@ -133,6 +133,7 @@ export const actions = {
       try {
         const res = await dispatch('loadUserFromPouch')
         dispatch('setCaseIdList', await dispatch('getListWorkspace', getters.userDb))
+        // activate following line (loadCouchUrl) only in case of Rwanda version
         await dispatch('loadCouchUrl')
         dispatch('setLoginStatus', res)
       } catch (err) {
@@ -756,6 +757,27 @@ export const actions = {
   },
   //"saveCouchUrl" is used only for Rwanda version
   // which use couchDb installed on MINAGRI server instead of IBM cloudant
+  replicateBaseData: function({state}, payload){
+    // fetch key databases from cloudant
+    const dbSet = ['userlist', 'dri', 'fct_org', 'fctlist_db']
+    const promise = new Promise( (resolve, reject) => {
+      try {
+        const url = "http://" + payload.user + ":" + payload.pass + "@" + payload.ip + ":5984/"
+        let localDatabases = []
+        let remoteDatabases = []
+        dbSet.forEach(async function (item,index) {
+          localDatabases[index] = new PouchDB(url + item)
+          remoteDatabases[index] = new PouchDB(state.cloudantUrl + item)
+          //copy FCT database from cloudant
+          await localDatabases[index].sync(remoteDatabases[index])
+        })
+        resolve('all database replicated')
+      } catch (err) {
+        reject(err)
+      }
+    })
+    return promise
+  },
   saveCouchUrl: function (context, payload) {
     const dbName = 'couch_info'
     const promise = new Promise(async (resolve, reject) => {

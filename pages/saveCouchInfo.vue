@@ -76,6 +76,9 @@
       },
       stateAll(){
         return (this.stateUser && this.statePass && this.stateIp)
+      },
+      myUrl(){
+        return  "http://" + this.ip + ":5984/"
       }
     },
     mounted(){
@@ -90,18 +93,23 @@
       })
     },
     methods:{
-      clickOk(){
+      async clickOk(){
         const vm = this
-        this.$store.dispatch('saveCouchUrl',{
-          user: this.user,
-          pass: this.pass,
-          ip: this.ip
-        }).then(function () {
+        try {
+          await vm.$store.dispatch('replicateBaseData', {
+            user: vm.user,
+            pass: vm.pass,
+            ip: vm.ip
+          })
+          await vm.$store.dispatch('saveCouchUrl',{
+            user: vm.user,
+            pass: vm.pass,
+            ip: vm.ip
+          })
           vm.saveComplete = true
-        }).catch((err)=>{
-          alert(err)
-          throw err
-        })
+        } catch (err) {
+          this.$nuxt.error(err)
+        }
       },
     }
   };
