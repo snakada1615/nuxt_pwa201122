@@ -5,6 +5,7 @@ export default function ({store, redirect, route}) {
       && route.name !=='user_login'
       && route.name !== 'user_reg'
       && route.name !== 'updateSW'
+      && route.name !== 'saveCouchInfo'
       && !(/^test*$/).test(route.name)
       && store.state.loginStatus!==1
     ) {
@@ -13,6 +14,14 @@ export default function ({store, redirect, route}) {
       return redirect('/')
     } else {
       console.log('autologin complete:')
+    }
+  }).catch(err => {
+    console.log(err)
+    console.log(err.message)
+    console.log(err.Error)
+    if (err.message === "initRwanda"){
+      alert('please setup couchDB database first')
+      redirect('/saveCouchInfo')
     }
   })
 }

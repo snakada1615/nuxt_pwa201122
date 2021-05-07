@@ -128,10 +128,21 @@ export const mutations = {
 }
 
 export const actions = {
-  async autoLogin({dispatch, getters}) {
-    const res = await dispatch('loadUserFromPouch')
-    dispatch('setCaseIdList', await dispatch('getListWorkspace', getters.userDb))
-    dispatch('setLoginStatus', res)
+  autoLogin({dispatch, getters}) {
+    let promise = new Promise(async (resolve, reject) => {
+      try {
+        const res = await dispatch('loadUserFromPouch')
+        dispatch('setCaseIdList', await dispatch('getListWorkspace', getters.userDb))
+        await dispatch('loadCouchUrl')
+        dispatch('setLoginStatus', res)
+      } catch (err) {
+        if (err.docId === "myCouch"){
+          reject(new Error('initRwanda'))
+        }
+        reject(err)
+      }
+    })
+    return promise
   },
   login({dispatch, state}, userInfo) {
     let promise = new Promise((resolve, reject) => {
@@ -736,7 +747,6 @@ export const actions = {
         url = "http://" + doc.user + ":" + doc.pass + "@" + doc.ip + ":5984/"
         //replace cloudant Url by CouchDb URL
         context.commit('setCloudantUrl', url)
-        context.commit()
         resolve(doc)
       }).catch(function (err) {
         reject(err)
