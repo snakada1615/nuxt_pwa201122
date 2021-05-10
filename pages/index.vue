@@ -56,8 +56,8 @@
       <b-col cols="6" md="4" class="px-1">
         <b-card class="bg-info my-2">
             <b-card-body class="px-0 py-0">
-              <b-card-text class="text-center font-weight-bold text-secondary bg-white">login / register</b-card-text>
-              <b-button class="btn btn-warning m-auto btn-block" to="/user_login" Nuxt>login</b-button>
+              <b-card-text class="text-center font-weight-bold text-secondary bg-white">change user</b-card-text>
+              <b-button class="btn btn-warning m-auto btn-block" to="/user_login" Nuxt>login / logout</b-button>
             </b-card-body>
         </b-card>
       </b-col>

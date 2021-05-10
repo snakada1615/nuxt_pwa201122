@@ -167,10 +167,13 @@
         this.$router.push('/user_reg')
       },
       logout() {
-        this.$store.dispatch('logout')
-        this.email = ''
-        this.password = ''
-        this.$router.push('/')
+        const vm = this
+        this.$store.dispatch('logout').then(function (res) {
+          vm.email = ''
+          vm.password = ''
+          console.log(res)
+          vm.$router.push('/')
+        })
       },
     },
   }

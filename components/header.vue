@@ -12,12 +12,24 @@
               <template #button-content>
                 <b-icon variant="light" icon="people-fill"/>
               </template>
-              <b-dropdown-item disabled>name: <span class="text-info" v-if="myUser">{{myUser.name}}</span></b-dropdown-item>
-              <b-dropdown-item disabled>email: <span class="text-info" v-if="myUser">{{myUser.email}}</span></b-dropdown-item>
-              <b-dropdown-item disabled>country:<span class="text-info" v-if="myUser">{{myUser.country}}</span></b-dropdown-item>
-              <b-dropdown-item disabled>organization:<span class="text-info" v-if="myUser">{{myUser.organization}}</span></b-dropdown-item>
-              <b-dropdown-item disabled>title:<span class="text-info" v-if="myUser">{{myUser.title}}</span></b-dropdown-item>
-              <b-dropdown-item disabled>workspace: <span class="text-info">{{$store.state.caseId}}</span></b-dropdown-item>
+              <b-dropdown-item disabled>
+                <b-badge variant="gray-300" style="width: 60px">name</b-badge> <span class="text-info" v-if="myUser">{{myUser.name}}</span>
+              </b-dropdown-item>
+              <b-dropdown-item disabled>
+                <b-badge variant="gray-300" style="width: 60px">email</b-badge> <span class="text-info" v-if="myUser">{{myUser.email}}</span>
+              </b-dropdown-item>
+              <b-dropdown-item disabled>
+                <b-badge variant="gray-300" style="width: 60px">country</b-badge> <span class="text-info" v-if="myUser">{{myUser.country}}</span>
+              </b-dropdown-item>
+              <b-dropdown-item disabled>
+                <b-badge variant="gray-300" style="width: 60px">org</b-badge> <span class="text-info" v-if="myUser">{{myUser.organization}}</span>
+              </b-dropdown-item>
+              <b-dropdown-item disabled>
+                <b-badge variant="gray-300" style="width: 60px">title</b-badge> <span class="text-info" v-if="myUser">{{myUser.title}}</span>
+              </b-dropdown-item>
+              <b-dropdown-item disabled>
+                <b-badge variant="gray-300">workspace</b-badge> <span class="text-info">{{$store.state.caseId}}</span>
+              </b-dropdown-item>
             </b-nav-item-dropdown>
             <b-nav-text v-if="$nuxt.isOnline" class="text-light"><b-icon icon="reception4"/></b-nav-text>
             <b-nav-text v-else class="text-light"><b-icon icon="reception0"/></b-nav-text>

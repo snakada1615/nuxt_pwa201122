@@ -134,7 +134,7 @@ export const actions = {
         const res = await dispatch('loadUserFromPouch')
         dispatch('setCaseIdList', await dispatch('getListWorkspace', getters.userDb))
         // activate following line (loadCouchUrl) only in case of Rwanda version
-        await dispatch('loadCouchUrl')
+        // await dispatch('loadCouchUrl')
         dispatch('setLoginStatus', res)
       } catch (err) {
         if (err.docId === "myCouch"){
@@ -160,22 +160,25 @@ export const actions = {
     return promise
   },
   logout({dispatch, state}) {
-    firebase.auth().signOut().then(function () {
-      // Sign-out successful.
-      dispatch('setOffUser')
-      dispatch('setCaseId', '')
-      dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId}).then(function () {
-        console.log('firebase:successfully sign out')
-      })
-      // set loginStatus to 0
-      dispatch('setLoginStatus', 0)
-      return true
-    }).catch(function (error) {
-      // An error happened.
-      console.log('firebase:sign out failed')
-      console.log(error)
-      return false
-    });
+    let promise = new Promise((resolve, reject) => {
+      firebase.auth().signOut().then(async function () {
+        // Sign-out successful.
+        dispatch('setOffUser')
+        dispatch('setCaseId', '')
+        await dispatch('saveUserToLastuser', {user: state.user, caseId: state.caseId}).then(function () {
+          console.log('firebase:successfully sign out')
+        })
+        // set loginStatus to 0
+        dispatch('setLoginStatus', 0)
+        resolve('sucecssfully logout')
+      }).catch(function (error) {
+        // An error happened.
+        console.log('firebase:sign out failed')
+        console.log(error)
+        reject('logout failed')
+      });
+    })
+    return promise
   },
   loginProvider(state, flag) {
     let provider = null
