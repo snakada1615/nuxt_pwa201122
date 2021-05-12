@@ -72,7 +72,7 @@
     },
     methods: {
       onChange:function(val){
-        if (val > 0) {
+        if (val >= 0) {
           this.selectedDRI = [...this.setDRI(val)]
 
           /**
@@ -85,6 +85,8 @@
            * @property {Object} value set of DRI information
            */
           this.$emit('changeDri', this.selectedDRI)
+        } else {
+          console.error('invalid selection id for driTable: onChange-driTable')
         }
       },
       setDRI: function (selectedId) {
@@ -92,7 +94,7 @@
         let tableItem = []
         //vm.selectedData.length = 0
         const dat = vm.items.filter(function (item) {
-          return item.id === String(selectedId)
+          return Number(item.id) === Number(selectedId)
         })
         if (dat.length !== 1) {
           return []

@@ -1,5 +1,8 @@
 <template>
   <b-container border-variant="primary" bg-variant="light" class="py-2">
+    <b-card>
+      {{DRI}}
+    </b-card>
     <b-table
       :items="DRI"
       :fields="fields2"
@@ -60,10 +63,17 @@
 
 <script>
   export default {
+    computed:{
+      loginChecked: function () {
+        return this.$store.state.loginStatus === 1
+      },
+    },
     data() {
       return {
         driID: 2,
         addNew: false,
+        dbName:'',
+        dbDescription:'',
         selectedDRI: {},
         validateResult: [],
         fields1: [
@@ -115,6 +125,29 @@
           this.validateResult.length = 0
           this.validateResult = [...this.validator(val)]
         }
+      },
+      loginChecked: async function () {
+        const vm  = this
+        const res = await vm.$store.dispatch('loadDriFromPouch',
+          {dbName: vm.$store.state.driDb, url: vm.$store.state.cloudantUrl})
+          .catch(err => {vm.$nuxt.error(err)})
+        console.log(res)
+        vm.DRI = res.map(function (val) {
+          return {
+            En: val.En,
+            Fe: val.Fe,
+            max_vol: val.max_vol,
+            Name: val.Name,
+            Pr: val.Pr,
+            Va: val.Va,
+            id: val.id
+          }
+        })
+        const res2 = await this.$store.dispatch('getDriInfo').catch(err =>{
+          console.log(err)
+        })
+        this.dbName = res2.dbName
+        this.dbDescription = res2.description
       }
     },
     methods: {

@@ -224,11 +224,11 @@ export const actions = {
   removeUserDoc({state},payload) {
     let promise = new Promise(async (resolve, reject) => {
       const db = new PouchDB(payload.dbName)
-      await pouchDeleteDoc(db, payload.docId).catch(err=>{reject(err)})
-      await pouchDeleteDb(state.lastUser).catch(err => { reject(err) })
-      await syncRemoteDb({dbName: payload.dbName, url: payload.url}).catch(err => reject(err))
+      await pouchDeleteDoc(db, payload.docId)
+      await pouchDeleteDb(state.lastUser)
+      await syncRemoteDb({dbName: payload.dbName, url: payload.url})
       resolve(true)
-    })
+    }).catch(err => reject(err))
     return promise
   },
   saveUseToUserSet({state, dispatch}, payload) {
@@ -434,6 +434,16 @@ export const actions = {
     })
     return promise
   },
+  getDriInfo({state}) {
+    let promise = new Promise(async (resolve, reject) => {
+      const dri = new PouchDB(state.driDb)
+      const res = await pouchGetDoc(dri, 'dri_info').catch(function (err) {
+        reject(err)
+      })
+      resolve(res)
+    })
+    return promise
+  },
   loadFctFromPouch({state}, payload) {
     const fct = new PouchDB(payload.dbName);
     let res = []
@@ -465,13 +475,13 @@ export const actions = {
     return promise
   },
   loadDriFromPouch({state}, payload) {
-    const dri = new PouchDB(payload);
+    const dri = new PouchDB(payload.dbName);
     let res = []
     let promise = new Promise((resolve) => {
       dri.info().then(function (info) {
         if (!(info.doc_count)) {
           console.log('your dataset is currently empty. the application will try to getch data from server!')
-          syncRemoteDb({dbName:payload, url: state.cloudantUrl}).then(dataset => {
+          syncRemoteDb({dbName:payload.dbName, url: payload.url}).then(dataset => {
             getPouchDataAll(dataset).then(docs => {
               res = setDRI(docs)
               resolve(res)
@@ -483,6 +493,8 @@ export const actions = {
             resolve(res)
           })
         }
+      }).catch(err => {
+        reject(err)
       })
     })
     return promise

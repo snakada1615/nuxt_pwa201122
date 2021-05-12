@@ -56,9 +56,9 @@
           </template>
         </b-card>
       </b-card-group>
-      <h6 class="text-warning">you need to login first to use all the functions</h6>
+      <h6 v-if="$store.state.loginStatus !== 1" class="text-warning">you need to login first to use all the functions</h6>
     </div>
-    <div v-if="!$nuxt.isOnline">this function is available when netrowk connection is available</div>
+    <div v-if="!$nuxt.isOnline">this function is available when network connection is available</div>
   </b-container>
 </template>
 
@@ -79,7 +79,9 @@
       deleteDb() {
         const vm = this
         vm.$store.dispatch('removeUserDoc', {
-          dbName: vm.$store.getters.userDb, docId: vm.$store.getters.currentPouchID
+          dbName: vm.$store.getters.userDb,
+          docId: vm.$store.getters.currentPouchID,
+          url: vm.$store.cloudantUrl
         }).then(function () {
           vm.$store.dispatch('logout')
           vm.$router.push('/')
