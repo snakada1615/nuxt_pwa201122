@@ -80,7 +80,8 @@
           try {
             vm.items = await vm.$store.dispatch('loadFctFromPouch',
               {dbName: vm.$store.state.fctDb, url: vm.$store.state.cloudantUrl})
-            vm.itemsDRI =  await vm.$store.dispatch('loadDriFromPouch', 'dri')
+            vm.itemsDRI =  await vm.$store.dispatch('loadDriFromPouch',
+              {dbName: 'dri', url: vm.$store.state.cloudantUrl})
 
             vm.WS.dietCases = JSON.parse(JSON.stringify(vm.$store.state.dietCases))
             vm.WS.user = JSON.parse(JSON.stringify(vm.$store.state.user))
