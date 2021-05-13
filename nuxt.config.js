@@ -40,7 +40,13 @@ export default {
   buildModules: [
     '@nuxtjs/pwa',
   ],
-
+  render: {
+    // Setting up cache for 'static' directory - a year in milliseconds
+    // https://web.dev/uses-long-cache-ttl
+    static: {
+      maxAge: 60 * 60 * 24 * 365 * 1000,
+    },
+  },
   pwa: {
     manifest: {
       "theme_color": "#c2f1c3",
@@ -50,6 +56,7 @@ export default {
       "start_url": "",
       "app_name": "NFA-tool",
       "short_name": "nfa",
+      "name":"nfa-tool"
     }
   },
 

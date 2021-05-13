@@ -74,6 +74,8 @@
           vm.$store.dispatch('logout')
           //location.reload()
           vm.$router.push('/')
+        }).catch(err=>{
+          vm.$nuxt.error(err)
         })
       },
       deleteDb() {

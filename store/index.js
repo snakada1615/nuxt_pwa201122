@@ -481,6 +481,7 @@ export const actions = {
       dri.info().then(function (info) {
         if (!(info.doc_count)) {
           console.log('your dataset is currently empty. the application will try to getch data from server!')
+          console.log(dri)
           syncRemoteDb({dbName:payload.dbName, url: payload.url}).then(dataset => {
             getPouchDataAll(dataset).then(docs => {
               res = setDRI(docs)
