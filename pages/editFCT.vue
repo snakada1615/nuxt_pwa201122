@@ -1,5 +1,5 @@
 <template>
-  <b-container>
+  <b-container style="max-width: 540px; min-width: 530px;">
     <div v-if="$nuxt.isOffline">
       Sorry, this page works only online
     </div>

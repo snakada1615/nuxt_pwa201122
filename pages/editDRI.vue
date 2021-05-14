@@ -1,5 +1,6 @@
 <template>
-  <b-container border-variant="primary" bg-variant="light" class="py-2">
+  <b-container border-variant="primary" bg-variant="light" class="py-2"
+               style="max-width: 540px; min-width: 530px;">
     <b-card>
       {{DRI}}
     </b-card>

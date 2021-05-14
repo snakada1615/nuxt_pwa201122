@@ -1,5 +1,5 @@
 <template>
-  <b-container class="py-1">
+  <b-container class="py-1" style="max-width: 540px; min-width: 530px;">
     <h6 class="text-danger">this function is only for Rwanda version</h6>
     <div v-if="!saveComplete">
       <b-card

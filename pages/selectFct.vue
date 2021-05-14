@@ -1,5 +1,5 @@
 <template>
-  <b-container>
+  <b-container style="max-width: 540px; min-width: 530px;">
     <b-card v-if="fctList">
       <b-form-group label="FCT list">
         <b-form-radio

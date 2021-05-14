@@ -91,7 +91,8 @@
         if (this.loginChecked) {
           vm.items = await this.$store.dispatch('loadFctFromPouch',
             {dbName: store.state.fctDb, url: store.state.cloudantUrl})
-          vm.itemsDRI =  await vm.$store.dispatch('loadDriFromPouch', 'dri')
+          vm.itemsDRI =  await vm.$store.dispatch('loadDriFromPouch',
+            {dbName: store.state.driDb, url: store.state.cloudantUrl})
 
           vm.WS.feasibilityCases = JSON.parse(JSON.stringify(
             this.$store.state.feasibilityCases))
@@ -121,7 +122,8 @@
       } else {
         myItem = await store.dispatch('loadFctFromPouch',
           {dbName: store.state.fctDb, url: store.state.cloudantUrl})
-        myitemsDRI =  await store.dispatch('loadDriFromPouch', 'dri')
+        myitemsDRI =  await store.dispatch('loadDriFromPouch',
+          {dbName: store.state.driDb, url: store.state.cloudantUrl})
 
         myWS.feasibilityCases = JSON.parse(JSON.stringify(store.state.feasibilityCases))
         myWS.user = JSON.parse(JSON.stringify(store.state.user))
