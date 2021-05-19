@@ -35,7 +35,7 @@ export const state = () => ({
   caseId: '',
   caseIdList: [],
 
-  cloudantUrl: "https://82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix:f8dabca0c2ed8c226f6a794ceaa65b625ae642f86ee0afcedf093d7e153edbd6@82e081b0-8c7a-44fe-bb89-b7330ba202a2-bluemix.cloudantnosqldb.appdomain.cloud/",
+  cloudantUrl: "https://apikey-v2-1jmz091zujnikuahdiuuilt32mj137f84jlsrv20wjub:cd464b8e3495aef8e6b62ee762d3cefe@f8e0d4e3-44e7-4a38-9383-ed4276608b10-bluemix.cloudantnosqldb.appdomain.cloud",
 
   loginStatus: 0,
   tabNumber: 10,
@@ -51,6 +51,7 @@ export const state = () => ({
   // loginDb: record of last user logged in
   /////////////////////
   fctDb: 'fct_org',
+  fctDb_mod: '',
   driDb: 'dri',
   fctListDb: 'fctlist_db',
   userInfoDb: 'userlist',
@@ -425,7 +426,6 @@ export const actions = {
   },
   getFctInfo({state}) {
     let promise = new Promise(async (resolve, reject) => {
-      console.log(state.fctDb)
       const fct = new PouchDB(state.fctDb)
       const res = await pouchGetDoc(fct, 'fct_info').catch(function (err) {
         reject(err)
@@ -463,7 +463,7 @@ export const actions = {
             const docs = await getPouchDataAll(fct)
             res = docs.filter(function (val) {
               //remove one record from db (db metadata)
-              return val._id !== payload.dbName
+              return (val._id !== 'fct_info') && (val._id !== fct)
             })
             resolve(res)
           }
@@ -786,6 +786,34 @@ export const actions = {
           remoteDatabases[index] = new PouchDB(state.cloudantUrl + item)
           //copy FCT database from cloudant
           await localDatabases[index].sync(remoteDatabases[index])
+        })
+        resolve('all database replicated')
+      } catch (err) {
+        reject(err)
+      }
+    })
+    return promise
+  },
+  //"saveCouchUrl" is used only for Rwanda version
+  // which use couchDb installed on MINAGRI server instead of IBM cloudant
+  replicateBaseData2: function({state}, payload){
+    // fetch key databases from cloudant
+    //const dbSet = ['userlist', 'dri', 'fct_org', 'fctlist_db']
+    const dbSet = payload.dbList
+    const urlFrom = payload.urlFrom
+    const urlTo = payload.urlTo
+    let fromDatabases = []
+    let toDatabases = []
+
+    const promise = new Promise( (resolve, reject) => {
+      try {
+        let localDatabases = []
+        let remoteDatabases = []
+        dbSet.forEach(async function (item,index) {
+          fromDatabases[index] = new PouchDB(urlFrom + '/' + item)
+          toDatabases[index] = new PouchDB(urlTo + '/' + item)
+          //copy FCT database from cloudant
+          await fromDatabases[index].sync(toDatabases[index])
         })
         resolve('all database replicated')
       } catch (err) {

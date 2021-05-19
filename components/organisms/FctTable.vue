@@ -110,7 +110,6 @@
           {key: 'Va', sortable: true, thStyle: {width: "50px"}},
           {key: 'Fe', sortable: true, thStyle: {width: "50px"}},
         ],
-        colWidth: [0, 0, 120, 30, 30, 30, 30],
         totalRows: 1,
         currentPage: 1,
         perPage: 5,
