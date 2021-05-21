@@ -61,9 +61,10 @@
           <dri-table-group
             ref="table"
             v-show="targetSwitch"
-            v-model="itemsDRI"
+            :items="itemsDRI"
+            @changeDri="onTargetChanged($event, pageId)"
             input-name='myDri'
-            rules="min_value:0|max_value:500"
+            rules="min_value:0|max_value:500000000"
             head-row-variant="success"
             table-variant="light"
           />
@@ -169,7 +170,7 @@
       :items="itemSingleCrop"
       :my-name="'modalTest' + pageId"
       my-type="Number"
-      rules="min_value:0|max_value:500"
+      rules="min_value:0|max_value:500000000"
       @modalOk="onCropWeightSet"
     ></food-modal>
   </b-container>

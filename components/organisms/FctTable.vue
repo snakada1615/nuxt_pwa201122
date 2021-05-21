@@ -9,7 +9,7 @@
       ></b-form-input>
 
       <template #append>
-        <b-dropdown text="Dropdown" variant="primary" >
+        <b-dropdown text="Group" variant="primary" >
           <b-dropdown-item
             v-for="grpName in FoodGrp"
             :key="grpName.name"

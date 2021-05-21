@@ -31,7 +31,11 @@
       table-variant="light"
       :items="total"
       :fields="fieldTotal"
-    ></b-table>
+    >
+      <template #cell(Value)="data">
+        <span class="text-info">{{ data.value.toLocaleString('US') }}</span>
+      </template>
+    </b-table>
   </b-container>
 </template>
 
@@ -102,12 +106,12 @@
         })
         return [
           {Item: 'target', Value: 'mixed'},
-          {Item: 'Energy', Value: formatRound.format(result.En)},
-          {Item: 'Protein', Value: formatRound.format(result.Pr)},
-          {Item: 'Vita-A', Value: formatRound.format(result.Va)},
-          {Item: 'Iron', Value: formatRound.format(result.Fe)}
+          {Item: 'Energy', Value: result.En},
+          {Item: 'Protein', Value: result.Pr},
+          {Item: 'Vit_A', Value: result.Va},
+          {Item: 'Iron', Value: result.Fe}
         ]
-      }
+      },
     },
     methods: {
       onPopulationChange(event, index) {
@@ -118,6 +122,12 @@
           }
           return value
         })
+        /**
+         * triggers when dri selection changed
+         * @property {Object} value set of DRI information
+         */
+        this.$emit('changeDri', this.total)
+
         this.$emit('input', result)
       },
     }

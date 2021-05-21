@@ -53,7 +53,7 @@ export default {
       "background_color": "#066308",
       "display": "standalone",
       "scope": "/",
-      "start_url": "",
+      "start_url": "/index.vue",
       "app_name": "NFA-tool",
       "short_name": "nfa",
       "name":"nfa-tool"
