@@ -17,6 +17,7 @@
             :fct-org="items"
             :dri-org="itemsDRI"
             :dri-id.sync="diet.driID"
+            :single-target.sync="diet.singleTarget"
             :food-items.sync="diet.foodItems"
             :page-id="index"
             :_id="diet._id"

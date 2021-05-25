@@ -11,18 +11,15 @@
       small
     >
 
-      <template #cell(number)="row">
-        <vee-input
-          mode="aggressive"
-          type="number"
-          :value="populationNumber[row.index]"
-          :name="inputName"
-          :rules="rules"
-          @input="onPopulationChange($event, row.index)"
-        ></vee-input>
+      <template #cell(number)="data">
+        <b-form-input
+          :value="data.En"
+          @input="onPopulationChange($event, data.index)"
+          size="sm"
+        ></b-form-input>
       </template>
     </b-table>
-
+    {{tableItems}}
     <b-table
       striped
       bordered
@@ -52,14 +49,8 @@
     components: {
       veeInput
     },
-    model: {
-      prop: 'items',
-      event: 'input'
-    },
     data() {
       return {
-        selectedData: [],
-        selectedValue: null,
         fieldDRI: [
           {key: 'id', sortable: true, tdClass: 'd-none', thClass: 'd-none'},
           {key: 'Name', sortable: false},
@@ -70,11 +61,15 @@
           {key: 'Item', sortable: false},
           {key: 'Value', sortable: false},
         ],
-//        tableItems:[],
+        tableItems:[],
       }
     },
     props: {
-      items: {
+      driPopulations:{
+        type:Array,
+        default:[{id: 0, count: 1}]
+      },
+      driItems: {
         type: Array,
         default: () => [],
       },
@@ -83,29 +78,36 @@
       },
       inputName: '',
     },
+    watch:{
+      driPopulations: {
+        deep: true,
+        immediate: true,
+        handler(val) {
+          this.tableItems.length=0
+          this.tableItems = JSON.parse(JSON.stringify(
+            this.updateTable(this.driItems, val)
+          ))
+        },
+      }
+    },
     computed: {
-      tableItems: function () {
-        const vm = this
-        return vm.items.map(function (value, index) {
-          value.number = vm.populationNumber[index]
-          return value
-        })
-      },
-      populationNumber: function () {
-        return this.items.map(a => a.number)
+      statusDataSet: function(){
+        return (this.driItems.length>0 && this.driPopulations.length>0)
       },
       total: function () {
+        const vm = this
         let result = {}
         result.En = 0
         result.Pr = 0
         result.Va = 0
         result.Fe = 0
-        this.items.forEach(function (value) {
+        this.tableItems.forEach(function (value) {
           result.En += Number(value.En) * Number(value.number)
           result.Pr += Number(value.Pr) * Number(value.number)
           result.Va += Number(value.Va) * Number(value.number)
           result.Fe += Number(value.Fe) * Number(value.number)
         })
+        console.log(result)
         return [
           {Item: 'target', Value: 'mixed'},
           {Item: 'Energy', Value: result.En},
@@ -116,6 +118,17 @@
       },
     },
     methods: {
+      updateTable(driValue, selectedValue){
+        const vm = this
+        return driValue.map(function (driItem) {
+          const res = selectedValue.filter(
+            item => Number(item.id) === Number(driItem.id)
+          )
+          driItem.number = res.length ? res[0].count : 0
+          return driItem
+        })
+
+      },
       setDigit(val, unitKey) {
         let res = ''
         const units = [
@@ -146,8 +159,10 @@
         return res
       },
       onPopulationChange(event, index) {
+        console.log(event)
+        console.log(index)
         const vm = this
-        const result = vm.items.map(function (value, i) {
+        const result = vm.tableItems.map(function (value, i) {
           if (i === index) {
             value.number = event
           }
@@ -158,7 +173,6 @@
          * @property {Object} value set of DRI information
          */
         this.$emit('changeDri', this.total)
-
         this.$emit('input', result)
       },
     }

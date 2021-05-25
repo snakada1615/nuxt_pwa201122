@@ -42,7 +42,7 @@
         <b-card bg-variant="gray-100" border-variant="info" class="mt-3 px-0 mx-1" footer-tag="footer">
           <div><span class="text-danger">edit</span> current Food Composition Table</div>
           <template #footer class="px-0 py-0">
-            <b-button block to="editFct" class="mx-0 my-0" variant="info"
+            <b-button block to="editFctMain" class="mx-0 my-0" variant="info"
                       size="sm" :disabled="$store.state.loginStatus !== 1"
             >edit FCT</b-button>
           </template>

@@ -11,6 +11,7 @@
         @input="onInput"
         @row-clicked="rowClick"
         foot-clone
+        no-footer-sorting
         v-bind="$attrs">
 
         <!-- A custom formatted footer cell for field 'name' -->
@@ -26,22 +27,39 @@
           <span>total</span>
         </template>
         <template #foot(En)="data">
-          <span class="text-info">{{ nutritionSum.En }}</span>
+          <span class="text-info" style="font-size: small">{{ setDigit(Number(nutritionSum.En),3) }}</span>
         </template>
         <template #foot(Pr)="data">
-          <span class="text-info">{{ nutritionSum.Pr }}</span>
+          <span class="text-info" style="font-size: small">{{ setDigit(Number(nutritionSum.Pr),0) }}</span>
         </template>
         <template #foot(Va)="data">
-          <span class="text-info">{{ nutritionSum.Va }}</span>
+          <span class="text-info" style="font-size: small">{{ setDigit(Number(nutritionSum.Va),1) }}</span>
         </template>
         <template #foot(Fe)="data">
-          <span class="text-info">{{ nutritionSum.Fe }}</span>
+          <span class="text-info" style="font-size: small">{{ setDigit(Number(nutritionSum.Fe),2) }}</span>
         </template>
         <template #foot(Wt)="data">
-          <span class="text-info">{{ nutritionSum.Wt }}</span>
+          <span class="text-info" style="font-size: small">{{ setDigit(Number(nutritionSum.Wt),0) }}</span>
         </template>
 
+        <!-- A custom formatted cell for field 'name' -->
+        <template #cell(En)="data">
+          <span class="text-info" style="font-size: small">{{ setDigit(Number(data.value), 3) }}</span>
+        </template>
+        <template #cell(Pr)="data">
+          <span class="text-info" style="font-size: small">{{ setDigit(Number(data.value), 0) }}</span>
+        </template>
+        <template #cell(Va)="data">
+          <span class="text-info" style="font-size: small">{{ setDigit(Number(data.value), 1) }}</span>
+        </template>
+        <template #cell(Fe)="data">
+          <span class="text-info" style="font-size: small">{{ setDigit(Number(data.value), 2) }}</span>
+        </template>
+        <template #cell(Wt)="data">
+          <span class="text-info" style="font-size: small">{{ setDigit(Number(data.value), 0) }}</span>
+        </template>
       </b-table>
+      KC: KiloCalorie, MC: MegaCalorie, GC: GigaCalorie
     </div>
   </b-container>
 </template>
@@ -71,17 +89,29 @@
         ],
       }
     },
-    watch:{
-      items:{
+    watch: {
+      items: {
         immediate: true,
-        handler(value){
-          this.nutritionSum = {...this.updateSum(value)}
+        handler(value) {
+          console.log(value)
+          if (value.length === 0){
+            this.nutritionSum = {
+              En: 0,
+              Pr: 0,
+              Va: 0,
+              Fe: 0,
+              Wt: 0,
+            }
+          } else {
+            this.nutritionSum = {...this.updateSum(value)}
+          }
         }
       }
     },
     data() {
       return {
-        nutritionSum:{},
+        nutritionSum: {},
+        showNutritionSum: {},
         fields: [
           {key: 'id', sortable: false, tdClass: 'd-none', thClass: 'd-none'},
           {key: 'Group', sortable: true, tdClass: 'd-none', thClass: 'd-none'},
@@ -95,14 +125,40 @@
       }
     },
     methods: {
-      updateSum(array){
-          return array.reduce((accumulator, item) => {
-            accumulator.En = (accumulator.En || 0) + Number(item.En)
-            accumulator.Pr = (accumulator.Pr || 0) + Number(item.Pr)
-            accumulator.Va = (accumulator.Va || 0) + Number(item.Va)
-            accumulator.Fe = (accumulator.Fe || 0) + Number(item.Fe)
-            return accumulator
-          }, {})
+      setDigit(item, unitKey) {
+        let res = ''
+        const units = [
+          {1:' g', 2:' kg', 3:' t'},
+          {1:' µg', 2:' mg', 3:' g'},
+          {1:' mg', 2:' g', 3:' kt'},
+          {1:' KC', 2:' MC', 3:' GC'},
+        ]
+        switch (true) {
+          case (item < 1000):
+            res = String(item) + units[unitKey]["1"]
+            break;
+          case (item >= 1000 && item < 1000000):
+            res = String(Math.round(item / 1000)) + units[unitKey]["2"]
+            break;
+          case (item >= 1000000):
+            res = String(Math.round(item / 1000000)) + units[unitKey]["3"]
+            break;
+          default:
+            console.error('parameter not valid:setDigit')
+            res = ''
+            break;
+        }
+        return res
+      },
+      updateSum(array) {
+        return array.reduce((accumulator, item) => {
+          accumulator.En = (accumulator.En || 0) + Number(item.En)
+          accumulator.Pr = (accumulator.Pr || 0) + Number(item.Pr)
+          accumulator.Va = (accumulator.Va || 0) + Number(item.Va)
+          accumulator.Fe = (accumulator.Fe || 0) + Number(item.Fe)
+          accumulator.Wt = (accumulator.Wt || 0) + Number(item.Wt)
+          return accumulator
+        }, {})
       },
       onInput() {
         this.$emit('totalChanged', this.nutritionSum)

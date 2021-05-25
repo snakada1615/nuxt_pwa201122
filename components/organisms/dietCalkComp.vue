@@ -1,5 +1,5 @@
 <template>
-  <b-container style="max-width: 540px;">
+  <b-container style="max-width: 540px; min-width: 530px;">
     <b-row class="my-2">
       <b-col class="px-0 mb-2 mt-1">
         <b-card
@@ -44,6 +44,7 @@
                   labelLeft="single"
                   labelRight="multiple"
                   name="check"
+                  @change=""
                   v-model="targetSwitch"
                 ></left-right-switch>
               </b-col>
@@ -121,7 +122,7 @@
           </b-row>
           <b-row>
             <nutrition-bar
-              cropName="Protain"
+              cropName="Protein"
               :iconNum=iconNum
               :max="10"
               :nutritionTarget="nutritionTarget.Pr"
@@ -170,7 +171,7 @@
       :items="itemSingleCrop"
       :my-name="'modalTest' + pageId"
       my-type="Number"
-      rules="min_value:0|max_value:500000000"
+      :maxWeight = 1000000000
       @modalOk="onCropWeightSet"
     ></food-modal>
   </b-container>
