@@ -5,6 +5,7 @@
       bordered
       head-row-variant="success"
       table-variant="light"
+      :fixed=true
       :items="tableItems"
       :fields="fieldDRI"
       :sort-by.sync="sortBy"
@@ -13,8 +14,10 @@
 
       <template #cell(number)="data">
         <b-form-input
-          :value="data.En"
+          :value="data.item.number"
           @input="onPopulationChange($event, data.index)"
+          :state="statusPopulationNumber(data.item.number)"
+          type="number"
           size="sm"
         ></b-form-input>
       </template>
@@ -24,13 +27,14 @@
       striped
       bordered
       small
+      :fixed=true
       head-row-variant="success"
       table-variant="light"
       :items="total"
       :fields="fieldTotal"
     >
       <template #cell(Value)="data">
-        <span class="text-info">{{ setDigit(data.value, data.index) }}</span>
+        <span class="text-info">{{ formatNumber(data.value, data.index) }}</span>
       </template>
     </b-table>
     KC: KiloCalorie, MC: MegaCalorie, GC: GigaCalorie
@@ -38,143 +42,118 @@
 </template>
 
 <script>
-  import veeInput from "../atoms/veeInput";
+import { setDigit } from "@/plugins/helper"
 
-  const formatRound = new Intl.NumberFormat('ja', {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  })
-
-  export default {
-    components: {
-      veeInput
+export default {
+  data() {
+    return {
+      fieldDRI: [
+        {key: 'id', sortable: true, tdClass: 'd-none', thClass: 'd-none'},
+        {key: 'Name', sortable: false},
+        {key: 'number', sortable: false},
+      ],
+      sortBy: 'id',
+      fieldTotal: [
+        {key: 'Item', sortable: false},
+        {key: 'Value', sortable: false},
+      ],
+      tableItems: [],
+    }
+  },
+  props: {
+    driPopulations: {
+      type: Array,
+      default: [{id: 0, count: 1}]
     },
-    data() {
-      return {
-        fieldDRI: [
-          {key: 'id', sortable: true, tdClass: 'd-none', thClass: 'd-none'},
-          {key: 'Name', sortable: false},
-          {key: 'number', sortable: false},
-        ],
-        sortBy: 'id',
-        fieldTotal: [
-          {key: 'Item', sortable: false},
-          {key: 'Value', sortable: false},
-        ],
-        tableItems:[],
-      }
+    driItems: {
+      type: Array,
+      default: () => [],
     },
-    props: {
-      driPopulations:{
-        type:Array,
-        default:[{id: 0, count: 1}]
-      },
-      driItems: {
-        type: Array,
-        default: () => [],
-      },
-      rules: {
-        type: String,
-      },
-      inputName: '',
+    max: {
+      type: Number,
+      default: 1000000,
     },
-    watch:{
-      driPopulations: {
-        deep: true,
-        immediate: true,
-        handler(val) {
-          this.tableItems.length=0
-          this.tableItems = JSON.parse(JSON.stringify(
-            this.updateTable(this.driItems, val)
-          ))
-        },
-      }
-    },
-    computed: {
-      statusDataSet: function(){
-        return (this.driItems.length>0 && this.driPopulations.length>0)
-      },
-      total: function () {
-        const vm = this
-        let result = {}
-        result.En = 0
-        result.Pr = 0
-        result.Va = 0
-        result.Fe = 0
-        this.tableItems.forEach(function (value) {
-          result.En += Number(value.En) * Number(value.number)
-          result.Pr += Number(value.Pr) * Number(value.number)
-          result.Va += Number(value.Va) * Number(value.number)
-          result.Fe += Number(value.Fe) * Number(value.number)
-        })
-        console.log(result)
-        return [
-          {Item: 'target', Value: 'mixed'},
-          {Item: 'Energy', Value: result.En},
-          {Item: 'Protein', Value: result.Pr},
-          {Item: 'Vit_A', Value: result.Va},
-          {Item: 'Iron', Value: result.Fe}
-        ]
-      },
-    },
-    methods: {
-      updateTable(driValue, selectedValue){
-        const vm = this
-        return driValue.map(function (driItem) {
-          const res = selectedValue.filter(
-            item => Number(item.id) === Number(driItem.id)
-          )
-          driItem.number = res.length ? res[0].count : 0
-          return driItem
-        })
-
-      },
-      setDigit(val, unitKey) {
-        let res = ''
-        const units = [
-          {1: ' KC', 2: ' MC', 3: ' GC'},   // for dietary energy
-          {1: ' g', 2: ' kg', 3: ' t'},    // for protein
-          {1: ' µg', 2: ' mg', 3: ' g'},    // for vit-A
-          {1: ' mg', 2: ' g', 3: ' kt'},    // for iron
-        ]
-        if (val === 'mixed') {
-          return "mixed"
-        }
-        const item = Number(val)
-        switch (true) {
-          case (item < 1000):
-            res = String(item) + units[unitKey - 1]["1"]
-            break;
-          case (item >= 1000 && item < 1000000):
-            res = String(Math.round(item / 1000)) + units[unitKey - 1]["2"]
-            break;
-          case (item >= 1000000):
-            res = String(Math.round(item / 1000000)) + units[unitKey - 1]["3"]
-            break;
-          default:
-            console.log('parameter not valid:setDigit')
-            res = ''
-            break;
-        }
-        return res
-      },
-      onPopulationChange(event, index) {
-        console.log(event)
-        console.log(index)
-        const vm = this
-        const result = vm.tableItems.map(function (value, i) {
-          if (i === index) {
-            value.number = event
-          }
-          return value
-        })
-        /**
-         * triggers when dri selection changed
-         * @property {Object} value set of DRI information
-         */
-        this.$emit('changeDri', this.total)
-        this.$emit('input', result)
+    inputName: '',
+  },
+  watch: {
+    driPopulations: {
+      deep: true,
+      immediate: true,
+      handler(val) {
+        this.tableItems.length = 0
+        this.tableItems = JSON.parse(JSON.stringify(
+          this.updateTable(this.driItems, val)
+        ))
+        console.log(this.driItems)
+        console.log(this.tableItems)
       },
     }
+  },
+  computed: {
+    total: function () {
+      const vm = this
+      let result = {}
+      result.En = 0
+      result.Pr = 0
+      result.Va = 0
+      result.Fe = 0
+      this.tableItems.forEach(function (value) {
+        result.En += Number(value.En) * Number(value.number)
+        result.Pr += Number(value.Pr) * Number(value.number)
+        result.Va += Number(value.Va) * Number(value.number)
+        result.Fe += Number(value.Fe) * Number(value.number)
+      })
+      return [
+        {Item: 'target', Value: 'mixed'},
+        {Item: 'Energy', Value: result.En},
+        {Item: 'Protein', Value: result.Pr},
+        {Item: 'Vit_A', Value: result.Va},
+        {Item: 'Iron', Value: result.Fe},
+        {Item: 'id', Value: 0}
+      ]
+    },
+  },
+  mounted() {
+    this.tableItems.length = 0
+    this.tableItems = JSON.parse(JSON.stringify(
+      this.updateTable(this.driItems, this.driPopulations)
+    ))
+  },
+  methods: {
+    formatNumber(val, index){
+      if (index === 0){
+        return 'mixed'
+      }
+      if (index === 5){
+        return val
+      }
+      return setDigit(val, index)
+    },
+    statusPopulationNumber(val) {
+      return (val >= 0 && val <= this.max)
+    },
+    updateTable(driValue, selectedValue) {
+      return driValue.map(function (driItem) {
+        const res = selectedValue.filter(
+          item => Number(item.id) === Number(driItem.id)
+        )
+        driItem.number = res.length ? res[0].count : 0
+        return driItem
+      })
+    },
+    onPopulationChange(event, index) {
+      /**
+       * triggers when dri selection changed
+       */
+
+      console.log(this.tableItems)
+      this.$emit('changeNutritionGroup', this.tableItems)
+      /**
+       * triggers when dri selection changed
+       */
+      console.log(this.total)
+      this.$emit('changeNutritionTarget', this.total)
+    },
   }
+}
 </script>

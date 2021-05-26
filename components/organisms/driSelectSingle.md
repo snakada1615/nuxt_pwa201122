@@ -1,20 +1,20 @@
+driSelectMulti example:
+
+```vue
 <template>
   <b-container border-variant="primary" bg-variant="light" class="py-2">
-    <b-card>{{ nutritionTarget }}</b-card>
-    <b-card>{{ info }}</b-card>
     <dri-select-single
       :items="DRI"
       :target="nutritionTarget"
-      @changeNutritionGroup="updateSelectionSingle"
-      @changeNutritionTarget="updateNutritionSingle"
+      @changeNutritionGroup="updateSelection"
+      @changeNutritionTarget="updateNutrition"
     >
     </dri-select-single>
+    <b-card>{{nutritionTarget}}</b-card>
+    <b-card>{{info}}</b-card>
     <dri-select-multi
       :driItems="DRI"
       :driPopulations="nutritionTarget"
-      :max=500
-      @changeNutritionGroup="updateSelectionGroup"
-      @changeNutritionTarget="updateNutritionGroup"
     >
     </dri-select-multi>
   </b-container>
@@ -70,20 +70,15 @@ export default {
     }
   },
   methods: {
-    updateSelectionSingle(val) {
+    updateSelection(val) {
       this.nutritionTarget.length = 0
       this.nutritionTarget.push(JSON.parse(JSON.stringify(val)))
     },
-    updateSelectionGroup(val) {
-      this.nutritionTarget.length = 0
-      this.nutritionTarget.push(JSON.parse(JSON.stringify(val)))
-    },
-    updateNutritionSingle(val) {
+    updateNutrition(val) {
       this.info = JSON.parse(JSON.stringify(val))
-    },
-    updateNutritionGroup(val) {
-      this.info = JSON.parse(JSON.stringify(val))
-    },
+    }
   }
 }
 </script>
+
+```

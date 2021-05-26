@@ -106,7 +106,7 @@
       // fetch data if loginstatus == 1 (autologin complete in middleware pages.js)
       // this is true when moving from index.vue (no reload)
       let myItem = []
-      let myitemsDRI = []
+      let myItemsDRI = []
       let myWS = {}
 
       if (store.state.loginStatus !== 1) {
@@ -115,7 +115,7 @@
         //myItem = getFCT(store.state.fctDb)
         myItem = await store.dispatch('loadFctFromPouch',
           {dbName: store.state.fctDb, url: store.state.cloudantUrl})
-        myitemsDRI =  await store.dispatch('loadDriFromPouch',
+        myItemsDRI =  await store.dispatch('loadDriFromPouch',
           {dbName: store.state.driDb, url: store.state.cloudantUrl})
 
 
@@ -129,7 +129,7 @@
       }
       return {
         items: await myItem,
-        itemsDRI: await myitemsDRI,
+        itemsDRI: await myItemsDRI,
         WS: myWS
       }
     },

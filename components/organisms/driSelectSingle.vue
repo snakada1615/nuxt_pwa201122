@@ -12,9 +12,16 @@
       small
       :items="selectedDRI"
       :fields="fields1"
+      :fixed=true
+      head-row-variant="success"
+      table-variant="light"
       v-bind="$attrs"
     >
+      <template #cell(Value)="data">
+        <span class="text-info">{{ formatNumber(data.value, data.index) }}</span>
+      </template>
     </b-table>
+    KC: KiloCalorie, MC: MegaCalorie, GC: GigaCalorie
   </b-container>
 </template>
 
@@ -25,6 +32,7 @@
    * table shows DRI information to match with items selected from dropdown menu
    *
    */
+  import { setDigit } from "@/plugins/helper"
 
   export default {
     data() {
@@ -39,6 +47,7 @@
     mounted() {
       // to reflect property on initial loading
       //this.onChange(this.value)
+      this.onChange(this.target[0].id)
     },
     computed: {
       options: function () {
@@ -75,6 +84,15 @@
       }
     },
     methods: {
+      formatNumber(val, index){
+        if (index === 0){
+          return val
+        }
+        if (index === 5){
+          return val
+        }
+        return setDigit(val, index)
+      },
       onChange:function(val){
         if (val >= 0) {
           this.selectedDRI = [...this.setDRI(val)]
