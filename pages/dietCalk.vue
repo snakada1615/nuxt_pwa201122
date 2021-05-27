@@ -17,11 +17,13 @@
             :fct-org="items"
             :dri-org="itemsDRI"
             :dri-id.sync="diet.driID"
+            :target="diet.target"
+            :max-pop="diet.maxPop"
             :single-target.sync="diet.singleTarget"
             :food-items.sync="diet.foodItems"
             :page-id="index"
             :_id="diet._id"
-            @changeTarget="modifiedSignal('target')"
+            @changeTarget="modifiedTarget($event, index)"
             @changeRecepi="modifiedSignal('recepi')"
           />
         </b-tab>
@@ -134,6 +136,10 @@
       }
     },
     methods: {
+      modifiedTarget(val, index){
+        this.WS.dietCases[index].target = JSON.parse(JSON.stringify(val))
+        this.$store.dispatch('setEdit', true)
+      },
       /**
        * emit modified signal
        * @param {String} val - indicate which DOM have changed

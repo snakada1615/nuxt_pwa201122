@@ -1,5 +1,5 @@
 <template>
-  <b-container class="my-0 px-0">
+  <b-container>
     <b-table
       striped
       bordered
@@ -11,18 +11,16 @@
       :sort-by.sync="sortBy"
       small
     >
-
       <template #cell(number)="data">
         <b-form-input
-          :value="data.item.number"
-          @input="onPopulationChange($event, data.index)"
+          v-model="data.item.number"
           :state="statusPopulationNumber(data.item.number)"
+          @input="onPopulationChange"
           type="number"
           size="sm"
         ></b-form-input>
       </template>
     </b-table>
-    {{tableItems}}
     <b-table
       striped
       bordered
@@ -63,7 +61,7 @@ export default {
   props: {
     driPopulations: {
       type: Array,
-      default: [{id: 0, count: 1}]
+      default: () => [{id: 0, count: 1}]
     },
     driItems: {
       type: Array,
@@ -79,13 +77,8 @@ export default {
     driPopulations: {
       deep: true,
       immediate: true,
-      handler(val) {
-        this.tableItems.length = 0
-        this.tableItems = JSON.parse(JSON.stringify(
-          this.updateTable(this.driItems, val)
-        ))
-        console.log(this.driItems)
-        console.log(this.tableItems)
+      handler() {
+        this.setTableItems()
       },
     }
   },
@@ -113,12 +106,6 @@ export default {
       ]
     },
   },
-  mounted() {
-    this.tableItems.length = 0
-    this.tableItems = JSON.parse(JSON.stringify(
-      this.updateTable(this.driItems, this.driPopulations)
-    ))
-  },
   methods: {
     formatNumber(val, index){
       if (index === 0){
@@ -132,6 +119,12 @@ export default {
     statusPopulationNumber(val) {
       return (val >= 0 && val <= this.max)
     },
+    setTableItems(){
+      this.tableItems.length = 0
+      this.tableItems = JSON.parse(JSON.stringify(
+        this.updateTable(this.driItems, this.driPopulations)
+      ))
+    },
     updateTable(driValue, selectedValue) {
       return driValue.map(function (driItem) {
         const res = selectedValue.filter(
@@ -141,18 +134,21 @@ export default {
         return driItem
       })
     },
-    onPopulationChange(event, index) {
+    onPopulationChange() {
       /**
        * triggers when dri selection changed
        */
-
-      console.log(this.tableItems)
-      this.$emit('changeNutritionGroup', this.tableItems)
+      const res = this.tableItems.map(function (item) {
+        return {
+          id:item.id,
+          count: Number(item.number),
+        }
+      })
+      this.$emit('changeNutritionGroup', res)
       /**
        * triggers when dri selection changed
        */
-      console.log(this.total)
-      this.$emit('changeNutritionTarget', this.total)
+      this.$emit('changeNutritionValue', this.total)
     },
   }
 }

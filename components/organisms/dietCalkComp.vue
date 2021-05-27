@@ -34,41 +34,14 @@
       <b-col class="px-0 mb-2 mt-1">
         <b-card header-bg-variant="success" bg-variant="light"
                 border-variant="success" class="mr-1 ml-1 px-0" style="min-width: 530px;">
-          <template #header>
-            <b-row class="my-0 py-0">
-              <b-col class="mx-0 px-0">
-                <b class="py-0 my-0 px-2">Nutrient requirement</b>
-              </b-col>
-              <b-col cols="4" class="mx-0 px-0">
-                <left-right-switch
-                  labelLeft="single"
-                  labelRight="multiple"
-                  name="check"
-                  @change=""
-                  v-model="targetSwitch"
-                ></left-right-switch>
-              </b-col>
-            </b-row>
-          </template>
-          <dri-table
-            v-show="!targetSwitch"
-            :value="driId"
-            :items="itemsDRI"
-            @change="$emit('update:driId', $event)"
-            @changeDri="onTargetChanged($event, pageId)"
-            head-row-variant="success"
-            table-variant="light"
-          />
-          <dri-table-group
-            ref="table"
-            v-show="targetSwitch"
-            :items="itemsDRI"
-            @changeDri="onTargetChanged($event, pageId)"
-            input-name='myDri'
-            rules="min_value:0|max_value:500000000"
-            head-row-variant="success"
-            table-variant="light"
-          />
+          <dri-select-all
+            :singleTarget.sync="targetSwitch"
+            :max="maxPop"
+            :driPopulations="target"
+            :driItems="itemsDRI"
+            @changeTarget="$emit('changeTarget', $event)"
+            @changeNutrition="onNutritionChanged($event, pageId)"
+          ></dri-select-all>
         </b-card>
       </b-col>
     </b-row>
@@ -186,8 +159,7 @@
   import fctTable from '~/components/organisms/FctTable'
   import nutritionBar from "~/components/organisms/nutritionBar";
   import recepiTable from "~/components/organisms/recepiTable";
-  import driTable from "@/components/organisms/driTable";
-  import driTableGroup from "@/components/organisms/driTableGroup";
+  import driSelectAll from "@/components/organisms/driSelectAll";
   import foodModal from '@/components/organisms/foodModal'
   import leftRightSwitch from "@/components/atoms/leftRightSwitch";
 
@@ -196,10 +168,9 @@
       fctTable,
       nutritionBar,
       recepiTable,
-      driTable,
       foodModal,
       leftRightSwitch,
-      driTableGroup,
+      driSelectAll,
     },
     computed: {
       nutritionRating: function () {
@@ -288,6 +259,13 @@
         type: String,
         default: '3'
       },
+      target:{
+        type: Array,
+        required: true
+      },
+      maxPop: {
+        default: 10000
+      },
       driId: {
         default: 2
       },
@@ -331,13 +309,14 @@
           this.nutritionSum = {...value}
         }
       },
-      onTargetChanged(value, pageId) {
-        console.log('onTargetChanged')
+      onNutritionChanged(value, pageId) {
+        console.log('onNutritionChanged')
         if (pageId !== this.pageId || !value.length) {
           return
         }
         if (this.nutritionTarget) {
           this.nutritionTarget = [...value]
+          this.$emit('changeNutrition', value)
         }
       },
       onFCTclick(rec, pageId) {

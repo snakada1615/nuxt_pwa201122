@@ -1,43 +1,36 @@
 <template>
   <b-container border-variant="primary" bg-variant="light" class="py-2">
-    <b-card>{{ nutritionTarget }}</b-card>
-    <b-card>{{ info }}</b-card>
-    <dri-select-single
-      :items="DRI"
-      :target="nutritionTarget"
-      @changeNutritionGroup="updateSelectionSingle"
-      @changeNutritionTarget="updateNutritionSingle"
-    >
-    </dri-select-single>
-    <dri-select-multi
-      :driItems="DRI"
+    <dri-select-all
+      :singleTarget.sync="singleTarget"
+      :max="max"
       :driPopulations="nutritionTarget"
-      :max=500
-      @changeNutritionGroup="updateSelectionGroup"
-      @changeNutritionTarget="updateNutritionGroup"
-    >
-    </dri-select-multi>
+      :driItems="DRI"
+      @changeTarget="nutritionTarget = JSON.parse(JSON.stringify($event))"
+      @changeNutrition="nutrition = $event"
+    ></dri-select-all>
+    <b-card>
+      {{nutritionTarget}}
+    </b-card>
   </b-container>
 </template>
 
 <script>
-import driSelectSingle from "@/components/organisms/driSelectSingle";
-import driSelectMulti from "@/components/organisms/driSelectMulti";
+  import driSelectAll from "@/components/organisms/driSelectAll";
 
 export default {
   components: {
-    driSelectSingle,
-    driSelectMulti
+    driSelectAll
   },
   data() {
     return {
-      info: [],
-      nutritionTarget: [
-        {
-          id: 1,
-          count: 1,
-        },
+      singleTarget: true,
+      nutrition: [],
+      fields:[
+        {key: 'Item', sortable: false},
+        {key: 'Value', sortable: false},
       ],
+      nutritionTarget: [{ id: 1, count: 1}],
+      max:10000,
       DRI: [
         {
           En: "1088.0",
@@ -70,20 +63,6 @@ export default {
     }
   },
   methods: {
-    updateSelectionSingle(val) {
-      this.nutritionTarget.length = 0
-      this.nutritionTarget.push(JSON.parse(JSON.stringify(val)))
-    },
-    updateSelectionGroup(val) {
-      this.nutritionTarget.length = 0
-      this.nutritionTarget.push(JSON.parse(JSON.stringify(val)))
-    },
-    updateNutritionSingle(val) {
-      this.info = JSON.parse(JSON.stringify(val))
-    },
-    updateNutritionGroup(val) {
-      this.info = JSON.parse(JSON.stringify(val))
-    },
   }
 }
 </script>

@@ -265,6 +265,9 @@ export const actions = {
       for (let index = 0; index < iCount; index++) {
         dat.push({
           'foodItems': [],
+          'target': [{id:0, count:1}],
+          'maxPop': 1000,
+          'singleTarget':true,
           'targetName': '',
           'driID': '0',
           '_id': id,
@@ -279,6 +282,7 @@ export const actions = {
       for (let index = 0; index < iCount; index++) {
         dat.push({
           'driID': "0",
+          'target': [{id:0, count:1}],
           'selectedItem': {},
           'ansList': [-99, -99, -99, -99, -99, -99, -99, -99, -99, -99, -99, -99],
         })
@@ -408,7 +412,7 @@ export const actions = {
    * @returns {Promise<unknown>}
    */
   async loadUserDataFromPouch({getters, dispatch}, payload) {
-    // fetch remoeteDb if localDb is not available
+    // fetch remoteDb if localDb is not available
     await dispatch('syncIfNoDb', payload.dbName)
 
     let db = new PouchDB(payload.dbName)

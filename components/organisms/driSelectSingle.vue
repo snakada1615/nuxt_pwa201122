@@ -2,8 +2,8 @@
   <b-container>
     <b-form-select
       :value="target[0].id"
-      @change="onChange"
       :options="options"
+      @change="onChange"
       size="sm"
       class="mb-2">
     </b-form-select>
@@ -47,7 +47,10 @@
     mounted() {
       // to reflect property on initial loading
       //this.onChange(this.value)
-      this.onChange(this.target[0].id)
+      let id = 0
+      if (this.target.length > 0) {id = this.target[0].id}
+      //const id = (this.target.length) ? 0 : this.target[0].id
+      this.onChange(id)
     },
     computed: {
       options: function () {
@@ -73,7 +76,7 @@
       //value: null,
       target:{
         type:Array,
-        default:[{id: 0, count: 1}]
+        default:() => [{id: 0, count: 1}]
       },
       /**
        * list of DRI information
@@ -100,11 +103,11 @@
           /**
            * triggers when dri selection changed
            */
-          this.$emit('changeNutritionGroup', {id: val, count:1})
+          this.$emit('changeNutritionGroup', [{id: val, count:1}])
           /**
            * triggers when dri selection changed
            */
-          this.$emit('changeNutritionTarget', this.selectedDRI)
+          this.$emit('changeNutritionValue', this.selectedDRI)
         } else {
           console.error('invalid selection id for driTable: onChange-driTable')
         }

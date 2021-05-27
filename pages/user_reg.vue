@@ -167,7 +167,7 @@
         return (/^[a-zA-Z][a-zA-Z .,'-]{1,47}[a-zA-Z]{1,3}$/).test(this.userName)
       },
       wsState() {
-        return (/^[a-zA-Z][a-zA-Z .,'-]{1,27}[a-zA-Z]{1,3}$/).test(this.userWorkspace)
+        return (/^[a-zA-Z0-9][a-zA-Z0-9 _.,'-]{1,27}[a-zA-Z0-9]{1,3}$/).test(this.userWorkspace)
       },
       countryState() {
         return (/^[a-zA-Z]+(([',. -][a-zA-Z ])?[a-zA-Z]*)*$/).test(this.userName)
