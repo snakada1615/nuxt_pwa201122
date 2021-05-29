@@ -35,14 +35,12 @@
 
 
 <script>
-  import driTable from "../components/organisms/driTable";
   import dietCalkComp from "../components/organisms/dietCalkComp";
   import navigationGuard from "../components/atoms/navigationGuard";
   import {makeToast} from "../plugins/pouchHelper";
 
   export default {
     components: {
-      driTable,
       dietCalkComp,
       navigationGuard,
     },

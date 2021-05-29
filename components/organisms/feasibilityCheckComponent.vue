@@ -134,14 +134,12 @@
 </template>
 <script>
   import FctTableModal from "@/components/organisms/FctTableModal";
-  import driTable from "@/components/organisms/driTable";
   import nutritionBar from "@/components/organisms/nutritionBar";
   import driSelectSingle from "@/components/organisms/driSelectSingle";
 
   export default {
     components: {
       FctTableModal,
-      driTable,
       nutritionBar,
       driSelectSingle,
     },
