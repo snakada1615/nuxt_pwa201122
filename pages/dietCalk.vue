@@ -14,7 +14,7 @@
     <b-row>
       <b-tabs lazy pills justified disabled="$store.state.isLoginChecked" content-class="mt-3">
         <b-tab v-for="(diet, index) in WS.dietCases" :key="index" :title="String(index + 1)">
-          <diet-calk-comp
+          <diet-calk-component
             :fct-org="items"
             :dri-org="itemsDRI"
             :target="diet.target"
@@ -35,13 +35,12 @@
 
 
 <script>
-  import dietCalkComp from "../components/organisms/dietCalkComp";
+  import dietCalkComponent from "../components/organisms/dietCalkComponent";
   import navigationGuard from "../components/atoms/navigationGuard";
-  import {makeToast} from "../plugins/pouchHelper";
 
   export default {
     components: {
-      dietCalkComp,
+      dietCalkComponent,
       navigationGuard,
     },
     data() {
