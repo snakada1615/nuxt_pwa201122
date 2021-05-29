@@ -7,7 +7,8 @@
           size="sm"
           :variant="colorFlag"
           @click="saveWS" class="my-2 float-right"
-        >save workspace</b-button>
+        >save workspace
+        </b-button>
       </b-col>
     </b-row>
     <b-row>
@@ -16,13 +17,13 @@
           <diet-calk-comp
             :fct-org="items"
             :dri-org="itemsDRI"
-            :dri-id.sync="diet.driID"
             :target="diet.target"
+            :target-switch="diet.targetSwitch"
             :max-pop="diet.maxPop"
-            :single-target.sync="diet.singleTarget"
             :food-items.sync="diet.foodItems"
             :page-id="index"
             :_id="diet._id"
+            @targetSwitchChange="diet.targetSwitch = $event"
             @changeTarget="modifiedTarget($event, index)"
             @changeRecepi="modifiedSignal('recepi')"
           />
@@ -66,8 +67,8 @@
       }
     },
     computed: {
-      colorFlag: function(){
-        return this.$store.state.isEdited? 'warning' : 'success'
+      colorFlag: function () {
+        return this.$store.state.isEdited ? 'warning' : 'success'
       },
       currentCaseId: function () {
         return this.$store.state.caseId
@@ -83,7 +84,7 @@
           try {
             vm.items = await vm.$store.dispatch('loadFctFromPouch',
               {dbName: vm.$store.state.fctDb, url: vm.$store.state.cloudantUrl})
-            vm.itemsDRI =  await vm.$store.dispatch('loadDriFromPouch',
+            vm.itemsDRI = await vm.$store.dispatch('loadDriFromPouch',
               {dbName: 'dri', url: vm.$store.state.cloudantUrl})
 
             vm.WS.dietCases = JSON.parse(JSON.stringify(vm.$store.state.dietCases))
@@ -104,7 +105,7 @@
     beforeDestroy() {
       console.log('beforeDestroy')
     },
-    async asyncData({store}){
+    async asyncData({store}) {
       // fetch data if loginstatus == 1 (autologin complete in middleware pages.js)
       // this is true when moving from index.vue (no reload)
       let myItem = []
@@ -117,9 +118,8 @@
         //myItem = getFCT(store.state.fctDb)
         myItem = await store.dispatch('loadFctFromPouch',
           {dbName: store.state.fctDb, url: store.state.cloudantUrl})
-        myItemsDRI =  await store.dispatch('loadDriFromPouch',
+        myItemsDRI = await store.dispatch('loadDriFromPouch',
           {dbName: store.state.driDb, url: store.state.cloudantUrl})
-
 
         store.dispatch('setNow')
 
@@ -136,7 +136,7 @@
       }
     },
     methods: {
-      modifiedTarget(val, index){
+      modifiedTarget(val, index) {
         this.WS.dietCases[index].target = JSON.parse(JSON.stringify(val))
         this.$store.dispatch('setEdit', true)
       },

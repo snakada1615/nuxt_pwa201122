@@ -25,7 +25,7 @@
             :items="items"
             head-row-variant="success"
             table-variant="light"
-            @fctClick="onFCTclick($event, pageId)"
+            @fctClick="onFctClick($event, pageId)"
           ></fct-table>
         </b-card>
       </b-col>
@@ -35,10 +35,11 @@
         <b-card header-bg-variant="success" bg-variant="light"
                 border-variant="success" class="mr-1 ml-1 px-0" style="min-width: 530px;">
           <dri-select-all
-            :singleTarget.sync="targetSwitch"
+            :target-switch="targetSwitch_computed"
             :max="maxPop"
             :driPopulations="target"
             :driItems="itemsDRI"
+            @targetSwitchChange="targetSwitch_computed = $event"
             @changeTarget="$emit('changeTarget', $event)"
             @changeNutrition="onNutritionChanged($event, pageId)"
           ></dri-select-all>
@@ -173,6 +174,14 @@
       driSelectAll,
     },
     computed: {
+      targetSwitch_computed:{
+          get () {
+            return this.targetSwitch
+          },
+          set (val) {
+            this.$emit('targetSwitchChange', val)
+          }
+      },
       nutritionRating: function () {
         if (!this.nutritionTarget) {
           return []
@@ -285,13 +294,16 @@
         type: Array,
         required: true
       },
+      targetSwitch:{
+        type: Boolean,
+        default: true
+      },
     },
     data() {
       return {
         itemSingleCrop: [],
         iconNum: 1,
         driSwitch: false,
-        targetSwitch: false,
         showFCT: true,
         showFoodDialog: false,
         initWeight: 0,
@@ -310,7 +322,6 @@
         }
       },
       onNutritionChanged(value, pageId) {
-        console.log('onNutritionChanged')
         if (pageId !== this.pageId || !value.length) {
           return
         }
@@ -319,7 +330,7 @@
           this.$emit('changeNutrition', value)
         }
       },
-      onFCTclick(rec, pageId) {
+      onFctClick(rec, pageId) {
         const vm = this
         if (pageId !== vm.pageId) {
           return

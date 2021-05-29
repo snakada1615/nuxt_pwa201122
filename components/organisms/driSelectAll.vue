@@ -5,12 +5,12 @@
       <b-form-checkbox
         id="mySwitch"
         switch
-        :checked="singleTarget"
-        @change="$emit('update:singleTarget', $event)"
+        v-model="targetSwitch_computed"
       ></b-form-checkbox>
       <span>single</span>
     </b-form>
-    <div v-if="singleTarget">
+    {{targetSwitch_computed}}
+    <div v-if="targetSwitch_computed">
       <dri-select-single
         :items="driItems"
         :target="driPopulations"
@@ -44,7 +44,7 @@
       leftRightSwitch
     },
     props: {
-      singleTarget:{
+      targetSwitch:{
         type:Boolean,
         default: true
       },
@@ -71,6 +71,16 @@
         //   id: 0
         //  }],
       }
+    },
+    computed: {
+      targetSwitch_computed:{
+        get () {
+          return this.targetSwitch
+        },
+        set (val) {
+          this.$emit('targetSwitchChange', val)
+        }
+      },
     },
     methods: {
       updateSelection(val) {

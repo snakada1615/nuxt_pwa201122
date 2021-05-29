@@ -267,7 +267,7 @@ export const actions = {
           'foodItems': [],
           'target': [{id:0, count:1}],
           'maxPop': 1000,
-          'singleTarget':true,
+          'targetSwitch':true,
           'targetName': '',
           'driID': '0',
           '_id': id,

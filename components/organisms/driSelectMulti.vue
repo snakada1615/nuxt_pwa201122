@@ -106,6 +106,11 @@ export default {
       ]
     },
   },
+  mounted() {
+    // to reflect property on initial loading
+    //this.onChange(this.value)
+    this.onPopulationChange()
+  },
   methods: {
     formatNumber(val, index){
       if (index === 0){
