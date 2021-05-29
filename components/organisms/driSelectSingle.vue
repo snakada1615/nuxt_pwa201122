@@ -10,7 +10,7 @@
     <b-table
       striped
       small
-      :items="selectedDRI"
+      :items="total"
       :fields="fields1"
       :fixed=true
       head-row-variant="success"
@@ -41,16 +41,15 @@
           {key: 'Item', sortable: false},
           {key: 'Value', sortable: false},
         ],
-        selectedDRI: [],
+        total: [],
       }
     },
     mounted() {
       // to reflect property on initial loading
-      //this.onChange(this.value)
-      let id = 0
-      if (this.target.length > 0) {id = this.target[0].id}
-      //const id = (this.target.length) ? 0 : this.target[0].id
-      this.onChange(id)
+      if (this.target.length > 0) {
+        const id = this.target[0].id
+        this.$emit('initTarget', this.setDRI(id))
+      }
     },
     computed: {
       options: function () {
@@ -97,17 +96,18 @@
         return setDigit(val, index)
       },
       onChange:function(val){
+        console.log('total is calculated')
         if (val >= 0) {
-          this.selectedDRI = [...this.setDRI(val)]
-
-          /**
-           * triggers when dri selection changed
-           */
-          this.$emit('changeNutritionGroup', [{id: val, count:1}])
-          /**
-           * triggers when dri selection changed
-           */
-          this.$emit('changeNutritionValue', this.selectedDRI)
+          this.total = [...this.setDRI(val)]
+          // will not be implemented if called from 'mounted:{}'
+            /**
+             * triggers when dri selection changed
+             */
+            this.$emit('changeNutritionGroup', [{id: val, count:1}])
+            /**
+             * triggers when dri selection changed
+             */
+            this.$emit('changeNutritionValue', this.total)
         } else {
           console.error('invalid selection id for driTable: onChange-driTable')
         }

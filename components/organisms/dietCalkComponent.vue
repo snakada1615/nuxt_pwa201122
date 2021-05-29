@@ -1,5 +1,29 @@
 <template>
   <b-container style="max-width: 540px; min-width: 530px;">
+    <b-row>
+      <b-col class="px-0 mb-2 mt-1">
+        <b-card header-bg-variant="success" bg-variant="light"
+                border-variant="success" class="mr-1 ml-1 px-0" style="min-width: 530px;">
+          <template #header>
+            <b-row>
+              <b-col>
+                <b class="py-0 my-0">Target selection</b>
+              </b-col>
+            </b-row>
+          </template>
+          <dri-select-all
+            :target-switch="targetSwitch_computed"
+            :max="maxPop"
+            :driPopulations="target"
+            :driItems="itemsDRI"
+            @targetSwitchChange="targetSwitch_computed = $event"
+            @changeTarget="$emit('changeTarget', $event)"
+            @changeNutrition="onNutritionChanged($event, pageId)"
+            @initTarget="initTarget"
+          ></dri-select-all>
+        </b-card>
+      </b-col>
+    </b-row>
     <b-row class="my-2">
       <b-col class="px-0 mb-2 mt-1">
         <b-card
@@ -11,7 +35,7 @@
           <template #header>
             <b-row>
               <b-col>
-                <b class="py-0 my-0">Food Composition Table</b>
+                <b class="py-0 my-0">Food Item Selection</b>
               </b-col>
               <b-col cols="4">
                 <b-form-checkbox v-model="showFCT" name="FCT-button" switch>
@@ -27,22 +51,6 @@
             table-variant="light"
             @fctClick="onFctClick($event, pageId)"
           ></fct-table>
-        </b-card>
-      </b-col>
-    </b-row>
-    <b-row>
-      <b-col class="px-0 mb-2 mt-1">
-        <b-card header-bg-variant="success" bg-variant="light"
-                border-variant="success" class="mr-1 ml-1 px-0" style="min-width: 530px;">
-          <dri-select-all
-            :target-switch="targetSwitch_computed"
-            :max="maxPop"
-            :driPopulations="target"
-            :driItems="itemsDRI"
-            @targetSwitchChange="targetSwitch_computed = $event"
-            @changeTarget="$emit('changeTarget', $event)"
-            @changeNutrition="onNutritionChanged($event, pageId)"
-          ></dri-select-all>
         </b-card>
       </b-col>
     </b-row>
@@ -145,7 +153,7 @@
       :items="itemSingleCrop"
       :my-name="'modalTest' + pageId"
       my-type="Number"
-      :maxWeight = 1000000000
+      :maxWeight=1000000000
       @modalOk="onCropWeightSet"
     ></food-modal>
   </b-container>
@@ -174,13 +182,13 @@
       driSelectAll,
     },
     computed: {
-      targetSwitch_computed:{
-          get () {
-            return this.targetSwitch
-          },
-          set (val) {
-            this.$emit('targetSwitchChange', val)
-          }
+      targetSwitch_computed: {
+        get() {
+          return this.targetSwitch
+        },
+        set(val) {
+          this.$emit('targetSwitchChange', val)
+        }
       },
       nutritionRating: function () {
         if (!this.nutritionTarget) {
@@ -242,9 +250,9 @@
       },
       items: {
         get: function () {
-          let res  =[]
-          if (this.fctOrg){
-            this.fctOrg.forEach(function(val){
+          let res = []
+          if (this.fctOrg) {
+            this.fctOrg.forEach(function (val) {
               res.push(val.doc)
             })
           }
@@ -268,7 +276,7 @@
         type: String,
         default: '3'
       },
-      target:{
+      target: {
         type: Array,
         required: true
       },
@@ -291,7 +299,7 @@
         type: Array,
         required: true
       },
-      targetSwitch:{
+      targetSwitch: {
         type: Boolean,
         default: true
       },
@@ -306,10 +314,14 @@
         initWeight: 0,
         groupFlag: false,
         nutritionTarget: [],
-        nutritionSum: {}
+        nutritionSum: {},
       }
     },
     methods: {
+      initTarget(val){
+        console.log(val)
+        this.nutritionTarget = [...val]
+      },
       onTotalChanged(value, pageId) {
         if (pageId !== this.pageId) {
           return

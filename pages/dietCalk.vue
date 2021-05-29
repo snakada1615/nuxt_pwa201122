@@ -135,6 +135,7 @@
     methods: {
       modifiedTarget(val, index) {
         this.WS.dietCases[index].target = JSON.parse(JSON.stringify(val))
+        console.log('setedit:modifiedTarget')
         this.$store.dispatch('setEdit', true)
       },
       /**

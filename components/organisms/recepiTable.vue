@@ -93,7 +93,6 @@
       items: {
         immediate: true,
         handler(value) {
-          console.log(value)
           if (value.length === 0){
             this.nutritionSum = {
               En: 0,

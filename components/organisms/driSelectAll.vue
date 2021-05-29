@@ -15,6 +15,7 @@
         :target="driPopulations"
         @changeNutritionGroup="updateSelection"
         @changeNutritionValue="updateNutrition"
+        @initTarget="$emit('initTarget', $event)"
       >
       </dri-select-single>
     </div>
@@ -25,6 +26,7 @@
         :max="max"
         @changeNutritionGroup="updateSelection"
         @changeNutritionValue="updateNutrition"
+        @initTarget="$emit('initTarget', $event)"
       >
       </dri-select-multi>
     </div>
@@ -87,6 +89,7 @@
         this.$emit('changeTarget', val)
       },
       updateNutrition(val) {
+        console.log('updateNutrition')
         const res = JSON.parse(JSON.stringify(val))
         this.$emit('changeNutrition', res)
       },
