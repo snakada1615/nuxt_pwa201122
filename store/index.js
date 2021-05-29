@@ -225,8 +225,9 @@ export const actions = {
     let promise = new Promise(async (resolve, reject) => {
       const db = new PouchDB(payload.dbName)
       await pouchDeleteDoc(db, payload.docId)
-      await pouchDeleteDb(state.lastUser)
       await syncRemoteDb({dbName: payload.dbName, url: payload.url})
+
+      await pouchDeleteDb(state.lastUser)
       resolve(true)
     }).catch(err => reject(err))
     return promise
@@ -672,13 +673,13 @@ export const actions = {
         reject('no workSpace is set:getListWorkspace')
       } else {
 
-        // fetch remoeteDb if localDb is not available
+        // fetch remoteDb if localDb is not available
         await dispatch('syncIfNoDb', payload).catch(err => {reject(err)})
 
         const db = new PouchDB(payload)
         db.allDocs({include_docs: true}).then(function (docs) {
           let res = []
-          docs.rows.forEach(function (value, index) {
+          docs.rows.forEach(function (value) {
             if (value.id !== state.lastUser) {
               if (value.doc.caseId) {
                 res.push({

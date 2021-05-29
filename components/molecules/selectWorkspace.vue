@@ -40,7 +40,7 @@
     <b-row class="my-2">
       <b-col>
         <b-button @click="selectWorkspace()" variant="info" size="sm"
-                  :disabled="!fileNameValidator">select</b-button>
+                  :disabled="!fileNameValidator">select / create</b-button>
         <b-button @click="cancel(id)" size="sm" variant="warning">cancel</b-button>
       </b-col>
     </b-row>
@@ -58,7 +58,7 @@
     },
     computed:{
       fileNameValidator: function () {
-        return (/^[a-zA-Z][a-zA-Z .,'-]{1,27}[a-zA-Z]{1,3}$/).test(this.fileName)
+        return (/^[a-zA-Z0-9][a-zA-Z0-9 _.,'-]{1,27}[a-zA-Z0-9]{1,3}$/).test(this.fileName)
       },
     },
     mounted() {
