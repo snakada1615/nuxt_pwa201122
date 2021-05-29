@@ -15,12 +15,14 @@
           <feasibility-check-component
             :dri-org="itemsDRI"
             :fct-org="items"
+            :target="feasibilityCase.target"
             :dri-id.sync="feasibilityCase.driID"
             :selected-item.sync="feasibilityCase.selectedItem"
             :ans-list="feasibilityCase.ansList"
             @ansListChange="modifiedSignal('ansList')"
             @update:driId="modifiedSignal('driId')"
             @update:selectedItem="modifiedSignal('crop')"
+            @changeTarget="modifiedTarget($event, index)"
           />
         </b-tab>
       </b-tabs>
@@ -88,18 +90,18 @@
     watch: {
       loginChecked: async function () {
         let vm = this
-        if (this.loginChecked) {
-          vm.items = await this.$store.dispatch('loadFctFromPouch',
-            {dbName: store.state.fctDb, url: store.state.cloudantUrl})
+        if (vm.loginChecked) {
+          vm.items = await vm.$store.dispatch('loadFctFromPouch',
+            {dbName: vm.$store.state.fctDb, url: vm.$store.state.cloudantUrl})
           vm.itemsDRI =  await vm.$store.dispatch('loadDriFromPouch',
-            {dbName: store.state.driDb, url: store.state.cloudantUrl})
+            {dbName: vm.$store.state.driDb, url: vm.$store.state.cloudantUrl})
 
           vm.WS.feasibilityCases = JSON.parse(JSON.stringify(
-            this.$store.state.feasibilityCases))
-          vm.WS.user = JSON.parse(JSON.stringify(this.$store.state.user))
-          vm.WS.caseId = this.$store.state.caseId
-          this.$store.dispatch('setNow')
-          vm.WS.saveDate = this.$store.state.saveDate
+            vm.$store.state.feasibilityCases))
+          vm.WS.user = JSON.parse(JSON.stringify(vm.$store.state.user))
+          vm.WS.caseId = vm.$store.state.caseId
+          vm.$store.dispatch('setNow')
+          vm.WS.saveDate = vm.$store.state.saveDate
 
           vm.beforeInitialize = false  // start rendering from here
           //vm.refreshScreen()
@@ -138,8 +140,9 @@
       }
     },
     methods: {
-      onUpdateDriId(){
-        this.modifiedSignal('driid')
+      modifiedTarget(val, index) {
+        this.WS.feasibilityCases[index].target = JSON.parse(JSON.stringify(val))
+        this.$store.dispatch('setEdit', true)
       },
       modifiedSignal(val) {
         //this.isEdited = true

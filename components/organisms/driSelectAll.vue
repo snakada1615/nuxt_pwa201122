@@ -9,7 +9,6 @@
       ></b-form-checkbox>
       <span>single</span>
     </b-form>
-    {{targetSwitch_computed}}
     <div v-if="targetSwitch_computed">
       <dri-select-single
         :items="driItems"
@@ -84,7 +83,7 @@
     },
     methods: {
       updateSelection(val) {
-        this.nutritionTarget = JSON.parse(JSON.stringify(val))
+        //this.nutritionTarget = JSON.parse(JSON.stringify(val))
         this.$emit('changeTarget', val)
       },
       updateNutrition(val) {

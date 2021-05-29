@@ -28,6 +28,8 @@
         bordered
         border-variant="dark"
         responsive
+        selectable
+        select-mode="single"
         small
         ref="table"
         :items="items"

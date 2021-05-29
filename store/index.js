@@ -269,7 +269,6 @@ export const actions = {
           'maxPop': 1000,
           'targetSwitch':true,
           'targetName': '',
-          'driID': '0',
           '_id': id,
           'pageId': index
         })
@@ -281,7 +280,6 @@ export const actions = {
       let dat = []
       for (let index = 0; index < iCount; index++) {
         dat.push({
-          'driID': "0",
           'target': [{id:0, count:1}],
           'selectedItem': {},
           'ansList': [-99, -99, -99, -99, -99, -99, -99, -99, -99, -99, -99, -99],

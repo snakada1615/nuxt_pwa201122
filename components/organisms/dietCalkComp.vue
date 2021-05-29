@@ -275,9 +275,6 @@
       maxPop: {
         default: 10000
       },
-      driId: {
-        default: 2
-      },
       pageId: {
         default: 1
       },

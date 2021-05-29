@@ -82,15 +82,13 @@
             <div>{{qaGroup.categoryText}}</div>
           </template>
           <div v-show="index===0" class="mb-2">
-            <dri-table
-              :value="driId"
+            <dri-select-single
               :items="itemsDRI"
-              :showTable=false
-              @changeDri="onTargetChanged($event, pageId)"
-              @change="$emit('update:driId', $event)"
-              head-row-variant="success"
-              table-variant="light"
-            />
+              :target="target"
+              @changeNutritionGroup="updateSelection"
+              @changeNutritionValue="updateNutrition"
+            >
+            </dri-select-single>
             <b-card class="px-0 mx-0">
               <b-row class="mt-0 bg-success mb-3">
                 <b-col cols="3" class="text-center mr-2 font-weight-bold">Nutrition</b-col>
@@ -138,31 +136,16 @@
   import FctTableModal from "@/components/organisms/FctTableModal";
   import driTable from "@/components/organisms/driTable";
   import nutritionBar from "@/components/organisms/nutritionBar";
+  import driSelectSingle from "@/components/organisms/driSelectSingle";
 
   export default {
     components: {
       FctTableModal,
       driTable,
       nutritionBar,
+      driSelectSingle,
     },
     methods: {
-      onInput(val, id) {
-        this.$emit('update:ansList[' + id + ']', val)
-      },
-      setDRI(docs) {
-        let vm = this
-        docs.forEach(function (val, index) {
-          vm.itemsDRI.push({
-            'id': val.key,
-            'Name': val.doc.nut_group,
-            'En': val.doc.energy,
-            'Pr': val.doc.protein,
-            'Va': val.doc.vita,
-            'Fe': val.doc.fe,
-            'number': 0
-          })
-        })
-      },
       onTargetChanged(value, pageId) {
         console.log('onTargetChanged')
         if (pageId !== this.pageId || !value.length) {
@@ -183,6 +166,14 @@
       },
       showDialogue() {
         this.$bvModal.show('modalTest')
+      },
+      updateSelection(val) {
+        //this.nutritionTarget = JSON.parse(JSON.stringify(val))
+        this.$emit('changeTarget', val)
+      },
+      updateNutrition(val) {
+        this.nutritionTarget = JSON.parse(JSON.stringify(val))
+        //this.$emit('changeNutrition', res)
       },
     },
     computed: {
@@ -441,9 +432,9 @@
         type: Object,
         default: () => ({})
       },
-      driId: {
-        type: String,
-        default: ''
+      target:{
+        type:Array,
+        required:true
       },
       ansList: {
         type: Array,
