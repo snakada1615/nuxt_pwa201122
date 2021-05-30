@@ -137,9 +137,49 @@ export const actions = {
         // await dispatch('loadCouchUrl')
         dispatch('setLoginStatus', res)
       } catch (err) {
-        if (err.docId === "myCouch"){
+        if (err.docId === "myCouch") {
           reject(new Error('initRwanda'))
         }
+        reject(err)
+      }
+    })
+    return promise
+  },
+  removeUser({state, dispatch}) {
+    const vm = this
+    const myPass = window.prompt("put password", "")
+    if (myPass === '') {
+      return
+    }
+    console.log(myPass)
+    let promise = new Promise(async (resolve, reject) => {
+      try {
+        await firebase.auth().signInWithEmailAndPassword(
+          state.user.email, myPass)
+        await firebase.auth().currentUser?.delete()
+        resolve('user successfully deleted')
+      } catch (err) {
+        reject(err)
+      }
+    })
+    return promise
+  },
+  removeUserInfo({state}, payload){
+    let promise = new Promise(async (resolve, reject) =>{
+      let docId = []
+      let db = new PouchDB(state.userInfoDb)
+      const docs = await db.allDocs({include_docs: true})
+      try {
+        console.log(docs)
+        docId = docs.rows.filter(
+          item =>item.doc.user.email === payload
+        ).map(items => items.id)
+        console.log(docId)
+        await Promise.all(docId.map(async item => await pouchDeleteDoc(db, item)))
+        await syncRemoteDb({dbName: state.userInfoDb, url: state.cloudantUrl})
+        resolve('success')
+      } catch (err) {
+        console.log(err)
         reject(err)
       }
     })
@@ -221,7 +261,7 @@ export const actions = {
     })
     return promise
   },
-  removeUserDoc({state},payload) {
+  removeUserDoc({state}, payload) {
     let promise = new Promise(async (resolve, reject) => {
       const db = new PouchDB(payload.dbName)
       await pouchDeleteDoc(db, payload.docId)
@@ -235,7 +275,9 @@ export const actions = {
   saveUseToUserSet({state, dispatch}, payload) {
     let promise = new Promise(async (resolve, reject) => {
       // fetch remoeteDb if localDb is not available
-      await dispatch('syncIfNoDb', state.userInfoDb).catch(err => {reject(err)})
+      await dispatch('syncIfNoDb', state.userInfoDb).catch(err => {
+        reject(err)
+      })
 
       //save all user-> pouchDB(lastUser)
       let db = new PouchDB(state.userInfoDb)
@@ -266,9 +308,9 @@ export const actions = {
       for (let index = 0; index < iCount; index++) {
         dat.push({
           'foodItems': [],
-          'target': [{id:0, count:1}],
+          'target': [{id: 0, count: 1}],
           'maxPop': 1000,
-          'targetSwitch':true,
+          'targetSwitch': true,
           'targetName': '',
           '_id': id,
           'pageId': index
@@ -281,7 +323,7 @@ export const actions = {
       let dat = []
       for (let index = 0; index < iCount; index++) {
         dat.push({
-          'target': [{id:0, count:1}],
+          'target': [{id: 0, count: 1}],
           'selectedItem': {},
           'ansList': [-99, -99, -99, -99, -99, -99, -99, -99, -99, -99, -99, -99],
         })
@@ -485,7 +527,7 @@ export const actions = {
         if (!(info.doc_count)) {
           console.log('your dataset is currently empty. the application will try to getch data from server!')
           console.log(dri)
-          syncRemoteDb({dbName:payload.dbName, url: payload.url}).then(dataset => {
+          syncRemoteDb({dbName: payload.dbName, url: payload.url}).then(dataset => {
             getPouchDataAll(dataset).then(docs => {
               res = setDRI(docs)
               resolve(res)
@@ -674,7 +716,9 @@ export const actions = {
       } else {
 
         // fetch remoteDb if localDb is not available
-        await dispatch('syncIfNoDb', payload).catch(err => {reject(err)})
+        await dispatch('syncIfNoDb', payload).catch(err => {
+          reject(err)
+        })
 
         const db = new PouchDB(payload)
         db.allDocs({include_docs: true}).then(function (docs) {
@@ -776,15 +820,15 @@ export const actions = {
   },
   //"saveCouchUrl" is used only for Rwanda version
   // which use couchDb installed on MINAGRI server instead of IBM cloudant
-  replicateBaseData: function({state}, payload){
+  replicateBaseData: function ({state}, payload) {
     // fetch key databases from cloudant
     const dbSet = ['userlist', 'dri', 'fct_org', 'fctlist_db']
-    const promise = new Promise( (resolve, reject) => {
+    const promise = new Promise((resolve, reject) => {
       try {
         const url = "http://" + payload.user + ":" + payload.pass + "@" + payload.ip + ":5984/"
         let localDatabases = []
         let remoteDatabases = []
-        dbSet.forEach(async function (item,index) {
+        dbSet.forEach(async function (item, index) {
           localDatabases[index] = new PouchDB(url + item)
           remoteDatabases[index] = new PouchDB(state.cloudantUrl + item)
           //copy FCT database from cloudant
