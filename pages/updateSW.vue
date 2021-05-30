@@ -88,10 +88,11 @@
     methods: {
       unRegister() {
         const vm = this
-        navigator.serviceWorker.getRegistration()
-          .then(registration => {
-            registration.unregister();
-          }).then(function () {
+        navigator.serviceWorker.getRegistrations().then(function (registrations) {
+          for (let registration of registrations) {
+            registration.unregister()
+          }
+        }).then(function () {
           vm.$store.dispatch('logout')
           //location.reload()
           vm.$router.push('/')
