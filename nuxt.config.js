@@ -28,7 +28,6 @@ export default {
 
   // Plugins to run before rendering page (https://go.nuxtjs.dev/config-plugins)
   plugins: [
-    {src: '@/plugins/vee-validate'},
     {src: '@/plugins/helper'},
     {src: '@/plugins/helperVue'},
   ],
@@ -106,6 +105,7 @@ export default {
         'FormSelectPlugin',
         'FormCheckboxPlugin',
         'FormRadioPlugin',
+        'FormTextareaPlugin',
         'ListGroupPlugin',
       ],
     }]
@@ -117,7 +117,6 @@ export default {
 
   // Build Configuration (https://go.nuxtjs.dev/config-build)
   build: {
-    transpile: ["vee-validate/dist/rules"],
     //analyze: true,
   },
 

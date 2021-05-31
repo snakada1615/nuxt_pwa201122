@@ -70,6 +70,10 @@
         </b-card>
       </b-col>
     </b-row>
+    <b-card>
+      note: this app is under frequent update. if you have any trouble, please go to option.
+      and try to 'delete user data' and start again using new data set
+    </b-card>
   </section>
 </template>
 

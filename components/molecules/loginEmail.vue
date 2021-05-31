@@ -7,37 +7,35 @@
     header-text-variant="white"
     hide-footer
   >
-    <validation-observer>
-      <b-form @submit.prevent>
-        <b-row class="my-2">
-          <b-col>
-            you are going to login as:
-          </b-col>
-        </b-row>
-        <b-row class="my-2">
-          <b-col>
-            <vee-input
-              name="input_email"
-              rules="required|email"
-              placeholder="email"
-              type="email"
-              v-model="myEmail"
-            />
-          </b-col>
-        </b-row>
-        <b-row class="my-2">
-          <b-col>
-            <vee-input
-              name="input_pass"
-              rules="required|min:6"
-              placeholder="password"
-              type="password"
-              v-model="myPassword"
-            />
-          </b-col>
-        </b-row>
-      </b-form>
-    </validation-observer>
+    <b-form @submit.prevent>
+      <b-row class="my-2">
+        <b-col>
+          you are going to login as:
+        </b-col>
+      </b-row>
+      <b-row class="my-2">
+        <b-col>
+          <b-form-input
+            id="input_email"
+            size="sm"
+            :state="stateEmail"
+            type="email"
+            v-model="myEmail"
+          ></b-form-input>
+        </b-col>
+      </b-row>
+      <b-row class="my-2">
+        <b-col>
+          <b-form-input
+            id="input_pass"
+            size="sm"
+            :state="statePass"
+            type="password"
+            v-model="myPassword"
+          ></b-form-input>
+        </b-col>
+      </b-row>
+    </b-form>
     <b-row class="my-2">
       <b-col>
         <b-button @click="login()" variant="info" size="sm">login</b-button>
@@ -48,27 +46,30 @@
 </template>
 
 <script>
-  import veeInput from "@/components/atoms/veeInput";
-
   export default {
-    components: {
-      veeInput,
-    },
     data() {
       return {
         myEmail: '',
         myPassword: '',
       }
     },
+    computed: {
+      stateEmail() {
+        return (/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/).test(this.myEmail)
+      },
+      statePass() {
+        return (this.myPassword.length >= 6 && this.myPassword.length <= 20)
+      }
+    },
     mounted() {
-      if(this.email) {
+      if (this.email) {
         this.myEmail = this.email
       }
     },
-    props:{
+    props: {
       id: {
         type: String,
-        required:true
+        required: true
       },
       myModalHeader: {
         type: String,
@@ -78,7 +79,7 @@
         type: String,
         default: ''
       },
-      uid:{
+      uid: {
         type: String,
         default: ''
       }
@@ -89,21 +90,21 @@
         this.$store.dispatch('login', {email: this.myEmail, password: this.myPassword}).then(function (res) {
           vm.myEmail = ''
           vm.password = ''
-          if (res){
+          if (res) {
             console.log('login success')
             vm.$emit('update:uid', res.uid)
             vm.$emit('update:email', res.email)
             vm.$emit('loginEmail', {uid: res.uid, email: res.email})
             vm.$bvModal.hide(vm.id)
           }
-        }).catch(function(err){
+        }).catch(function (err) {
           vm.myEmail = ''
           vm.password = ''
           console.log(err)
           alert(err.message)
         })
       },
-      cancel(val){
+      cancel(val) {
         this.$emit('cancelLoginEmail')
         this.$bvModal.hide(val)
       },

@@ -72,6 +72,15 @@
             </b-button>
           </template>
         </b-card>
+        <b-card bg-variant="gray-100" border-variant="info" class="mt-3 px-0 mx-1" footer-tag="footer">
+          <div><span class="text-danger">message board</span></div>
+          <template #footer class="px-0 py-0">
+            <b-button block to="messages" class="mx-0 my-0" variant="info"
+                      size="sm" :disabled="$store.state.loginStatus !== 1"
+            >send message
+            </b-button>
+          </template>
+        </b-card>
       </b-card-group>
       <h6 v-if="$store.state.loginStatus !== 1" class="text-warning">you need to login first to use all the
         functions</h6>

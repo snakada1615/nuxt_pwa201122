@@ -163,17 +163,18 @@
     },
     methods:{
       saveFct(){
-        this.$store.dispatch('saveFctToPouch_bulk',{
-          _id: this.dbName,
-          dbName: this.dbUniqueName,
-          description: this.dbDescription,
-          creator: this.$store.state.user.name,
-          data: this.csv,
+        const vm = this
+        vm.$store.dispatch('saveFctToPouch_bulk',{
+          _id: vm.dbName,
+          dbName: vm.dbUniqueName,
+          description: vm.dbDescription,
+          creator: vm.$store.state.user.name,
+          data: vm.csv,
         }).then(function () {
           alert('import success')
-          this.$router.push('/')
+          vm.$router.push('/')
         }).catch(err => {
-          this.$nuxt.error(err)
+          vm.$nuxt.error(err)
         })
       }
     }

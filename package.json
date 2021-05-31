@@ -19,7 +19,6 @@
     "nuxt": "^2.14.6",
     "pouchdb": "^7.2.2",
     "pouchdb-upsert": "^2.2.0",
-    "vee-validate": "^3.3.7",
     "vue-csv-import": "^2.3.4",
     "vue-rate-it": "^2.1.0"
   },
