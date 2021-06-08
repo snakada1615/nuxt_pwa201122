@@ -136,10 +136,28 @@ export const actions = {
         // activate following line (loadCouchUrl) only in case of Rwanda version
         // await dispatch('loadCouchUrl')
         dispatch('setLoginStatus', res)
+        resolve(true)
       } catch (err) {
         if (err.docId === "myCouch") {
           reject(new Error('initRwanda'))
         }
+        reject(err)
+      }
+    })
+    console.log('autologin complete')
+    return promise
+  },
+  removeUser2({dispatch, getters, store}, payload) {
+    let promise = new Promise(async (resolve, reject) => {
+      const vm = this
+      try {
+        await firebase.auth().currentUser?.delete()
+        await dispatch('removeUserDb', 'userdata_' + payload.uid.toLowerCase())
+        await dispatch('removeUserInfo', payload.uid)
+        await dispatch('logout')
+        await vm.$router.push('/')
+        resolve('user successfully deleted')
+      } catch (err) {
         reject(err)
       }
     })
@@ -164,15 +182,15 @@ export const actions = {
     })
     return promise
   },
-  removeUserInfo({state}, payload){
-    let promise = new Promise(async (resolve, reject) =>{
+  removeUserInfo({state}, payload) {
+    let promise = new Promise(async (resolve, reject) => {
       let docId = []
       let db = new PouchDB(state.userInfoDb)
       const docs = await db.allDocs({include_docs: true})
       try {
         console.log(docs)
         docId = docs.rows.filter(
-          item =>item.doc.user.email === payload
+          item => item.doc.user.uid === payload
         ).map(items => items.id)
         console.log(docId)
         await Promise.all(docId.map(async item => await pouchDeleteDoc(db, item)))
@@ -259,6 +277,14 @@ export const actions = {
         reject(error)
       });
     })
+    return promise
+  },
+  removeUserDb({dispatch}, payload) {
+    let promise = new Promise(async (resolve, reject) => {
+      await pouchDeleteDb(payload)
+      await pouchDeleteDb(state.cloudantUrl + payload)
+      resolve(true)
+    }).catch(err => reject(err))
     return promise
   },
   removeUserDoc({state}, payload) {
@@ -369,8 +395,8 @@ export const actions = {
     console.log(res)
     return res
   },
-  //
-  // fetch db if no localDb exists
+//
+// fetch db if no localDb exists
   syncIfNoDb({state}, payload) {
     let promise = new Promise(async (resolve, reject) => {
       let db = new PouchDB(payload)
@@ -393,7 +419,7 @@ export const actions = {
     })
     return promise
   },
-  // get user information from userInfoDb
+// get user information from userInfoDb
   loadUserPersonalInfo({state, dispatch}, payload) {
     let promise = new Promise(async (resolve, reject) => {
       // fetch remoeteDb if localDb is not available
@@ -478,7 +504,8 @@ export const actions = {
       resolve(res)
     })
     return promise
-  },
+  }
+  ,
   getDriInfo({state}) {
     let promise = new Promise(async (resolve, reject) => {
       const dri = new PouchDB(state.driDb)
@@ -799,8 +826,8 @@ export const actions = {
   setEdit: function (context, payload) {
     context.commit('setEdit', payload)
   },
-  // "loadCouchUrl" is used only for Rwanda version
-  // which use couchDb installed on MINAGRI server instead of IBM cloudant
+// "loadCouchUrl" is used only for Rwanda version
+// which use couchDb installed on MINAGRI server instead of IBM cloudant
   loadCouchUrl: function (context) {
     const dbName = 'couch_info'
     const myId = 'myCouch'
@@ -818,8 +845,8 @@ export const actions = {
     })
     return promise
   },
-  //"saveCouchUrl" is used only for Rwanda version
-  // which use couchDb installed on MINAGRI server instead of IBM cloudant
+//"saveCouchUrl" is used only for Rwanda version
+// which use couchDb installed on MINAGRI server instead of IBM cloudant
   replicateBaseData: function ({state}, payload) {
     // fetch key databases from cloudant
     const dbSet = ['userlist', 'dri', 'fct_org', 'fctlist_db']

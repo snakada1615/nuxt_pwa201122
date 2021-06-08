@@ -1,20 +1,22 @@
 <template>
   <b-container>
     <b-modal :id="name" :static="true" hide-footer
-             :title="modalTitle" size="sm" header-bg-variant="info">
+             :title="modalTitle" header-bg-variant="info">
       <div v-show="state==='startLogin'">
         <div class="mb-2">please send your mobile number. You will then, get confirmation code through SMS</div>
-        <b-form-input
-          v-model='phoneNumber'
-          placeholder="phone number"
-          type="tel"
-          class="my-2"
-        />
-        <button id='linkPhoneNumberBtn' @click="sendSmsVerification">send</button>
+        <vue-phone-number-input
+          v-model="localNumber"
+          @update="numberUpdate"
+        ></vue-phone-number-input>
+        <button id='linkPhoneNumberBtn'
+                @click="sendSmsVerification"
+                :disabled="!statePhoneNUmber"
+                class="mt-2"
+        >send</button>
       </div>
 
       <div v-show="state==='waitingVerify'">
-        <div class="mb-2">please send verificatino code you got from SMS</div>
+        <div class="mb-2">please send verification code you got from SMS</div>
         <b-form-input
           v-model='verificationCode'
           placeholder="******"
@@ -34,8 +36,13 @@
 
 <script>
   import firebase from '~/plugins/firebase'
+  import VuePhoneNumberInput from  'vue-phone-number-input'
+  import 'vue-phone-number-input/dist/vue-phone-number-input.css'
 
   export default {
+    components:{
+      VuePhoneNumberInput,
+    },
     props:{
       name: {
         type: String,
@@ -52,7 +59,9 @@
     },
     data() {
       return {
-        phoneNumber: '',
+        phoneNumber:'',
+        localNumber:'',
+        statePhoneNUmber: false,
         recaptchaVerifier: null,
         confirmationResult: null,
         waitingVerify: false,
@@ -92,6 +101,13 @@
       })
     },
     methods: {
+      numberUpdate(val){
+        if (val.formattedNumber){
+          console.log(val.formattedNumber)
+          this.phoneNumber = val.formattedNumber
+          this.statePhoneNUmber = val.isValid
+        }
+      },
       async sendSmsVerification() {
         try {
           this.confirmationResult = await firebase.auth().signInWithPhoneNumber(this.phoneNumber, this.recaptchaVerifier)
@@ -101,15 +117,19 @@
         }
       },
       async confirmVerification() {
-        console.log('check01')
-        const result = await this.confirmationResult.confirm(this.verificationCode)
-        console.log(result.user)
-        this.$emit('update:email', result.user.email)
-        this.$emit('update:uid', result.user.uid)
-        this.recaptchaVerifier = null
-        this.confirmationResult = null
-        this.result = null
-        this.waitingVerify = false
+        try {
+          const result = await this.confirmationResult.confirm(this.verificationCode)
+          console.log(result.user)
+          this.$emit('update:email', result.user.email)
+          this.$emit('update:uid', result.user.uid)
+          this.$emit('loginSuccess', result.user)
+          this.recaptchaVerifier = null
+          this.confirmationResult = null
+          this.result = null
+          this.waitingVerify = false
+        } catch (err) {
+          alert(err)
+        }
         this.$bvModal.hide(this.name)
       }
     }

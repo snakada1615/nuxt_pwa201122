@@ -122,8 +122,13 @@
         <h5 v-if="isLogin" class="text-danger">please logout first to register</h5>
       </b-col>
     </b-row>
-    <login-sms name="loginSms" :uid.sync="userId"/>
-    <regist-email id="registEmail" @registSuccess="initNewUser($event, userWorkspace)"/>
+    <login-sms
+      name="loginSms"
+      :uid.sync="userId"
+      @logiSuccess="initNewUser($event, userWorkspace)"/>
+    <regist-email
+      id="registEmail"
+      @registSuccess="initNewUser($event, userWorkspace)"/>
   </b-container>
 </template>
 
@@ -231,6 +236,7 @@
             console.log('1')
             break
           case 2:
+            this.$bvModal.show('loginSms')
             console.log('2')
             break
           case 3:

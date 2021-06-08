@@ -14,6 +14,9 @@
         </b-col>
       </b-row>
       <b-row class="my-2">
+        <b-col cols="3">
+          email
+        </b-col>
         <b-col>
           <b-form-input
             id="input_email"
@@ -25,6 +28,9 @@
         </b-col>
       </b-row>
       <b-row class="my-2">
+        <b-col cols="3">
+          password
+        </b-col>
         <b-col>
           <b-form-input
             id="input_pass"

@@ -14,10 +14,14 @@
         </b-col>
       </b-row>
       <b-row class="my-2">
+        <b-col cols="3">
+          email
+        </b-col>
         <b-col>
           <b-form-input
             id="input_email"
             size="sm"
+            placeholder="email"
             :state="stateEmail"
             type="email"
             v-model="myEmail"
@@ -25,10 +29,14 @@
         </b-col>
       </b-row>
       <b-row class="my-2">
+        <b-col cols="3">
+          password
+        </b-col>
         <b-col>
           <b-form-input
             id="input_pass"
             size="sm"
+            placeholder="password"
             :state="statePass"
             type="password"
             v-model="myPassword"
@@ -95,6 +103,7 @@
             vm.$emit('update:uid', res.uid)
             vm.$emit('update:email', res.email)
             vm.$emit('loginEmail', {uid: res.uid, email: res.email})
+            vm.$emit('loginSuccess', res)
             vm.$bvModal.hide(vm.id)
           }
         }).catch(function (err) {

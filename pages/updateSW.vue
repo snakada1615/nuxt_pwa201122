@@ -130,7 +130,7 @@
             docId: vm.$store.getters.currentPouchID,
             url: vm.$store.cloudantUrl
           }).then(function () {
-            vm.$store.dispatch('removeUserInfo', vm.$store.state.user.email).then(function () {
+            vm.$store.dispatch('removeUserInfo', vm.$store.state.user.uid).then(function () {
               vm.$store.dispatch('logout').then(function () {
                 vm.$router.push('/')
               })
