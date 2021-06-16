@@ -132,7 +132,6 @@ export async function syncRemoteDb(value) {
 
   // Replicating a local database to Remote
   console.log('syncCouch in progress...')
-  console.log(value)
   let promise = new Promise((resolve, reject) => {
     const localdb = new PouchDB(value.dbName)
     const remotedb = new PouchDB(value.url + '/' + value.dbName)

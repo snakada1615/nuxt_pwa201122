@@ -4,6 +4,7 @@ export default function ({store, redirect, route}) {
     if (route.name !=='index'
       && route.name !=='user_login'
       && route.name !== 'user_reg'
+      && route.name !== 'user_remove'
       && route.name !== 'updateSW'
       && route.name !== 'saveCouchInfo'
       && !(/^test*$/).test(route.name)

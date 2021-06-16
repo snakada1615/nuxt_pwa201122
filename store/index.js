@@ -20,7 +20,8 @@ export const state = () => ({
     subnational3: '',
     organization: '',
     title: '',
-    uid: ''
+    uid: '',
+    phoneNumber:''
   },
   fctData: {
     _id: '',
@@ -111,7 +112,8 @@ export const mutations = {
       subnational3: '',
       organization: '',
       title: '',
-      uid: ''
+      uid: '',
+      phoneNumber: ''
     }
   },
   setLoginUnChecked: function (state) {
@@ -122,7 +124,7 @@ export const mutations = {
   },
   setNow: function (state) {
     const today = new Date()
-    state.saveDate = today.getFullYear() + '/' + today.getMonth() + 1 + '/' + today.getDate()
+    state.saveDate = today.getFullYear() + '/' + String(Number(today.getMonth()) + 1) + '/' + today.getDate()
       + '-' + ('00' + today.getHours()).slice(-2) + ':' + ('00' + today.getMinutes()).slice(-2)
   }
 }
@@ -329,6 +331,7 @@ export const actions = {
     return promise
   },
   async initPouch({state, dispatch, getters}, payload) {
+    console.log('initPouch')
     function initDiet(id, iCount) {
       let dat = []
       for (let index = 0; index < iCount; index++) {
@@ -384,9 +387,12 @@ export const actions = {
     // set feasibilityCases to $store
     dispatch('setFeasibilityCases', WS.feasibilityCases)
 
+    console.log(WS)
     // set workSpace to pouchDb
     let db = new PouchDB(getters.userDb)
-    const res = await pouchPutNewOrUpdate(db, WS).catch((err) => reject(err))
+    const res = await pouchPutNewOrUpdate(db, WS).catch(function(err){
+      throw err
+    })
 
     // set workSpace to cloudant
     await syncRemoteDb({dbName: getters.userDb, url: state.cloudantUrl})
@@ -489,6 +495,7 @@ export const actions = {
         resolve(doc)
       }).catch(function (err) {
         console.log('no data exists in PouchDB')
+        err.funcName = 'loadUserDataFromPouch'
         resolve(err)
       })
     })
@@ -757,7 +764,8 @@ export const actions = {
                   email: value.doc.user.email,
                   uid: value.doc.user.uid,
                   caseId: value.doc.caseId,
-                  saveDate: value.doc.saveDate
+                  saveDate: value.doc.saveDate,
+                  phoneNumber: value.doc.user.phoneNumber
                 })
               }
             }

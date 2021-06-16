@@ -1,6 +1,6 @@
 <template>
   <b-container>
-    <b-modal :id="name" :static="true" hide-footer
+    <b-modal :id="id" :static="true" hide-footer
              :title="modalTitle" header-bg-variant="info">
       <div v-show="state==='startLogin'">
         <div class="mb-2">please send your mobile number. You will then, get confirmation code through SMS</div>
@@ -22,7 +22,7 @@
           placeholder="******"
           type="number"
           class="my-2"/>
-        <button @click="confirmVerification" class="my-2">send</button>
+        <button @click="passCodeVerification" class="my-2">send</button>
       </div>
 
       <div v-show="state==='authComplete'">
@@ -44,13 +44,9 @@
       VuePhoneNumberInput,
     },
     props:{
-      name: {
+      id: {
         type: String,
         required: true,
-      },
-      email: {
-        type: String,
-        default: ''
       },
       uid:{
         type: String,
@@ -103,7 +99,6 @@
     methods: {
       numberUpdate(val){
         if (val.formattedNumber){
-          console.log(val.formattedNumber)
           this.phoneNumber = val.formattedNumber
           this.statePhoneNUmber = val.isValid
         }
@@ -116,11 +111,10 @@
           console.error(error)
         }
       },
-      async confirmVerification() {
+      async passCodeVerification() {
         try {
           const result = await this.confirmationResult.confirm(this.verificationCode)
           console.log(result.user)
-          this.$emit('update:email', result.user.email)
           this.$emit('update:uid', result.user.uid)
           this.$emit('loginSuccess', result.user)
           this.recaptchaVerifier = null
@@ -130,7 +124,7 @@
         } catch (err) {
           alert(err)
         }
-        this.$bvModal.hide(this.name)
+        this.$bvModal.hide(this.id)
       }
     }
   }

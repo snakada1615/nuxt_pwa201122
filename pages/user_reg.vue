@@ -8,7 +8,7 @@
               <b-icon icon="envelope"/>
               email
             </b-form-radio>
-            <b-form-radio v-model="loginOption" disabled value="2">
+            <b-form-radio v-model="loginOption" value="2">
               <b-icon icon="chat-dots-fill"/>
               SMS
             </b-form-radio>
@@ -123,9 +123,9 @@
       </b-col>
     </b-row>
     <login-sms
-      name="loginSms"
+      id="loginSms"
       :uid.sync="userId"
-      @logiSuccess="initNewUser($event, userWorkspace)"/>
+      @loginSuccess="initNewUser($event, userWorkspace)"/>
     <regist-email
       id="registEmail"
       @registSuccess="initNewUser($event, userWorkspace)"/>
@@ -134,7 +134,6 @@
 
 <script>
   import loginSms from "@/components/molecules/loginSms"
-  import loginEmail from "@/components/molecules/loginEmail"
   import registEmail from "@/components/molecules/registEmail";
   import {syncRemoteDb} from "../plugins/pouchHelper";
 
@@ -156,6 +155,7 @@
         userWorkspace: '',
         userEmail: '',
         userId: '',
+        userPhoneNumber:''
       }
     },
     computed: {
@@ -187,6 +187,7 @@
           subnational2: this.userSubNational2,
           subnational3: this.userSubNational3,
           organization: this.userOrgainzation,
+          phoneNumber: this.userPhoneNumber,
           title: this.userTitle,
         }
       }
@@ -197,6 +198,7 @@
         const userInfo = {
             email: user.email,
             uid: user.uid,
+            phoneNumber: user.phoneNumber,
             name: this.userName,
             country: this.userCountry,
             subnational1: this.userSubNational1,
@@ -222,8 +224,8 @@
 
         //move to top page
         console.log('registion complete')
-        vm.email = ''
-        vm.password = ''
+        vm.userEmail = ''
+        vm.userPhoneNumber = ''
         vm.$router.push('/')
       },
       registUser(val) {
@@ -254,8 +256,8 @@
       },
       logout() {
         this.$store.dispatch('logout')
-        this.email = ''
-        this.password = ''
+        this.userEmail = ''
+        this.userPhoneNumber = ''
         //this.$router.push('/')
       },
     },

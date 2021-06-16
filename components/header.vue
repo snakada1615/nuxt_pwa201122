@@ -13,22 +13,39 @@
                 <b-icon variant="light" icon="people-fill"/>
               </template>
               <b-dropdown-item disabled>
-                <b-badge variant="gray-300" style="width: 60px">name</b-badge> <span class="text-info" v-if="myUser">{{myUser.name}}</span>
+                <b-badge variant="gray-300" style="width: 60px">name</b-badge> <span class="text-info" v-if="myUser">
+                {{myUser.name}}
+              </span>
               </b-dropdown-item>
               <b-dropdown-item disabled>
-                <b-badge variant="gray-300" style="width: 60px">email</b-badge> <span class="text-info" v-if="myUser">{{myUser.email}}</span>
+                <b-badge variant="gray-300" style="width: 60px">email</b-badge> <span class="text-info" v-if="myUser">
+                {{myUser.email}}
+              </span>
               </b-dropdown-item>
               <b-dropdown-item disabled>
-                <b-badge variant="gray-300" style="width: 60px">country</b-badge> <span class="text-info" v-if="myUser">{{myUser.country}}</span>
+                <b-badge variant="gray-300" style="width: 60px">phone</b-badge> <span class="text-info" v-if="myUser">
+                {{myUser.phoneNumber}}
+              </span>
               </b-dropdown-item>
               <b-dropdown-item disabled>
-                <b-badge variant="gray-300" style="width: 60px">org</b-badge> <span class="text-info" v-if="myUser">{{myUser.organization}}</span>
+                <b-badge variant="gray-300" style="width: 60px">country</b-badge> <span class="text-info" v-if="myUser">
+                {{myUser.country}}
+              </span>
               </b-dropdown-item>
               <b-dropdown-item disabled>
-                <b-badge variant="gray-300" style="width: 60px">title</b-badge> <span class="text-info" v-if="myUser">{{myUser.title}}</span>
+                <b-badge variant="gray-300" style="width: 60px">org</b-badge> <span class="text-info" v-if="myUser">
+                {{myUser.organization}}
+              </span>
               </b-dropdown-item>
               <b-dropdown-item disabled>
-                <b-badge variant="gray-300">workspace</b-badge> <span class="text-info">{{$store.state.caseId}}</span>
+                <b-badge variant="gray-300" style="width: 60px">title</b-badge> <span class="text-info" v-if="myUser">
+                {{myUser.title}}
+              </span>
+              </b-dropdown-item>
+              <b-dropdown-item disabled>
+                <b-badge variant="gray-300">workspace</b-badge> <span class="text-info">
+                {{$store.state.caseId}}
+              </span>
               </b-dropdown-item>
             </b-nav-item-dropdown>
             <b-nav-text v-if="$nuxt.isOnline" class="text-light"><b-icon icon="reception4"/></b-nav-text>

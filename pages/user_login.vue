@@ -8,7 +8,7 @@
               <b-icon icon="envelope"/>
               email
             </b-form-radio>
-            <b-form-radio v-model="loginOption" disabled value="2">
+            <b-form-radio v-model="loginOption" value="2">
               <b-icon icon="chat-dots-fill"/>
               SMS
             </b-form-radio>
@@ -39,8 +39,8 @@
         <h6 v-if="isLogin" class="text-danger">please logout first before login/register</h6>
       </b-col>
     </b-row>
-    <login-sms name="loginSms" :uid.sync="userId"/>
-    <login-email id="loginEmail" @loginEmail="getWorkspace"/>
+    <login-sms id="loginSms" :uid.sync="uid" @loginSuccess="getWorkspace"/>
+    <login-email id="loginEmail" @loginSuccess="getWorkspace"/>
     <select-workspace
       id="selectWs"
       :workspaceList="$store.state.caseIdList"
@@ -64,7 +64,7 @@
     data() {
       return {
         loginOption: 0,
-        userId: '',
+        uid: '',
         user: {},
       }
     },
@@ -83,7 +83,7 @@
         let res = []
         if (this.$store.caseIdList) {
           res = this.$store.caseIdList.filter(function (val) {
-            return val.uid === vm.userId
+            return val.uid === vm.uid
           })
         }
         return res
@@ -92,10 +92,11 @@
     methods: {
       async getWorkspace(val) {
         const vm = this
-        vm.userId = val.uid
+        vm.uid = val.uid
 
         //get user information from PouchDB using 'uid' as filter
-        const userTemp = await vm.$store.dispatch('loadUserPersonalInfo', vm.userId).catch(async function(err){
+        const userTemp = await vm.$store.dispatch('loadUserPersonalInfo', vm.uid).catch(async function(err){
+          err.explanation = 'user may not have been registered yet'
           console.log(err)
           throw err
         })
@@ -138,8 +139,6 @@
         }
         //move to top page
         console.log('login complete')
-        vm.email = ''
-        vm.password = ''
         await vm.$router.push('/')
       },
       loginUser(val) {
@@ -152,6 +151,8 @@
             console.log('1')
             break
           case 2:
+            this.uid = ''
+            this.$bvModal.show('loginSms')
             console.log('2')
             break
           case 3:
@@ -169,8 +170,6 @@
       logout() {
         const vm = this
         this.$store.dispatch('logout').then(function (res) {
-          vm.email = ''
-          vm.password = ''
           console.log(res)
           vm.$router.push('/')
         })

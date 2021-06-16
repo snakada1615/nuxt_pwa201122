@@ -100,6 +100,7 @@
           vm.password = ''
           if (res) {
             console.log('login success')
+            console.log(res)
             vm.$emit('update:uid', res.uid)
             vm.$emit('update:email', res.email)
             vm.$emit('loginEmail', {uid: res.uid, email: res.email})

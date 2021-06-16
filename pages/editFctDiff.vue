@@ -4,7 +4,7 @@
       Sorry, this page works only online
     </div>
     <div v-if="$nuxt.isOnline">
-      <b-card>
+      <b-card class="my-2">
         <fct-table-edit
           v-if="csvState"
           :items="csv"
@@ -123,8 +123,9 @@
           .catch(err => {
             this.$nuxt.error(err)
           })
-        this.csv = res.map(function (val) {
-          return {
+        this.csv = res.filter(val => val.doc.id).map(function (val) {
+          return {  // doc.id !== null のみを抽出
+            'isShow': false,
             'id': val.doc.id,
             '_id': val.doc._id,
             '_rev': val.doc._rev,
@@ -161,6 +162,9 @@
         const diffMinus = csv_old.filter(item => {
           return !csv_new.includes(item)
         })
+        console.log(diffMinus)
+        console.log(JSON.parse(diffMinus))
+        console.log(JSON.parse(diffPlus))
         console.log({add: JSON.parse(diffPlus), del: JSON.parse(diffMinus)})
         return {add: JSON.parse(diffPlus), del: JSON.parse(diffMinus)}
       },

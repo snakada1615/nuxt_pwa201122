@@ -36,7 +36,7 @@
         </span>
       </b-col>
     </b-row>
-    <login-sms name="loginSms" :uid.sync="userId" @loginSuccess="removeUser"/>
+    <login-sms id="loginSms" :uid.sync="userId" @loginSuccess="removeUser"/>
     <login-email id="loginEmail" @loginSuccess="removeUser"/>
   </b-container>
 </template>
@@ -70,12 +70,17 @@
     },
     methods: {
       removeUser(val){
-        try {
-          this.$store.dispatch('removeUser2', val).then(function () {
-            console.log('remove success')
-          })
-        } catch (err) {
-          alert(err)
+        console.log(val)
+        const myName = (val.email ?? val.phoneNumber) ?? val.uid
+        let isExecuted = confirm("Are you sure to delete user: " + myName + ' ?');
+        if (isExecuted){
+          try {
+            this.$store.dispatch('removeUser2', val).then(function () {
+              console.log('remove success')
+            })
+          } catch (err) {
+            alert(err)
+          }
         }
       },
       loginUser(val) {
