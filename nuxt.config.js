@@ -1,5 +1,7 @@
 //import path from 'path'
 //import fs from 'fs'
+import {BFormFile} from "bootstrap-vue/dist/bootstrap-vue.esm";
+
 export default {
   // add version number from WebPack to the program environmental variable
   // Disable server-side rendering (https://go.nuxtjs.dev/ssr-mode)
@@ -85,6 +87,7 @@ export default {
         'BIconGoogle',
         'BIconChatDotsFill',
         'BIconBookmarkCheck',
+        'BFormFile',
       ],
       componentPlugins: [
         'NavbarPlugin',
