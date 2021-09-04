@@ -1,5 +1,17 @@
 {
   "projects": {
     "default": "nuxt-first-237f0"
+  },
+  "targets": {
+    "nuxt-first-237f0": {
+      "hosting": {
+        "main-prg": [
+          "nuxt-first-237f0"
+        ],
+        "components": [
+          "components-list-nfa"
+        ]
+      }
+    }
   }
 }
