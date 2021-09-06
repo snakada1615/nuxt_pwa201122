@@ -73,6 +73,15 @@
           </template>
         </b-card>
         <b-card bg-variant="gray-100" border-variant="info" class="mt-3 px-0 mx-1" footer-tag="footer">
+          <div><span class="text-danger">change</span> location</div>
+          <template #footer class="px-0 py-0">
+            <b-button block to="setLocation" class="mx-0 my-0" variant="info"
+                      size="sm" :disabled="$store.state.loginStatus !== 1"
+            >change WS
+            </b-button>
+          </template>
+        </b-card>
+        <b-card bg-variant="gray-100" border-variant="info" class="mt-3 px-0 mx-1" footer-tag="footer">
           <div><span class="text-danger">message board</span></div>
           <template #footer class="px-0 py-0">
             <b-button block to="messages" class="mx-0 my-0" variant="info"

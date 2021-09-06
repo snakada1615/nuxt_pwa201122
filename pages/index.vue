@@ -69,14 +69,6 @@
             </b-card-body>
         </b-card>
       </b-col>
-      <b-col cols="6" md="4" class="px-1">
-        <b-card class="bg-info my-2">
-            <b-card-body class="px-0 py-0">
-              <b-card-text class="text-center font-weight-bold text-secondary bg-white">set location</b-card-text>
-              <b-button class="btn btn-warning m-auto btn-block" to="/setLocation">go</b-button>
-            </b-card-body>
-        </b-card>
-      </b-col>
     </b-row>
     <b-card>
       note: this app is under frequent update. if you have any trouble, please go to option.
