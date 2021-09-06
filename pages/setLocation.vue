@@ -5,31 +5,32 @@
         label="Region"
         class="my-0"
       >
-        <b-form-select v-model="selectedRegion" :options="dat1" class="mb-1 mt-0"/>
+        <b-form-select v-model="selectedRegion" :options="dat1" size="sm" class="mb-1 mt-0"/>
       </b-form-group>
       <b-form-group
         label="Zone"
         class="my-0"
       >
-        <b-form-select v-model="selectedZone" :options="dat2" class="mb-1 mt-0"/>
+        <b-form-select v-model="selectedZone" :options="dat2" size="sm" class="mb-1 mt-0"/>
       </b-form-group>
       <b-form-group
         label="Woreda"
         class="my-0"
       >
-        <b-form-select v-model="selectedWoreda" :options="dat3" class="mb-1 mt-0"/>
+        <b-form-select v-model="selectedWoreda" :options="dat3" size="sm" class="mb-1 mt-0"/>
       </b-form-group>
       <b-form-group
         label="Village or Other"
         class="my-0"
       >
-        <b-form-input v-model="selectedVillage" class="mb-1 mt-0"/>
+        <b-form-input v-model="selectedVillage" size="sm" class="mb-1 mt-0"/>
       </b-form-group>
       <b-form-group
         label="Agro-Ecological Zone"
         class="my-0"
       >
-        <b-form-select v-if="fctList" v-model="selectedFct" :options="fctList" class="mb-1 mt-0"/>
+        <b-form-select v-if="fctList" v-model="selectedFct" :options="fctList"
+                       size="sm" class="mb-1 mt-0"/>
       </b-form-group>
 
       <b-form-group
@@ -56,16 +57,17 @@
       <b-button
         variant="warning"
         class="mt-2"
+        size="sm"
         @click="selectFct({fct: selectedFctDbName, workSpace: workSpaceName})"
         :disabled="!selectedRegion || !selectedWoreda || !selectedZone || !selectedFct || !wsNameState"
       >save</b-button>
     </b-card>
-    <div>{{selectedFct}}</div>
-    <div>{{selectedFctDbName}}</div>
   </b-container>
 </template>
 
 <script>
+
+  import {syncRemoteDb} from "../plugins/pouchHelper";
 
   export default {
     data() {
@@ -180,6 +182,9 @@
 
         //initialieze user workspace
         await vm.$store.dispatch('initPouch', {user: vm.$store.state.user, caseId: val.workSpace, fctDb: val.fct})
+
+        //sync PouchDB(local) with cloudant(remote)
+        syncRemoteDb({url:vm.$store.state.cloudantUrl, dbName: vm.$store.state.userInfoDb})
 
         //move to top page
         console.log('fct selected')

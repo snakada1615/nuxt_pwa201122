@@ -2,7 +2,7 @@
   <b-container>
     <b-row>
       <b-col>
-        <b-card bg-variant="gray-300" class="mt-3 mb-2">
+        <b-card bg-variant="gray-300" border-variant="info" class="mt-3 mb-2">
           <b-form-group label="login option" class="my-0" :state="loginOptionState">
             <b-form-radio v-model="loginOption" value="1">
               <b-icon icon="envelope"/>
@@ -27,7 +27,7 @@
             <b-form-invalid-feedback :state="loginOptionState">Please select one</b-form-invalid-feedback>
           </b-form-group>
         </b-card>
-        <b-card bg-variant="gray-300" class="mt-1 mb-2">
+        <b-card bg-variant="info" text-variant="white" class="mt-1 mb-2">
           <b-row class="my-1 py-0">
             <b-col cols="3">workspace name:</b-col>
             <b-col cols="9">
@@ -42,7 +42,7 @@
             </b-col>
           </b-row>
         </b-card>
-        <b-card bg-variant="gray-300" class="mt-1 mb-2">
+        <b-card bg-variant="info" text-variant="white" class="mt-1 mb-2">
           <b-row class="my-1">
             <b-col cols="3">Name:</b-col>
             <b-col cols="9">
@@ -56,40 +56,58 @@
             </b-col>
           </b-row>
           <b-row class="my-1">
-            <b-col cols="3">Country:</b-col>
+            <b-col cols="3">Region:</b-col>
             <b-col cols="9">
-              <b-form-input
-                id="countryInput"
-                v-model="userCountry"
-                placeholder="country"
-                size="sm"
-              />
+              <b-form-select v-model="selectedRegion" :options="dat1" size="sm">
+                <template #first>
+                  <b-form-select-option :value="null" disabled>-- Please select region --</b-form-select-option>
+                </template>
+              </b-form-select>
             </b-col>
           </b-row>
           <b-row class="my-1">
-            <b-col cols="3">Aera1:</b-col>
+            <b-col cols="3">Zone:</b-col>
             <b-col cols="9">
-              <b-form-input
-                id="countryInput2"
-                v-model="userSubNational1"
-                placeholder="Area1"
-                size="sm"
-              />
+              <b-form-select v-model="selectedZone" :options="dat2" size="sm">
+                <template #first>
+                  <b-form-select-option :value="null" disabled>-- Please select Zone --</b-form-select-option>
+                </template>
+              </b-form-select>
             </b-col>
           </b-row>
           <b-row class="my-1">
-            <b-col cols="3">Area2:</b-col>
+            <b-col cols="3">Woreda:</b-col>
+            <b-col cols="9">
+              <b-form-select v-model="selectedWoreda" :options="dat3" size="sm">
+                <template #first>
+                  <b-form-select-option :value="null" disabled>-- Please select Woreda --</b-form-select-option>
+                </template>
+              </b-form-select>
+            </b-col>
+          </b-row>
+          <b-row class="my-1">
+            <b-col cols="3">Village/other</b-col>
             <b-col cols="9">
               <b-form-input
                 id="countryInput3"
-                v-model="userSubNational2"
-                placeholder="Area2"
+                v-model="selectedVillage"
+                placeholder="target site"
                 size="sm"
               />
             </b-col>
           </b-row>
           <b-row class="my-1">
-            <b-col cols="3">Organization:</b-col>
+            <b-col cols="3">AgroEoology</b-col>
+            <b-col cols="9">
+              <b-form-select v-if="fctList" v-model="selectedFct" :options="fctList" size="sm">
+                <template #first>
+                  <b-form-select-option :value="null" disabled>-- Please select Agro-Ecology --</b-form-select-option>
+                </template>
+              </b-form-select>
+            </b-col>
+          </b-row>
+          <b-row class="my-1">
+            <b-col cols="3">Organization</b-col>
             <b-col cols="9">
               <b-form-input
                 id="organizationInput"
@@ -146,10 +164,13 @@
       return {
         loginOption: 0,
         userName: '',
-        userCountry: '',
-        userSubNational1: '',
-        userSubNational2: '',
-        userSubNational3: '',
+        selectedRegion: null,
+        selectedZone: null,
+        selectedWoreda: null,
+        selectedVillage: null,
+        selectedFct: null,
+        fctList_org: null,
+
         userOrgainzation: '',
         userTitle: '',
         userWorkspace: '',
@@ -159,6 +180,69 @@
       }
     },
     computed: {
+      countryData(){
+        return this.$store.state.countryStates
+      },
+      dat1(){
+        return this.countryData.map(function(val){
+          if (val.doc.GID_0 === "ETH") {
+            return val.doc.NAME_1
+          }
+        }).filter(function(val2, index2, arr2){
+          // val2 == undefined の値も除く
+          return arr2.indexOf(val2) === index2 && !!val2
+        })
+      },
+      dat2(){
+        let vm = this
+        return this.countryData.map(function(val){
+          if (val.doc.NAME_1 === vm.selectedRegion) {
+            return val.doc.NAME_2
+          }
+        }).filter(function(val2, index2, arr2){
+          // val2 == undefined の値も除く
+          return arr2.indexOf(val2) === index2 && !!val2
+        })
+      },
+      dat3(){
+        let vm = this
+        return this.countryData.map(function(val){
+          if (val.doc.NAME_2 === vm.selectedZone) {
+            return val.doc.NAME_3
+          }
+        }).filter(function(val2, index2, arr2){
+          // val2 == undefined の値も除く
+          return arr2.indexOf(val2) === index2 && !!val2
+        })
+      },
+      fctList(){
+        if (this.fctList_org){
+          return this.fctList_org.filter(function(val,index,arr){
+            return (/^(?=.*eth_aez).*$/).test(val.dbId)
+          }).map(function (val2) {
+            return val2.description
+          })
+        } else {
+          return ''
+        }
+      },
+      selectedFctDbName(){
+        if (this.fctList_org){
+          let vm = this
+          const res = vm.fctList_org.filter(function (val, index, arr) {
+            console.log(val.dbId)
+            console.log(vm.selectedFct)
+            return val.description === vm.selectedFct
+          })
+          return res[0]? res[0].dbId:''
+        } else {
+          return ''
+        }
+      },
+      fileState(){
+        return !!this.file1
+      },
+
       isLogin() {
         return (this.$store.state.user.uid !== '')
       },
@@ -166,7 +250,8 @@
         return this.loginOption > 0
       },
       registReady() {
-        return (!this.isLogin && this.loginOption > 0 && this.nameState && this.wsState)
+        return (!this.isLogin && this.loginOption > 0 && this.nameState &&
+          this.wsState && this.selectedFctDbName)
       },
       nameState() {
         return (/^[a-zA-Z][a-zA-Z .,'-]{1,47}[a-zA-Z]{1,3}$/).test(this.userName)
@@ -182,17 +267,34 @@
           email: this.userEmail,
           uid: this.userId,
           name: this.userName,
-          country: this.userCountry,
-          subnational1: this.userSubNational1,
-          subnational2: this.userSubNational2,
-          subnational3: this.userSubNational3,
+          country: this.selectedRegion,
+          subnational1: this.selectedZone,
+          subnational2: this.selectedWoreda,
+          subnational3: this.selectedVillage,
           organization: this.userOrgainzation,
           phoneNumber: this.userPhoneNumber,
           title: this.userTitle,
         }
       }
     },
+    mounted() {
+      console.log('start')
+      this.getFctList()
+      console.log('done')
+    },
     methods: {
+      async getFctList(){
+        const res = await this.$store.dispatch('getFctList')
+        this.fctList_org = res.rows.map(function (res) {
+          return {
+            dbId: res.doc.dbId,
+            dbName: res.doc.dbName,
+            description: res.doc.description,
+            creator: res.doc.creator,
+            saveDate: res.doc.saveDate
+          }
+        })
+      },
       async initNewUser(user, workSpace) {
         //create initialized userData
         const userInfo = {
@@ -200,17 +302,17 @@
             uid: user.uid,
             phoneNumber: user.phoneNumber,
             name: this.userName,
-            country: this.userCountry,
-            subnational1: this.userSubNational1,
-            subnational2: this.userSubNational2,
-            subnational3: this.userSubNational3,
+            country: this.selectedRegion,
+            subnational1: this.selectedZone,
+            subnational2: this.selectedWoreda,
+            subnational3: this.selectedVillage,
             organization: this.userOrgainzation,
             title: this.userTitle,
         }
         const vm = this
 
         //save initialized userData to $store and PouchDb
-        await vm.$store.dispatch('initPouch', {user: userInfo, caseId: workSpace, fctDb: 'fct_org'})
+        await vm.$store.dispatch('initPouch', {user: userInfo, caseId: workSpace, fctDb: vm.selectedFctDbName})
 
         //update PouchDB-userSet
         await vm.$store.dispatch('saveUseToUserSet', {_id: userInfo.uid, user: userInfo})
