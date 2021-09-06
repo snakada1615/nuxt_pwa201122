@@ -89,7 +89,8 @@
   export default {
     computed:{
       loginOk:function () {
-        if (this.$store.state.loginStatus === 1){
+        if (this.$store.state.loginStatus === 1 &&
+            this.$store.state.fctDb !== 'fct_org'){
           return true
         } else {
           return false
