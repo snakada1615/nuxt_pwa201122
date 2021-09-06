@@ -56,16 +56,16 @@
       <b-button
         variant="warning"
         class="mt-2"
-        @click="selectFct({fct: selectedFct, workSpace: workSpaceName})"
+        @click="selectFct({fct: selectedFctDbName, workSpace: workSpaceName})"
         :disabled="!selectedRegion || !selectedWoreda || !selectedZone || !selectedFct || !wsNameState"
       >save</b-button>
     </b-card>
+    <div>{{selectedFct}}</div>
+    <div>{{selectedFctDbName}}</div>
   </b-container>
 </template>
 
 <script>
-
-  import PouchDB from "pouchdb";
 
   export default {
     data() {
@@ -112,6 +112,19 @@
           }).map(function (val2) {
             return val2.description
           })
+        } else {
+          return ''
+        }
+      },
+      selectedFctDbName(){
+        if (this.fctList_org){
+          let vm = this
+          const res = vm.fctList_org.filter(function (val, index, arr) {
+            console.log(val.dbId)
+            console.log(vm.selectedFct)
+            return val.description === vm.selectedFct
+          })
+          return res[0]? res[0].dbId:''
         } else {
           return ''
         }
