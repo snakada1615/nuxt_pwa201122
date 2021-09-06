@@ -28,7 +28,7 @@
               </span>
               </b-dropdown-item>
               <b-dropdown-item disabled>
-                <b-badge variant="gray-300" style="width: 60px">country</b-badge> <span class="text-info" v-if="myUser">
+                <b-badge variant="gray-300" style="width: 60px">Region</b-badge> <span class="text-info" v-if="myUser">
                 {{myUser.country}}
               </span>
               </b-dropdown-item>
