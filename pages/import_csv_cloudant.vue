@@ -41,7 +41,7 @@
 </template>
 
 <script>
-
+  // this is to import csv file into local pouchdb and cloudant
   import PouchDB from "pouchdb";
   import {syncRemoteDb} from "../plugins/pouchHelper";
 

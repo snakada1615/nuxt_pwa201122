@@ -43,12 +43,15 @@ export const state = () => ({
   lastUser: 'lastuser',
   isEdited: false,
   saveDate: '',
+
+  countryStates: [],
   /////////////////////
   // ********** database used in the program **********
   // fctDb: food composition table
   // fctListDb: list of fctDb
   // userDb: user working data
   // userInfoDb: list of user personal information (e.g. name, email, country, occupation, etc.)
+  // loginDb: record of last user logged in
   // loginDb: record of last user logged in
   /////////////////////
   fctDb: 'fct_org',
@@ -71,6 +74,9 @@ export const getters = {
 }
 
 export const mutations = {
+  setCountryStates: function(state, payload){
+    state.countryStates = payload
+  },
   setCloudantUrl: function (state, payload) {
     state.cloudantUrl = payload
   },
@@ -130,7 +136,7 @@ export const mutations = {
 }
 
 export const actions = {
-  autoLogin({dispatch, getters}) {
+  autoLogin({dispatch, getters, state}) {
     let promise = new Promise(async (resolve, reject) => {
       try {
         const res = await dispatch('loadUserFromPouch')
@@ -138,6 +144,11 @@ export const actions = {
         // activate following line (loadCouchUrl) only in case of Rwanda version
         // await dispatch('loadCouchUrl')
         dispatch('setLoginStatus', res)
+        // for ethiopia --------------------
+        const res2 = await dispatch('loadDataFromPouch',
+          {dbName: "ethiopia_states", url: state.cloudantUrl})
+        dispatch('setCountryStates', res2)
+        // ---------------------------------
         resolve(true)
       } catch (err) {
         if (err.docId === "myCouch") {
@@ -553,6 +564,30 @@ export const actions = {
     })
     return promise
   },
+  loadDataFromPouch({state}, payload) {
+    const db = new PouchDB(payload.dbName);
+    let res = []
+    let promise = new Promise((resolve) => {
+      db.info().then(function (info) {
+        if (!(info.doc_count)) {
+          console.log('your dataset is currently empty. the application will try to getch data from server!')
+          console.log(db)
+          syncRemoteDb({dbName: payload.dbName, url: payload.url}).then(dataset => {
+            getPouchDataAll(dataset).then(docs => {
+              resolve(docs)
+            })
+          })
+        } else {
+          getPouchDataAll(db).then(docs => {
+            resolve(docs)
+          })
+        }
+      }).catch(err => {
+        reject(err)
+      })
+    })
+    return promise
+  },
   loadDriFromPouch({state}, payload) {
     const dri = new PouchDB(payload.dbName);
     let res = []
@@ -833,6 +868,9 @@ export const actions = {
   },
   setEdit: function (context, payload) {
     context.commit('setEdit', payload)
+  },
+  setCountryStates: function (context, payload) {
+    context.commit('setCountryStates', payload)
   },
 // "loadCouchUrl" is used only for Rwanda version
 // which use couchDb installed on MINAGRI server instead of IBM cloudant
