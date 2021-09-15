@@ -1,5 +1,6 @@
 <template>
   <b-container border-variant="primary" bg-variant="light" class="py-2">
+    test for registration
     <b-card bg-variant="info">
       <b-form-group
         label="Region"
