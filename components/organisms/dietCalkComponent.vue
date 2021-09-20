@@ -210,9 +210,9 @@
         }
       },
       driRange: function () {
-        let res = 1
+        let res = 3
         if (this.driSwitch) {
-          res = 0.33
+          res = 1
         }
         return res
       },
