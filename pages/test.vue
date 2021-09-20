@@ -1,105 +1,93 @@
 <template>
-  <b-container border-variant="primary" bg-variant="light" class="py-2">
-    <b-card bg-variant="info">
-      <b-form-group
-        label="Region"
-        class="my-0"
-      >
-        <b-form-select v-model="selectedRegion" :options="dat1" class="mb-1 mt-0"/>
+  <b-container style="max-width: 540px; min-width: 530px;">
+    <b-card v-if="fctList">
+      <b-form-group label="FCT list">
+        <b-form-radio
+          v-for="fct in fctList"
+          :key="fct._id"
+          v-model="selected"
+          :name="fct.dbName"
+          :value="fct.dbId"
+        >
+          <b-card class="my-1">
+            <b-row>
+              <b-col cols="3">name</b-col>
+              <b-col cols="9">{{fct.dbName}}</b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="3">description</b-col>
+              <b-col cols="9">{{fct.description}}</b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="3">created by</b-col>
+              <b-col cols="9">{{fct.creator}}</b-col>
+            </b-row>
+            <b-row>
+              <b-col cols="3">created at</b-col>
+              <b-col cols="9">{{fct.saveDate}}</b-col>
+            </b-row>
+            <b-row class="my-0 py-0">
+              <b-col cols="3" class="px-0 mx-0"></b-col>
+              <b-col cols="9" class="px-0 mx-0">
+                <div class="text-light">xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx</div>
+              </b-col>
+            </b-row>
+          </b-card>
+        </b-form-radio>
       </b-form-group>
-      <b-form-group
-        label="Zone"
-        class="my-0"
-      >
-        <b-form-select v-model="selectedZone" :options="dat2" class="mb-1 mt-0"/>
-      </b-form-group>
-      <b-form-group
-        label="Woreda"
-        class="my-0"
-      >
-        <b-form-select v-model="selectedWoreda" :options="dat3" class="mb-1 mt-0"/>
-      </b-form-group>
-      <b-form-group
-        label="Village or Other"
-        class="my-0"
-      >
-        <b-form-input v-model="selectedVillage" class="mb-1 mt-0"/>
-      </b-form-group>
-      <b-form-group
-        label="Agro-Ecological Zone"
-        class="my-0"
-      >
-        <b-form-select v-model="selectedWoreda" :options="dat3" class="mb-1 mt-0"/>
-      </b-form-group>
-      <div>{{selectedWoreda}}</div>
-      <b-button
-        variant="warning"
-        class="mt-2"
-        :disabled="!selectedRegion || !selectedWoreda || !selectedZone"
-      >save</b-button>
+      selected: {{selected}}
+    </b-card>
+    <b-card>
+      <b-row class="my-1">
+        <b-col cols="3" class="mx-0 px-1">
+          <b-button variant="info" @click="removeFct({fct: selected})"
+                    size="sm">remove</b-button>
+        </b-col>
+      </b-row>
     </b-card>
   </b-container>
 </template>
 
 <script>
-
-  import PouchDB from "pouchdb";
-
   export default {
-    data() {
-      return {
-        selectedCountry: null,
-        selectedRegion: null,
-        selectedZone: null,
-        selectedWoreda: null,
-        selectedVillage: null,
+    data(){
+      return{
+        fctList:[],
+        selected:'',
+        workSpaceName:'',
       }
     },
-    computed: {
-      countryData(){
-        return this.$store.state.countryStates
-      },
-      dat1(){
-        return this.countryData.map(function(val){
-          if (val.doc.GID_0 === "ETH") {
-            return val.doc.NAME_1
-          }
-        }).filter(function(val2, index2, arr2){
-          // val2 == undefined の値も除く
-          return arr2.indexOf(val2) === index2 && !!val2
-        })
-      },
-      dat2(){
-        let vm = this
-        return this.countryData.map(function(val){
-          if (val.doc.NAME_1 === vm.selectedRegion) {
-            return val.doc.NAME_2
-          }
-        }).filter(function(val2, index2, arr2){
-          // val2 == undefined の値も除く
-          return arr2.indexOf(val2) === index2 && !!val2
-        })
-      },
-      dat3(){
-        let vm = this
-        return this.countryData.map(function(val){
-          if (val.doc.NAME_2 === vm.selectedZone) {
-            return val.doc.NAME_3
-          }
-        }).filter(function(val2, index2, arr2){
-          // val2 == undefined の値も除く
-          return arr2.indexOf(val2) === index2 && !!val2
-        })
-      },
-      nameState() {
-        return (/^[a-z._]{4,20}$/).test(this.dbName)
-      },
-      fileState(){
-        return !!this.file1
-      },
+    computed:{
     },
-    methods: {
-
+    mounted(){
+      console.log('start')
+      this.getFctList()
+      console.log('done')
+    },
+    methods:{
+      async getFctList(){
+        const res = await this.$store.dispatch('getFctList')
+        this.fctList = res.rows.map(function (res) {
+          return {
+            dbId: res.doc.dbId,
+            dbName: res.doc.dbName,
+            description: res.doc.description,
+            creator: res.doc.creator,
+            saveDate: res.doc.saveDate
+          }
+        })
+      },
+      async removeFct(val){
+        const vm = this
+        console.log(val.fct)
+        try {
+          this.$store.dispatch('removeFctDb', val.fct).then(function () {
+            console.log('remove success')
+          })
+        } catch (err) {
+          alert(err)
+        }
+      }
     }
   }
 </script>

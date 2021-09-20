@@ -89,8 +89,11 @@
         for (let i = 1; i < csvArray.length - 1; i++) {
           let a_line = new Object();
           a_line['_id'] = String(i)
-          // カンマで区切られた各データに分割する
-          let csvArrayD = csvArray[i].split(',');
+          // カンマで区切られた各データに分割する。
+          //　同時に@をピリオドに変換する（戻し）
+          let csvArrayD = csvArray[i].split(',').map(function (val) {
+            return val.replaceAll("@",".")
+          });
           //// 各データをループ処理する
           for (let j = 0; j < items.length; j++) {
             // 要素名：items[j]

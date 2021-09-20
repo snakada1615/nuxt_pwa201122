@@ -766,6 +766,23 @@ export const actions = {
     })
     return promise
   },
+  async removeFctDb({state}, dbId) {
+    let promise = new Promise(async (resolve, reject) => {
+      const db = await new PouchDB(state.cloudantUrl + state.fctListDb)
+      const doc = await db.get(dbId)
+      await db.remove(doc).catch(function(err){
+        console.log('error deliting db info from fct_db')
+        reject(err)
+      })
+      const db2 = await new PouchDB(state.cloudantUrl + dbId)
+      await db2.destroy().catch(function(err){
+        console.log('error in removeFctDb in cloudant')
+        reject(err)
+      })
+      resolve(true)
+    })
+    return promise
+  },
   async getFctList({state}) {
     let promise = new Promise(async (resolve, reject) => {
       const db = new PouchDB(state.cloudantUrl + state.fctListDb)
