@@ -164,12 +164,21 @@
     methods:{
       saveFct(){
         const vm = this
+        // replace @ with "." if exists
+        const csvRemoveAtMark = vm.csv.map(function (val) {
+          return Object.fromEntries(
+            Object.entries(val).map(function (val2) {
+              return [val2[0], val2[1].replaceAll("@", ".")]
+            })
+          )
+        })
+
         vm.$store.dispatch('saveFctToPouch_bulk',{
           _id: vm.dbName,
           dbName: vm.dbUniqueName,
           description: vm.dbDescription,
           creator: vm.$store.state.user.name,
-          data: vm.csv,
+          data: csvRemoveAtMark,
         }).then(function () {
           alert('import success')
           vm.$router.push('/')
