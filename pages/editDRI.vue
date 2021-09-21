@@ -30,7 +30,7 @@
     <b-button
       size="sm"
       variant="info"
-      @click="addDri"
+      @click="saveDri"
     >save all dataset
     </b-button>
 
@@ -38,7 +38,7 @@
       id="modalDri"
       title="modify DRI item"
       @ok="setDri(selectedDRI, addNew)"
-      :ok-disabled= "!validate_all()"
+      :ok-disabled="!validate_all()"
       @cancel="onclickCancel"
       body-bg-variant="gray-100"
     >
@@ -64,7 +64,7 @@
 
 <script>
   export default {
-    computed:{
+    computed: {
       loginChecked: function () {
         return this.$store.state.loginStatus === 1
       },
@@ -73,8 +73,8 @@
       return {
         driID: 2,
         addNew: false,
-        dbName:'',
-        dbDescription:'',
+        dbName: '',
+        dbDescription: '',
         selectedDRI: {},
         validateResult: [],
         fields1: [
@@ -121,17 +121,19 @@
     },
     watch: {
       selectedDRI: {
-        deep:true,
-        handler(val){
+        deep: true,
+        handler(val) {
           this.validateResult.length = 0
           this.validateResult = [...this.validator(val)]
         }
       },
       loginChecked: async function () {
-        const vm  = this
+        const vm = this
         const res = await vm.$store.dispatch('loadDriFromPouch',
           {dbName: vm.$store.state.driDb, url: vm.$store.state.cloudantUrl})
-          .catch(err => {vm.$nuxt.error(err)})
+          .catch(err => {
+            vm.$nuxt.error(err)
+          })
         console.log(res)
         vm.DRI = res.map(function (val) {
           return {
@@ -144,7 +146,7 @@
             id: val.id
           }
         })
-        const res2 = await this.$store.dispatch('getDriInfo').catch(err =>{
+        const res2 = await this.$store.dispatch('getDriInfo').catch(err => {
           console.log(err)
         })
         this.dbName = res2.dbName
@@ -155,9 +157,9 @@
       onclickCancel() {
 
       },
-      validate_all(){
-        if (this.selectedDRI.length){
-          const res = this.validator(this.selectedDRI).reduce((a,b) => {
+      validate_all() {
+        if (this.selectedDRI.length) {
+          const res = this.validator(this.selectedDRI).reduce((a, b) => {
             return a * b
           })
           return (res === 1)
@@ -165,7 +167,7 @@
           return true
         }
       },
-      validator(val){
+      validator(val) {
         let res = []
         val.forEach(function (item, index) {
           switch (index) {
@@ -252,6 +254,12 @@
         this.addNew = true
         this.setSelectedDri({id: idMax + 1})
         this.$bvModal.show('modalDri')
+      },
+      saveDri() {
+        const res = confirm('this will modify current DRI record: Are you sure?')
+        if (res) {
+
+        }
       },
     }
   }

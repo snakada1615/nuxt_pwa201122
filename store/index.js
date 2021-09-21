@@ -55,7 +55,7 @@ export const state = () => ({
   // loginDb: record of last user logged in
   /////////////////////
   fctDb: 'fct_org',
-  driDb: 'dri',
+  driDb: 'dri_eth',
   fctListDb: 'fctlist_db',
   userInfoDb: 'userlist',
   loginDb: 'logindb',
@@ -707,6 +707,33 @@ export const actions = {
           resolve(db)
         } else {
           reject(false)
+        }
+      } catch (err) {
+        reject(err)
+      }
+    })
+    return promise
+  },
+  async saveDriToPouch_replace({state, getters, dispatch}, payload) {
+    console.log('saveDriToPouch_replace')
+    const dbName = state.driDb
+
+    // fetch remoeteDb if localDb is not available
+    await dispatch('syncIfNoDb', dbName)
+
+    console.log('saveDriToPouch_replace02')
+    let db = new PouchDB(dbName)
+
+    let promise = new Promise(async (resolve, reject) => {
+      try {
+        console.log('saveDriToPouch_replace03')
+        const res1 = await db.bulkDocs(payload.data)
+        if (res1) {
+          // sync localDb with remoteDb
+          await syncRemoteDb({dbName: dbName, url: state.cloudantUrl})
+          resolve(db)
+        } else {
+          reject(new Error('update failed or sync failed for ' + dbName))
         }
       } catch (err) {
         reject(err)
