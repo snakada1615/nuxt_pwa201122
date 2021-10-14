@@ -218,13 +218,13 @@
             name: 'VitA',
             target: this.nutritionTarget[3] ? Number(this.nutritionTarget[3].Value) : 0,
             rating: this.nutritionTarget[3] ?
-              Math.round(this.nutritionSum.Va / this.nutritionTarget[3].Value) * 10 : 0
+              Math.round(this.nutritionSum.Va / this.nutritionTarget[3].Value * 10)  : 0
           },
           {
             name: 'Fe',
             target: this.nutritionTarget[4] ? Number(this.nutritionTarget[4].Value) : 0,
             rating: this.nutritionTarget[4] ?
-              Math.round(this.nutritionSum.Fe / this.nutritionTarget[4].Value) * 10 : 0
+              Math.round(this.nutritionSum.Fe / this.nutritionTarget[4].Value * 10): 0
           },
         ]
       },
