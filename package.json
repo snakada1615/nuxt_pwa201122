@@ -7,8 +7,6 @@
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate",
-    "styleguide": "vue-styleguidist server",
-    "styleguide:build": "vue-styleguidist build",
     "preinstall": "npx npm-force-resolutions"
   },
   "dependencies": {
@@ -25,7 +23,7 @@
     "vue-rate-it": "^2.1.0"
   },
   "devDependencies": {
-    "node-sass": "^5.0.0",
+    "node-sass": "^7.0.1",
     "sass-loader": "^10.1.0"
   },
   "resolutions": {
