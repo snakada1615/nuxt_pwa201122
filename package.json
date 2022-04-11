@@ -8,7 +8,8 @@
     "start": "nuxt start",
     "generate": "nuxt generate",
     "styleguide": "vue-styleguidist server",
-    "styleguide:build": "vue-styleguidist build"
+    "styleguide:build": "vue-styleguidist build",
+    "preinstall": "npx npm-force-resolutions"
   },
   "dependencies": {
     "@nuxtjs/axios": "^5.12.2",
@@ -19,14 +20,20 @@
     "nuxt": "^2.14.6",
     "pouchdb": "^7.2.2",
     "pouchdb-upsert": "^2.2.0",
-    "vue-csv-import": "^2.3.4",
+    "vue-csv-import": "^3.3.8",
     "vue-phone-number-input": "^1.1.10",
     "vue-rate-it": "^2.1.0"
   },
   "devDependencies": {
-    "jsdoc": "^3.6.6",
     "node-sass": "^5.0.0",
-    "sass-loader": "^10.1.0",
-    "vue-styleguidist": "^4.38.1"
+    "sass-loader": "^10.1.0"
+  },
+  "resolutions": {
+    "css-what": "5.0.1",
+    "glob-parent": "5.1.2",
+    "node-fetch": "2.6.7",
+    "nth-check": "2.0.1",
+    "unset-value": "2.0.1",
+    "trim-newlines": "3.0.1"
   }
 }
